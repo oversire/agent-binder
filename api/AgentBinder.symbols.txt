@@ -2,7 +2,6 @@ swift.class Runtime :: actor Runtime
 swift.class Tracker :: final class Tracker
 swift.enum AgentBinder :: enum AgentBinder
 swift.enum AgentBinderError :: enum AgentBinderError
-swift.enum Attachment.Source :: enum Source
 swift.enum AuthState :: enum AuthState
 swift.enum Classifier :: enum Classifier
 swift.enum Credentials.Format :: enum Format
@@ -15,6 +14,7 @@ swift.enum MCPCapability :: enum MCPCapability
 swift.enum MCPRender :: enum MCPRender
 swift.enum MCPServer.Transport :: enum Transport
 swift.enum PermissionPolicy.Mode :: enum Mode
+swift.enum PromptAttachment.Source :: enum Source
 swift.enum RawValue :: enum RawValue
 swift.enum SessionStatus :: enum SessionStatus
 swift.enum ShellWords :: enum ShellWords
@@ -39,8 +39,6 @@ swift.enum.case AgentBinderError.timeout(_:) :: case timeout(String)
 swift.enum.case AgentBinderError.turnActive :: case turnActive
 swift.enum.case AgentBinderError.unsupported(_:) :: case unsupported(String)
 swift.enum.case AgentBinderError.vendor(code:message:) :: case vendor(code: Int, message: String)
-swift.enum.case Attachment.Source.data(_:) :: case data(Data)
-swift.enum.case Attachment.Source.file(_:) :: case file(URL)
 swift.enum.case AuthState.missing :: case missing
 swift.enum.case AuthState.ok :: case ok
 swift.enum.case AuthState.unknown :: case unknown
@@ -89,6 +87,8 @@ swift.enum.case PermissionPolicy.Mode.ask :: case ask
 swift.enum.case PermissionPolicy.Mode.auto :: case auto
 swift.enum.case PermissionPolicy.Mode.autoEdit :: case autoEdit
 swift.enum.case PermissionPolicy.Mode.inherit :: case inherit
+swift.enum.case PromptAttachment.Source.data(_:) :: case data(Data)
+swift.enum.case PromptAttachment.Source.file(_:) :: case file(URL)
 swift.enum.case RawValue.bool(_:) :: case bool(Bool)
 swift.enum.case RawValue.string(_:) :: case string(String)
 swift.enum.case SessionStatus.idle :: case idle
@@ -114,8 +114,6 @@ swift.enum.case WindowKey.fiveHour :: case fiveHour
 swift.enum.case WindowKey.monthly :: case monthly
 swift.enum.case WindowKey.weekly :: case weekly
 swift.func.op AgentBinderError.!=(_:_:) :: static func != (lhs: Self, rhs: Self) -> Bool
-swift.func.op Attachment.!=(_:_:) :: static func != (lhs: Self, rhs: Self) -> Bool
-swift.func.op Attachment.Source.!=(_:_:) :: static func != (lhs: Self, rhs: Self) -> Bool
 swift.func.op AuthState.!=(_:_:) :: static func != (lhs: Self, rhs: Self) -> Bool
 swift.func.op Classification.!=(_:_:) :: static func != (lhs: Self, rhs: Self) -> Bool
 swift.func.op Credentials.!=(_:_:) :: static func != (lhs: Self, rhs: Self) -> Bool
@@ -140,6 +138,8 @@ swift.func.op PermissionPolicy.!=(_:_:) :: static func != (lhs: Self, rhs: Self)
 swift.func.op PermissionPolicy.Mode.!=(_:_:) :: static func != (lhs: Self, rhs: Self) -> Bool
 swift.func.op PermissionRequest.!=(_:_:) :: static func != (lhs: Self, rhs: Self) -> Bool
 swift.func.op Prompt.!=(_:_:) :: static func != (lhs: Self, rhs: Self) -> Bool
+swift.func.op PromptAttachment.!=(_:_:) :: static func != (lhs: Self, rhs: Self) -> Bool
+swift.func.op PromptAttachment.Source.!=(_:_:) :: static func != (lhs: Self, rhs: Self) -> Bool
 swift.func.op RawValue.!=(_:_:) :: static func != (lhs: Self, rhs: Self) -> Bool
 swift.func.op SessionStatus.!=(_:_:) :: static func != (lhs: Self, rhs: Self) -> Bool
 swift.func.op Skill.!=(_:_:) :: static func != (lhs: Self, rhs: Self) -> Bool
@@ -152,7 +152,6 @@ swift.func.op TurnResult.!=(_:_:) :: static func != (lhs: Self, rhs: Self) -> Bo
 swift.func.op Usage.!=(_:_:) :: static func != (lhs: Self, rhs: Self) -> Bool
 swift.func.op WindowKey.!=(_:_:) :: static func != (lhs: Self, rhs: Self) -> Bool
 swift.func.op WireError.!=(_:_:) :: static func != (lhs: Self, rhs: Self) -> Bool
-swift.init Attachment.init(mime:source:) :: init(mime: String? = nil, source: Attachment.Source)
 swift.init AuthState.init(from:) :: init(from decoder: any Decoder) throws
 swift.init AuthState.init(rawValue:) :: init?(rawValue: String)
 swift.init Classification.init(cls:code:message:) :: init(cls: FailureClass, code: String, message: String = "")
@@ -188,7 +187,8 @@ swift.init PermissionPolicy.Mode.init(from:) :: init(from decoder: any Decoder) 
 swift.init PermissionPolicy.Mode.init(rawValue:) :: init?(rawValue: String)
 swift.init PermissionPolicy.init(mode:allowTools:) :: init(mode: PermissionPolicy.Mode = .ask, allowTools: [String] = [])
 swift.init PermissionRequest.init(id:tool:kind:question:input:options:toolUseID:) :: init(id: String, tool: String = "", kind: ToolKind = .other, question: String = "", input: String = "", options: [String] = [], toolUseID: String? = nil)
-swift.init Prompt.init(_:kind:attachments:) :: init(_ text: String, kind: String? = nil, attachments: [Attachment] = [])
+swift.init Prompt.init(_:kind:attachments:) :: init(_ text: String, kind: String? = nil, attachments: [PromptAttachment] = [])
+swift.init PromptAttachment.init(mime:source:) :: init(mime: String? = nil, source: PromptAttachment.Source)
 swift.init Runtime.Options.init(clientName:clientVersion:ledger:logger:fingerprintIgnoreEnvironment:maxFrameBytes:onStderr:authCacheTTL:modelCacheTTL:binarySearchPaths:useLoginShellPath:environment:) :: init(clientName: String = "agentbinder", clientVersion: String = "", ledger: URL? = nil, logger: Logger? = nil, fingerprintIgnoreEnvironment: [String] = [], maxFrameBytes: Int = 16 << 20, onStderr: ((Harness, String) -> Void)? = nil, authCacheTTL: Duration = .seconds(300), modelCacheTTL: Duration = .seconds(600), binarySearchPaths: [URL]? = nil, useLoginShellPath: Bool = true, environment: [String : String]? = nil)
 swift.init Runtime.init(options:) :: convenience init(options: Runtime.Options = .init())
 swift.init SessionStatus.init(from:) :: init(from decoder: any Decoder) throws
@@ -288,8 +288,6 @@ swift.method WindowKey.hash(into:) :: func hash(into hasher: inout Hasher)
 swift.property AgentBinderError.code :: var code: String { get }
 swift.property AgentBinderError.description :: var description: String { get }
 swift.property AgentBinderError.localizedDescription :: var localizedDescription: String { get }
-swift.property Attachment.mime :: var mime: String?
-swift.property Attachment.source :: var source: Attachment.Source
 swift.property AuthState.hashValue :: var hashValue: Int { get }
 swift.property Classification.cls :: var cls: FailureClass
 swift.property Classification.code :: var code: String
@@ -373,9 +371,11 @@ swift.property PermissionRequest.options :: var options: [String]
 swift.property PermissionRequest.question :: var question: String
 swift.property PermissionRequest.tool :: var tool: String
 swift.property PermissionRequest.toolUseID :: var toolUseID: String?
-swift.property Prompt.attachments :: var attachments: [Attachment]
+swift.property Prompt.attachments :: var attachments: [PromptAttachment]
 swift.property Prompt.kind :: var kind: String?
 swift.property Prompt.text :: var text: String
+swift.property PromptAttachment.mime :: var mime: String?
+swift.property PromptAttachment.source :: var source: PromptAttachment.Source
 swift.property Runtime.Options.authCacheTTL :: var authCacheTTL: Duration
 swift.property Runtime.Options.binarySearchPaths :: var binarySearchPaths: [URL]?
 swift.property Runtime.Options.clientName :: var clientName: String
@@ -479,7 +479,6 @@ swift.protocol SelfDetecting :: protocol SelfDetecting : Driver
 swift.protocol Session :: protocol Session : AnyObject, Sendable
 swift.protocol SessionModelListing :: protocol SessionModelListing : Session
 swift.protocol Steerable :: protocol Steerable : Session
-swift.struct Attachment :: struct Attachment
 swift.struct Classification :: struct Classification
 swift.struct Credentials :: struct Credentials
 swift.struct Decision :: struct Decision
@@ -498,6 +497,7 @@ swift.struct OneShot :: struct OneShot
 swift.struct PermissionPolicy :: struct PermissionPolicy
 swift.struct PermissionRequest :: struct PermissionRequest
 swift.struct Prompt :: struct Prompt
+swift.struct PromptAttachment :: struct PromptAttachment
 swift.struct Runtime.Options :: struct Options
 swift.struct RuntimeContext :: struct RuntimeContext
 swift.struct Skill :: struct Skill
@@ -507,8 +507,6 @@ swift.struct Tracker.Snapshot :: struct Snapshot
 swift.struct TurnResult :: struct TurnResult
 swift.struct Usage :: struct Usage
 swift.struct WireError :: struct WireError
-swift.type.method Attachment.data(_:mime:) :: static func data(_ data: Data, mime: String) -> Attachment
-swift.type.method Attachment.file(_:mime:) :: static func file(_ url: URL, mime: String? = nil) -> Attachment
 swift.type.method Classifier.classify(_:harness:) :: static func classify(_ r: TurnResult, harness: Harness? = nil) -> Classification
 swift.type.method Classifier.classify(_:status:harness:) :: static func classify(_ text: String, status: Int? = nil, harness: Harness? = nil) -> Classification
 swift.type.method Decision.allow(message:updatedInput:) :: static func allow(message: String? = nil, updatedInput: Data? = nil) -> Decision
@@ -520,6 +518,8 @@ swift.type.method MCPRender.headerVariable(_:_:) :: static func headerVariable(_
 swift.type.method MCPRender.openCodeConfigContent(_:) :: static func openCodeConfigContent(_ servers: [MCPServer]) -> String
 swift.type.method MCPServer.http(name:url:headers:) :: static func http(name: String, url: URL, headers: [String : String] = [:]) -> MCPServer
 swift.type.method MCPServer.stdio(name:command:args:env:) :: static func stdio(name: String, command: String, args: [String] = [], env: [String : String] = [:]) -> MCPServer
+swift.type.method PromptAttachment.data(_:mime:) :: static func data(_ data: Data, mime: String) -> PromptAttachment
+swift.type.method PromptAttachment.file(_:mime:) :: static func file(_ url: URL, mime: String? = nil) -> PromptAttachment
 swift.type.method ShellWords.split(_:) :: static func split(_ command: String) -> [String]
 swift.type.property AgentBinder.version :: static let version: String
 swift.type.property Effort.high :: static let high: Effort

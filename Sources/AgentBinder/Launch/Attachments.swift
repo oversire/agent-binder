@@ -9,11 +9,11 @@ struct LoadedAttachment: Sendable, Equatable {
     var base64: String { data.base64EncodedString() }
 }
 
-extension Attachment {
+extension PromptAttachment {
     /// The explicit media type, else the type of the file extension.
     var resolvedMIME: String? {
         if let mime, !mime.isEmpty { return mime }
-        if case .file(let url) = source { return Attachment.mime(forExtension: url.pathExtension) }
+        if case .file(let url) = source { return PromptAttachment.mime(forExtension: url.pathExtension) }
         return nil
     }
 
@@ -37,7 +37,7 @@ extension Attachment {
 
     /// The images first, so a vendor that takes an image only before text gets a valid prompt.
     /// Each group keeps its order.
-    static func sorted(_ items: [Attachment]) -> [Attachment] {
+    static func sorted(_ items: [PromptAttachment]) -> [PromptAttachment] {
         items.filter(\.isImage) + items.filter { !$0.isImage }
     }
 

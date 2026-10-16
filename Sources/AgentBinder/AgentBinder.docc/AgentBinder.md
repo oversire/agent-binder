@@ -19,7 +19,7 @@ Each CLI uses its own login. The library never reads a vendor token.
 ### Prompts and permissions
 
 - ``Prompt``
-- ``Attachment``
+- ``PromptAttachment``
 - ``PermissionPolicy``
 - ``Decision``
 
