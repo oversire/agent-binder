@@ -6,6 +6,7 @@ Recorded vendor frames for the driver tests.
 
 The first set came once, as plain data, from the reference project trebi-ai/agent-wire at commit `ed24a97` (2026-10-16): `testdata/claude/**` and `testdata/models/*.json`.
 This repository owns the files now. It records new fixtures itself.
+`fake/` holds hand-written frames of the fake harness.
 
 ## Layout
 
@@ -15,7 +16,8 @@ This repository owns the files now. It records new fixtures itself.
 
 ## Record a new fixture
 
-Set `AGENTBINDER_RECORD=<dir>` on a live run. The frame log then writes each frame that the child sends to `<dir>/<harness>-<time>.ndjson`.
+Set `AGENTBINDER_RECORD=<dir>` on a live run. The session then writes each frame that the child sends, as it is, to `<dir>/<harness>-<time>-<n>.ndjson`.
+Examine the file for secrets before you commit it.
 
 ## Write the golden files again
 

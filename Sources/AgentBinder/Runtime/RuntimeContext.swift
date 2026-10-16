@@ -102,8 +102,21 @@ public struct RuntimeContext: Sendable {
         var c = WireConfig()
         c.maxFrameBytes = maxFrameBytes
         c.logPath = r.frameLog
+        c.recordPath = recordPath(r.harness)
         if let t = r.handshakeTimeout { c.handshakeTimeout = t }
         return c
+    }
+
+    /// The environment key of the fixture recorder. Its value is a folder.
+    static let recordEnvironmentKey = "AGENTBINDER_RECORD"
+
+    // One new fixture file for each session: `<dir>/<harness>-<time>-<id>.ndjson`.
+    private func recordPath(_ h: Harness) -> URL? {
+        guard let dir = environment[Self.recordEnvironmentKey], !dir.isEmpty else { return nil }
+        let folder = URL(fileURLWithPath: dir, isDirectory: true)
+        try? FileManager.default.createDirectory(at: folder, withIntermediateDirectories: true)
+        let stamp = Int(Date().timeIntervalSince1970)
+        return folder.appendingPathComponent("\(h.rawValue)-\(stamp)-\(nextID()).ndjson")
     }
 
     /// The stderr hook of one child: the hook of the request, then the hook of the runtime.

@@ -1,0 +1,12 @@
+{"type":"init","session_id":"s1","models":[{"id":"m1","default":true},{"id":"m2","name":"Model Two"}]}
+{"type":"status","status":"running"}
+{"type":"thought","text":"plan","delta":true}
+{"type":"assistant","text":"hello"}
+{"type":"tool","id":"t1","name":"Bash","input":"{\"command\":\"ls\"}","status":"started"}
+{"type":"tool","id":"t1","name":"Bash","output":"a.txt","status":"completed"}
+{"type":"permission","id":"p1","tool":"Edit","question":"edit it?","input":"{\"file_path\":\"a.txt\"}"}
+{"type":"usage","input":12,"output":4,"model":"m1"}
+not json
+{"type":"unknown_kind"}
+{"type":"error","error":"slow down","code":"rate_limited","end_reason":"limit"}
+{"type":"result","subtype":"success","text":"done","session_id":"s1","usage":{"input":12,"output":4}}

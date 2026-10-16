@@ -1,0 +1,76 @@
+[
+  {
+    "kind": "init",
+    "session_id": "s1"
+  },
+  {
+    "kind": "status",
+    "status": "running"
+  },
+  {
+    "delta": true,
+    "kind": "thought",
+    "text": "plan"
+  },
+  {
+    "delta": false,
+    "kind": "assistant",
+    "text": "hello"
+  },
+  {
+    "id": "t1",
+    "input": "{\"command\":\"ls\"}",
+    "kind": "tool",
+    "name": "Bash",
+    "status": "started",
+    "tool_kind": "exec"
+  },
+  {
+    "id": "t1",
+    "kind": "tool",
+    "name": "Bash",
+    "output": "a.txt",
+    "status": "completed",
+    "tool_kind": "exec"
+  },
+  {
+    "id": "p1",
+    "input": "{\"file_path\":\"a.txt\"}",
+    "kind": "permission",
+    "question": "edit it?",
+    "tool": "Edit",
+    "tool_kind": "edit"
+  },
+  {
+    "kind": "usage",
+    "usage": {
+      "cache_creation": 0,
+      "cache_read": 0,
+      "cost_usd": 0.0,
+      "input": 12,
+      "model": "m1",
+      "output": 4
+    }
+  },
+  {
+    "code": "rate_limited",
+    "end_reason": "limit",
+    "kind": "error",
+    "message": "slow down"
+  },
+  {
+    "is_error": false,
+    "kind": "result",
+    "result_session_id": "s1",
+    "session_id": "s1",
+    "subtype": "success",
+    "text": "done",
+    "usage": {
+      "cache_creation": 0,
+      "cache_read": 0,
+      "cost_usd": 0.0,
+      "input": 12,
+      "output": 4
+    }
+  }
+]

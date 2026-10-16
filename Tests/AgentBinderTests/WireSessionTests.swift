@@ -405,3 +405,29 @@ struct WireSessionTests {
         try await eventually { ref.value == nil }
     }
 }
+
+@Suite("EventChannelTests")
+struct EventChannelTests {
+    @Test func closingKeepsEventsThatFit() async {
+        let c = EventChannel(capacity: 2)
+        await c.send(Event(.assistant(text: "a", delta: false)))
+        c.beginClosing()
+        await c.send(Event(.assistant(text: "b", delta: false)))
+        await c.send(Event(.assistant(text: "dropped", delta: false)))
+        await c.send(Event(.exit(code: 0, error: nil, errorCode: nil)))
+        c.finish()
+        var names: [String] = []
+        while let e = await c.receive() { names.append(e.assistantText ?? e.kind.name) }
+        #expect(names == ["a", "b", "exit"])
+    }
+
+    @Test func closingReleasesAWaitingSender() async throws {
+        let c = EventChannel(capacity: 1)
+        await c.send(Event(.assistant(text: "a", delta: false)))
+        let blocked = Task { await c.send(Event(.assistant(text: "b", delta: false))) }
+        try await Task.sleep(for: .milliseconds(50))
+        c.beginClosing()
+        try await withTimeout { await blocked.value }
+        #expect(c.count == 1)
+    }
+}

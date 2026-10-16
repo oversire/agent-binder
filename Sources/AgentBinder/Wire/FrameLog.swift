@@ -34,6 +34,17 @@ final class FrameLog: Sendable {
         }
     }
 
+    /// Writes one frame as it is, in the fixture format.
+    func record(_ frame: Data) {
+        var buf = frame
+        buf.append(0x0A)
+        let line = buf
+        fd.withLock { fd in
+            guard fd >= 0 else { return }
+            line.withUnsafeBytes { _ = Darwin.write(fd, $0.baseAddress!, $0.count) }
+        }
+    }
+
     func close() {
         fd.withLock { fd in
             if fd >= 0 { _ = Darwin.close(fd) }

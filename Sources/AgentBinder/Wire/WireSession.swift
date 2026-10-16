@@ -7,6 +7,8 @@ struct WireConfig: Sendable {
     var maxFrameBytes = FrameReader.defaultMaxBytes
     /// The frame log, when one is set. It holds secrets.
     var logPath: URL?
+    /// A fixture file that receives each frame from the child as it is.
+    var recordPath: URL?
     /// The time limit of the adapter handshake.
     var handshakeTimeout: Duration = .seconds(30)
     /// The time of each stage of the graceful close.
@@ -46,6 +48,7 @@ final class WireSession: Session, Steerable {
     private let channel: EventChannel
     private let outbox = Outbox()
     private let log: FrameLog?
+    private let record: FrameLog?
     private let state: Locked<State>
     private let done = Latch()
     /// The writer of the adapter.
@@ -62,6 +65,7 @@ final class WireSession: Session, Steerable {
         frameCap = FrameReader(maxBytes: config.maxFrameBytes).maxBytes
         let log = try config.logPath.map { try FrameLog(path: $0) }
         self.log = log
+        record = try config.recordPath.map { try FrameLog(path: $0) }
         let state = Locked(State())
         self.state = state
         writer = FrameWriter(
@@ -166,6 +170,11 @@ final class WireSession: Session, Steerable {
     func setID(_ id: String) {
         guard !id.isEmpty else { return }
         state.withLock { $0.id = id }
+    }
+
+    /// Closes the stdin of the child after the pending writes, so a one-shot child ends after its turn.
+    func closeInput() {
+        if case .process(let p) = io { p.closeStdin() }
     }
 
     /// Adds a cleanup hook. The hooks run once, after the session ends.
@@ -326,6 +335,7 @@ final class WireSession: Session, Steerable {
         case .line(let line):
             if FrameReader.isBlank(line) { return }
             log?.write(.in, line)
+            record?.record(line)
             for var e in adapter.parse(line) {
                 if e.raw == nil { e.raw = line }
                 switch e.kind {
@@ -364,6 +374,7 @@ final class WireSession: Session, Steerable {
         writer.close()
         channel.finish()
         log?.close()
+        record?.close()
         state.withLock { $0.loop = nil }
         done.open()
     }

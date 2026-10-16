@@ -3,7 +3,8 @@ import Foundation
 /// A bounded event buffer between the read loop and the one consumer.
 ///
 /// A full buffer suspends the sender, so a slow consumer slows the read loop instead of growing memory.
-/// After ``beginClosing()`` the channel drops every event except `.exit`, and `.exit` always goes in.
+/// After ``beginClosing()`` a full buffer drops the event instead, so the read loop can end.
+/// `.exit` always goes in.
 final class EventChannel: Sendable {
     static let defaultCapacity = 256
 
@@ -50,7 +51,6 @@ final class EventChannel: Sendable {
             }
             let step = state.withLock { s -> Step in
                 if s.finished { return .done }
-                if s.closing && !isExit { return .done }
                 if let r = s.receiver {
                     s.receiver = nil
                     return .deliver(r)
@@ -59,6 +59,7 @@ final class EventChannel: Sendable {
                     s.buffer.append(e)
                     return .done
                 }
+                if s.closing { return .done }
                 s.nextSender += 1
                 s.senders[s.nextSender] = (e, cont)
                 s.senderOrder.append(s.nextSender)
@@ -104,7 +105,7 @@ final class EventChannel: Sendable {
         }
     }
 
-    /// Drops all later events except `.exit` and releases the waiting senders.
+    /// Stops the wait of the senders. A full buffer then drops all events except `.exit`.
     func beginClosing() {
         let released = state.withLock { s -> [CheckedContinuation<Void, Never>] in
             s.closing = true
