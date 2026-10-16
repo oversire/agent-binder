@@ -1,0 +1,88 @@
+[
+  {
+    "kind": "status",
+    "status": "running"
+  },
+  {
+    "kind": "status",
+    "status": "running"
+  },
+  {
+    "kind": "status",
+    "status": "running"
+  },
+  {
+    "id": "t1",
+    "input": "{\"path\":\"/tmp/coa.txt\"}",
+    "kind": "tool",
+    "name": "Edit file",
+    "paths": [
+      "/tmp/coa.txt"
+    ],
+    "status": "started",
+    "tool_kind": "edit"
+  },
+  {
+    "id": "t1",
+    "kind": "tool",
+    "name": "tool",
+    "status": "started",
+    "tool_kind": "other"
+  },
+  {
+    "id": "t1",
+    "kind": "tool",
+    "name": "tool",
+    "output": "/tmp/coa.txt",
+    "status": "completed",
+    "tool_kind": "other"
+  },
+  {
+    "id": "t2",
+    "kind": "tool",
+    "name": "Run tests",
+    "status": "started",
+    "tool_kind": "exec"
+  },
+  {
+    "id": "t2",
+    "kind": "tool",
+    "name": "tool",
+    "output": "permission denied",
+    "status": "failed",
+    "tool_kind": "other"
+  },
+  {
+    "id": "t3",
+    "kind": "tool",
+    "name": "fetch",
+    "status": "started",
+    "tool_kind": "read"
+  },
+  {
+    "id": "t4",
+    "kind": "tool",
+    "name": "tool",
+    "status": "started",
+    "tool_kind": "other"
+  },
+  {
+    "delta": false,
+    "kind": "assistant",
+    "text": "pong"
+  },
+  {
+    "kind": "usage",
+    "usage": {
+      "cache_creation": 0,
+      "cache_read": 0,
+      "cost_usd": 0.5,
+      "input": 12,
+      "output": 4
+    }
+  },
+  {
+    "kind": "status",
+    "status": "running"
+  }
+]

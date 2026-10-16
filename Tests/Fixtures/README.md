@@ -9,6 +9,7 @@ This repository owns the files now. It records new fixtures itself.
 `fake/` holds hand-written frames of the fake harness.
 `claude/shapes.ndjson` holds hand-written Claude frame shapes that the recorded streams do not have.
 `codex/notifications.ndjson` holds hand-written Codex app-server notifications. Record real Codex turns on the first live run.
+`acp/updates.ndjson` holds hand-written ACP `session/update` notifications. The Copilot, Cursor and Gemini drivers share it. Record real turns on the first live run.
 
 ## Layout
 
