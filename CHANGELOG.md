@@ -6,6 +6,8 @@ The project uses [Semantic Versioning](https://semver.org/).
 
 ## [Unreleased]
 
+## [0.1.0] - 2026-10-16
+
 ### Added
 
 - Package skeleton: the `AgentBinder` and `AgentBinderNative` products.
@@ -112,3 +114,6 @@ The project uses [Semantic Versioning](https://semver.org/).
 - Native: OpenAI sends `tool_choice` only with tools.
 - Native: an OpenAI tool call with an empty input sends `"{}"`.
 - Native: the providers never read the environment (base URLs, tokens, organization ids).
+
+[Unreleased]: https://github.com/oversire/agent-binder/compare/0.1.0...HEAD
+[0.1.0]: https://github.com/oversire/agent-binder/releases/tag/0.1.0
