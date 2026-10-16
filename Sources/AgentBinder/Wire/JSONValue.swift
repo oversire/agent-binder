@@ -1,0 +1,238 @@
+import Foundation
+
+/// A JSON value. Integers and doubles stay apart, so an id `1` goes back on the wire as `1`, not `1.0`.
+enum JSONValue: Sendable, Equatable, Hashable {
+    case null
+    case bool(Bool)
+    case int(Int64)
+    case double(Double)
+    case string(String)
+    case array([JSONValue])
+    case object([String: JSONValue])
+
+    // MARK: decode
+
+    /// Parses one JSON document. It returns nil for text that is not JSON.
+    static func parse(_ data: Data) -> JSONValue? {
+        guard let any = try? JSONSerialization.jsonObject(with: data, options: [.fragmentsAllowed]) else {
+            return nil
+        }
+        return JSONValue(any: any)
+    }
+
+    static func parse(_ text: String) -> JSONValue? { parse(Data(text.utf8)) }
+
+    init(any: Any) {
+        switch any {
+        case let n as NSNumber:
+            if CFGetTypeID(n) == CFBooleanGetTypeID() {
+                self = .bool(n.boolValue)
+            } else if CFNumberIsFloatType(n) {
+                self = .double(n.doubleValue)
+            } else {
+                self = .int(n.int64Value)
+            }
+        case let s as String: self = .string(s)
+        case let a as [Any]: self = .array(a.map(JSONValue.init(any:)))
+        case let o as [String: Any]: self = .object(o.mapValues(JSONValue.init(any:)))
+        default: self = .null
+        }
+    }
+
+    // MARK: encode
+
+    /// The compact JSON text, with sorted keys.
+    var jsonString: String {
+        var out = ""
+        write(to: &out)
+        return out
+    }
+
+    var jsonData: Data { Data(jsonString.utf8) }
+
+    /// One NDJSON frame: the JSON text and a newline.
+    var frame: Data { Data((jsonString + "\n").utf8) }
+
+    private func write(to out: inout String) {
+        switch self {
+        case .null: out += "null"
+        case .bool(let b): out += b ? "true" : "false"
+        case .int(let i): out += String(i)
+        case .double(let d):
+            if d.isFinite {
+                if d == d.rounded(), abs(d) < 1e15 {
+                    out += String(format: "%.1f", d)
+                } else {
+                    out += "\(d)"
+                }
+            } else {
+                out += "null"
+            }
+        case .string(let s): JSONValue.writeString(s, to: &out)
+        case .array(let a):
+            out += "["
+            for (i, v) in a.enumerated() {
+                if i > 0 { out += "," }
+                v.write(to: &out)
+            }
+            out += "]"
+        case .object(let o):
+            out += "{"
+            for (i, k) in o.keys.sorted().enumerated() {
+                if i > 0 { out += "," }
+                JSONValue.writeString(k, to: &out)
+                out += ":"
+                o[k]!.write(to: &out)
+            }
+            out += "}"
+        }
+    }
+
+    static func writeString(_ s: String, to out: inout String) {
+        out += "\""
+        for u in s.unicodeScalars {
+            switch u {
+            case "\"": out += "\\\""
+            case "\\": out += "\\\\"
+            case "\n": out += "\\n"
+            case "\r": out += "\\r"
+            case "\t": out += "\\t"
+            case "\u{08}": out += "\\b"
+            case "\u{0C}": out += "\\f"
+            default:
+                if u.value < 0x20 {
+                    out += String(format: "\\u%04x", u.value)
+                } else {
+                    out.unicodeScalars.append(u)
+                }
+            }
+        }
+        out += "\""
+    }
+
+    /// The JSON text of a string, with quotes and escapes.
+    static func quote(_ s: String) -> String {
+        var out = ""
+        writeString(s, to: &out)
+        return out
+    }
+
+    // MARK: access
+
+    subscript(key: String) -> JSONValue? {
+        if case .object(let o) = self { return o[key] }
+        return nil
+    }
+
+    subscript(index: Int) -> JSONValue? {
+        if case .array(let a) = self, index >= 0, index < a.count { return a[index] }
+        return nil
+    }
+
+    /// Walks a path of object keys.
+    func at(_ path: String...) -> JSONValue? {
+        var v: JSONValue? = self
+        for k in path { v = v?[k] }
+        return v
+    }
+
+    var string: String? {
+        if case .string(let s) = self { return s }
+        return nil
+    }
+
+    var int: Int64? {
+        switch self {
+        case .int(let i): return i
+        case .double(let d) where d == d.rounded() && abs(d) < 9.2e18: return Int64(d)
+        default: return nil
+        }
+    }
+
+    var double: Double? {
+        switch self {
+        case .int(let i): return Double(i)
+        case .double(let d): return d
+        default: return nil
+        }
+    }
+
+    var bool: Bool? {
+        if case .bool(let b) = self { return b }
+        return nil
+    }
+
+    var array: [JSONValue]? {
+        if case .array(let a) = self { return a }
+        return nil
+    }
+
+    var object: [String: JSONValue]? {
+        if case .object(let o) = self { return o }
+        return nil
+    }
+
+    var isNull: Bool { self == .null }
+
+    /// A string value, or the JSON text of any other value. Nil and null give an empty string.
+    var text: String {
+        switch self {
+        case .string(let s): return s
+        case .null: return ""
+        default: return jsonString
+        }
+    }
+}
+
+extension Optional where Wrapped == JSONValue {
+    /// The string value, or an empty string.
+    var stringValue: String { self?.string ?? "" }
+}
+
+extension JSONValue: ExpressibleByStringLiteral, ExpressibleByIntegerLiteral, ExpressibleByBooleanLiteral,
+    ExpressibleByArrayLiteral, ExpressibleByDictionaryLiteral, ExpressibleByFloatLiteral, ExpressibleByNilLiteral
+{
+    init(stringLiteral value: String) { self = .string(value) }
+    init(integerLiteral value: Int64) { self = .int(value) }
+    init(booleanLiteral value: Bool) { self = .bool(value) }
+    init(arrayLiteral elements: JSONValue...) { self = .array(elements) }
+    init(dictionaryLiteral elements: (String, JSONValue)...) {
+        self = .object(Dictionary(elements, uniquingKeysWith: { _, b in b }))
+    }
+    init(floatLiteral value: Double) { self = .double(value) }
+    init(nilLiteral: ()) { self = .null }
+}
+
+extension JSONValue: Codable {
+    init(from decoder: any Decoder) throws {
+        let c = try decoder.singleValueContainer()
+        if c.decodeNil() {
+            self = .null
+        } else if let b = try? c.decode(Bool.self) {
+            self = .bool(b)
+        } else if let i = try? c.decode(Int64.self) {
+            self = .int(i)
+        } else if let d = try? c.decode(Double.self) {
+            self = .double(d)
+        } else if let s = try? c.decode(String.self) {
+            self = .string(s)
+        } else if let a = try? c.decode([JSONValue].self) {
+            self = .array(a)
+        } else {
+            self = .object(try c.decode([String: JSONValue].self))
+        }
+    }
+
+    func encode(to encoder: any Encoder) throws {
+        var c = encoder.singleValueContainer()
+        switch self {
+        case .null: try c.encodeNil()
+        case .bool(let b): try c.encode(b)
+        case .int(let i): try c.encode(i)
+        case .double(let d): try c.encode(d)
+        case .string(let s): try c.encode(s)
+        case .array(let a): try c.encode(a)
+        case .object(let o): try c.encode(o)
+        }
+    }
+}

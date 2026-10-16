@@ -22,7 +22,9 @@ public struct MCPServer: Sendable, Equatable {
     }
 
     /// A stdio server.
-    public static func stdio(name: String, command: String, args: [String] = [], env: [String: String] = [:])
+    public static func stdio(
+        name: String, command: String, args: [String] = [], env: [String: String] = [:]
+    )
         -> MCPServer
     {
         MCPServer(name: name, transport: .stdio(command: command, args: args, env: env))

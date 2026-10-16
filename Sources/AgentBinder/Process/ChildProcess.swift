@@ -42,8 +42,6 @@ final class ChildProcess: Sendable {
         var stdin: Int32
         var stdout: Int32
         var exit: ExitStatus?
-        var waiters: [UInt64: CheckedContinuation<Bool, Never>] = [:]
-        var nextWaiter: UInt64 = 0
         var stderrTail = Data()
     }
 
@@ -51,6 +49,7 @@ final class ChildProcess: Sendable {
     private let stdinQueue: DispatchQueue
     private let stdoutQueue: DispatchQueue
     private let stderrDone = DispatchSemaphore(value: 0)
+    private let exited = Latch()
 
     private init(child: SpawnedChild, argv: [String]) {
         pid = child.pid
@@ -227,12 +226,8 @@ final class ChildProcess: Sendable {
             // Give the stderr drain a moment, so the tail is complete for classification.
             // A grandchild can keep the pipe open, so the wait has a limit.
             if done.wait(timeout: .now() + .milliseconds(500)) == .success { done.signal() }
-            let waiters = state.withLock { s -> [CheckedContinuation<Bool, Never>] in
-                s.exit = exit
-                defer { s.waiters.removeAll() }
-                return Array(s.waiters.values)
-            }
-            for w in waiters { w.resume(returning: true) }
+            state.withLock { $0.exit = exit }
+            exited.open()
         }
     }
 
@@ -248,23 +243,7 @@ final class ChildProcess: Sendable {
 
     /// Waits up to `timeout` for the child to exit. It returns false when the child is still alive.
     func waitForExit(timeout: Duration?) async -> Bool {
-        await withCheckedContinuation { (cont: CheckedContinuation<Bool, Never>) in
-            let id = state.withLock { s -> UInt64? in
-                if s.exit != nil { return nil }
-                s.nextWaiter += 1
-                s.waiters[s.nextWaiter] = cont
-                return s.nextWaiter
-            }
-            guard let id else {
-                cont.resume(returning: true)
-                return
-            }
-            guard let timeout else { return }
-            DispatchQueue.global().asyncAfter(deadline: .now() + timeout.timeInterval) { [state] in
-                let w = state.withLock { $0.waiters.removeValue(forKey: id) }
-                w?.resume(returning: false)
-            }
-        }
+        await exited.wait(timeout: timeout)
     }
 
     // MARK: signals

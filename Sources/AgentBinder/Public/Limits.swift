@@ -31,7 +31,8 @@ public struct LimitWindow: Sendable, Equatable {
     public var resetsAt: Date?
 
     /// Makes a limit window.
-    public init(key: WindowKey, scope: String? = nil, minutes: Int = 0, usedPercent: Double = 0, resetsAt: Date? = nil) {
+    public init(key: WindowKey, scope: String? = nil, minutes: Int = 0, usedPercent: Double = 0, resetsAt: Date? = nil)
+    {
         self.key = key
         self.scope = scope
         self.minutes = minutes
