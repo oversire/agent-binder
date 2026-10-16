@@ -13,8 +13,8 @@ The live tier uses the login of each CLI on the test machine. A case that fails 
 | `opencode` | opencode 2.0.26 (2.x wire) | verified | 7 of 7 |
 | `opencode2` | opencode 2.0.26 | verified | 7 of 7 |
 | `copilot` | GitHub Copilot CLI 1.0.98 | verified | 7 of 7 |
-| `gemini` | Gemini CLI 0.17.0 | blocked by the local login | 0 of 7 |
-| `pi` | pi 0.84.1 | blocked by the local login | 0 of 6 |
+| `gemini` | not run | not verified | none |
+| `pi` | not run | not verified | none |
 | `cursor` | not run | not verified | none |
 
 OpenCode 1.x is not verified. The test machine has only 2.0.26, and an `opencode` request on a 2.x binary uses the 2.x wire.
@@ -39,9 +39,10 @@ A harness that does not have a feature skips its case. The number of cases is di
 
 - **codex limits**: the ChatGPT usage endpoint rejects the local token (HTTP 401). The library gives the vendor error.
 - **codex mcp**: Codex loads the server (`codex mcp list` shows it). The local model (a ZAI model) replies with no tool call. A plain `codex exec` has the same result.
-- **gemini**: the local login needs `GOOGLE_CLOUD_PROJECT`. Each case stops at "Authentication required".
-- **pi**: the OAuth refresh of the local login fails (`invalid_grant`). No turn completes. The `mcp` case also needs `StartRequest.home`.
-- **cursor**: the local login is stale, so the tier did not run Cursor. The ACP driver has fixture tests for the Cursor wire.
+
+## Harnesses that are not run
+
+The tier did not run Gemini, pi and Cursor for 0.1.0. Their drivers have fixture tests for the vendor wire. The pi `mcp` case needs `StartRequest.home`.
 
 ## Vendor quirks
 
