@@ -10,6 +10,8 @@ final class BinaryResolver: Sendable {
         var environment: [String: String] = ProcessInfo.processInfo.environment
         var home: URL = FileManager.default.homeDirectoryForCurrentUser
         var shellTimeout: Duration = .seconds(5)
+        /// When set, the resolver searches only these folders.
+        var only: [URL]?
     }
 
     private let config: Config
@@ -37,6 +39,7 @@ final class BinaryResolver: Sendable {
     func searchPath() async -> [String] {
         if let c = cached.value { return c }
         let dirs = await flight.run("path") { [config] in
+            if let only = config.only { return only.map(\.path) }
             var out: [String] = []
             var seen = Set<String>()
             func add(_ d: String) {

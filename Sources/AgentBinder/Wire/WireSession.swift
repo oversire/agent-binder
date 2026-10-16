@@ -145,6 +145,12 @@ final class WireSession: Session, Steerable {
         return nil
     }
 
+    /// The process group of the child, for the ledger.
+    var pgid: Int32? {
+        if case .process(let p) = io { return p.pgid }
+        return nil
+    }
+
     /// The command line of the child, for the ledger.
     var argv: [String] {
         if case .process(let p) = io { return p.argv }

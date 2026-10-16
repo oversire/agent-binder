@@ -155,7 +155,7 @@ struct ProcessTests {
     }
 
     @Test func childEnvironmentOverridesWin() {
-        let env = childEnvironment(
+        let env = ChildEnvironment.merge(
             base: ["A": "1", "CLAUDECODE": "1", "PATH": "/usr/bin"], overrides: ["A": "2", "B": "3"], path: "/x:/y")
         #expect(env == ["A": "2", "B": "3", "PATH": "/x:/y"])
     }
