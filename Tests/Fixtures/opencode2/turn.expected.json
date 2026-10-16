@@ -1,0 +1,109 @@
+[
+  {
+    "kind": "status",
+    "status": "running"
+  },
+  {
+    "kind": "status",
+    "status": "running"
+  },
+  {
+    "delta": true,
+    "kind": "assistant",
+    "text": "po"
+  },
+  {
+    "delta": true,
+    "kind": "assistant",
+    "text": "ng"
+  },
+  {
+    "delta": true,
+    "kind": "assistant",
+    "text": "\n(exit code 0)"
+  },
+  {
+    "id": "call_1",
+    "kind": "tool",
+    "name": "write",
+    "status": "started",
+    "tool_kind": "edit"
+  },
+  {
+    "id": "call_1",
+    "input": "{\"path\":\"/tmp/probe.txt\"}",
+    "kind": "tool",
+    "name": "write",
+    "paths": [
+      "/tmp/probe.txt"
+    ],
+    "status": "started",
+    "tool_kind": "edit"
+  },
+  {
+    "id": "call_1",
+    "input": "{\"content\":\"x\",\"path\":\"/tmp/probe.txt\"}",
+    "kind": "tool",
+    "name": "write",
+    "paths": [
+      "/tmp/probe.txt"
+    ],
+    "status": "started",
+    "tool_kind": "edit"
+  },
+  {
+    "id": "call_1",
+    "kind": "tool",
+    "name": "write",
+    "output": "wrote",
+    "status": "completed",
+    "tool_kind": "edit"
+  },
+  {
+    "id": "call_2",
+    "kind": "tool",
+    "name": "bash",
+    "status": "started",
+    "tool_kind": "exec"
+  },
+  {
+    "id": "call_2",
+    "kind": "tool",
+    "name": "bash",
+    "output": "exit 1",
+    "status": "failed",
+    "tool_kind": "exec"
+  },
+  {
+    "kind": "usage",
+    "usage": {
+      "cache_creation": 0,
+      "cache_read": 128,
+      "cost_usd": 0.0019,
+      "input": 12548,
+      "model": "kimi-k3",
+      "output": 3
+    }
+  },
+  {
+    "id": "per_1",
+    "kind": "permission",
+    "question": "write: /tmp/probe.txt",
+    "tool": "write",
+    "tool_kind": "edit"
+  },
+  {
+    "is_error": false,
+    "kind": "result",
+    "result_session_id": "ses_2",
+    "subtype": "success",
+    "text": "",
+    "usage": {
+      "cache_creation": 0,
+      "cache_read": 0,
+      "cost_usd": 0.0,
+      "input": 0,
+      "output": 0
+    }
+  }
+]

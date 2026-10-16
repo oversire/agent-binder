@@ -21,11 +21,12 @@ public struct RuntimeContext: Sendable {
     let ledger: Ledger
     let onStderr: (@Sendable (Harness, String) -> Void)?
     let fingerprintIgnoreEnvironment: [String]
+    let openCode: OpenCodeServerPool
     private let ids: Locked<Int>
 
     init(
         options o: Runtime.Options, environment: [String: String], now: @escaping Now,
-        probeTimeout: Duration = ProbeCache.timeout
+        probeTimeout: Duration = ProbeCache.timeout, openCodePool: OpenCodeServerPool = OpenCodeServerPool()
     ) {
         clientName = o.clientName.isEmpty ? "agentbinder" : o.clientName
         clientVersion = o.clientVersion
@@ -43,6 +44,9 @@ public struct RuntimeContext: Sendable {
         ledger = Ledger(path: o.ledger)
         onStderr = o.onStderr
         fingerprintIgnoreEnvironment = o.fingerprintIgnoreEnvironment
+        let pool = openCodePool
+        openCode = pool
+        ledger.onCloseAll { await pool.stopAll() }
         ids = Locked(0)
     }
 

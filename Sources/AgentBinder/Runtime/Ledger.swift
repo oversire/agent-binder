@@ -6,6 +6,9 @@ protocol ProcessBacked {
     var argv: [String] { get }
 }
 
+/// A session on a child that other sessions share. The owner of the child tracks its row.
+protocol SharedChildBacked {}
+
 /// A session that runs hooks after it ends.
 protocol CloseObserving {
     func onClose(_ hook: @escaping @Sendable () -> Void)
@@ -47,14 +50,17 @@ final class Ledger: Sendable {
 
     /// Registers a live session and records its child. The row goes away when the session ends.
     /// It returns the key.
+    // Fixed on purpose: sessions on a shared child get their own key, so one close does not drop the others.
     @discardableResult
     func add(_ s: any Session) -> String {
+        let shared = s is SharedChildBacked
         let key = state.withLock { st -> String in
             st.seq += 1
+            if shared { return "\(s.harness):shared-\(st.seq)" }
             return "\(s.harness):\(s.pid.map(String.init) ?? "mem-\(st.seq)")"
         }
         state.withLock { $0.sessions[key] = s }
-        if let pid = s.pid {
+        if !shared, let pid = s.pid {
             let p = s as? ProcessBacked
             track(key: key, harness: s.harness, pid: pid, pgid: p?.pgid, argv: p?.argv ?? [])
         }

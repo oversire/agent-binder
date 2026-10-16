@@ -1,0 +1,17 @@
+{"id":"evt_1","type":"session.created","data":{"sessionID":"ses_2","info":{"id":"ses_2"}}}
+{"id":"evt_2","type":"session.execution.started","data":{"sessionID":"ses_2"}}
+{"id":"evt_3","type":"session.step.started","data":{"sessionID":"ses_2"}}
+{"id":"evt_4","type":"session.text.delta","data":{"sessionID":"ses_2","assistantMessageID":"msg_a","ordinal":0,"delta":"po"}}
+{"id":"evt_5","type":"session.text.delta","data":{"sessionID":"ses_2","assistantMessageID":"msg_a","ordinal":0,"delta":"ng"}}
+{"id":"evt_6","type":"session.text.ended","data":{"sessionID":"ses_2","assistantMessageID":"msg_a","ordinal":0,"text":"pong\n(exit code 0)"}}
+{"id":"evt_7","type":"session.text.ended","data":{"sessionID":"ses_2","assistantMessageID":"msg_a","ordinal":0,"text":"pong\n(exit code 0)"}}
+{"id":"evt_8","type":"session.tool.input.started","data":{"sessionID":"ses_2","id":"call_1","name":"write"}}
+{"id":"evt_9","type":"session.tool.input.ended","data":{"sessionID":"ses_2","id":"call_1","text":"{\"path\":\"/tmp/probe.txt\"}"}}
+{"id":"evt_10","type":"session.tool.called","data":{"sessionID":"ses_2","id":"call_1","input":{"path":"/tmp/probe.txt","content":"x"}}}
+{"id":"evt_11","type":"session.tool.success","data":{"sessionID":"ses_2","id":"call_1","content":[{"type":"text","text":"wrote"},{"type":"text","text":""}]}}
+{"id":"evt_12","type":"session.tool.input.started","data":{"sessionID":"ses_2","id":"call_2","name":"bash"}}
+{"id":"evt_13","type":"session.tool.failed","data":{"sessionID":"ses_2","id":"call_2","error":{"message":"exit 1"}}}
+{"id":"evt_14","type":"session.step.ended","data":{"sessionID":"ses_2","tokens":{"input":12548,"output":3,"cache":{"read":128,"write":0}},"cost":0.0019,"model":{"id":"kimi-k3"}}}
+{"id":"evt_15","type":"permission.asked","data":{"sessionID":"ses_2","id":"per_1","action":"write","resources":["/tmp/probe.txt"]}}
+{"id":"evt_16","type":"shell.started","data":{"info":{"metadata":{"sessionID":"ses_2"}}}}
+{"id":"evt_17","type":"session.execution.succeeded","data":{"sessionID":"ses_2"}}

@@ -80,9 +80,14 @@ public actor Runtime {
     }
 
     /// Tests raise `probeTimeout`: the first run of a new script can wait for a system scan.
-    init(options: Options, now: @escaping Now, probeTimeout: Duration = ProbeCache.timeout) {
+    /// They also give a pool with a test server.
+    init(
+        options: Options, now: @escaping Now, probeTimeout: Duration = ProbeCache.timeout,
+        openCodePool: OpenCodeServerPool = OpenCodeServerPool()
+    ) {
         let env = options.environment ?? ProcessInfo.processInfo.environment
-        let ctx = RuntimeContext(options: options, environment: env, now: now, probeTimeout: probeTimeout)
+        let ctx = RuntimeContext(
+            options: options, environment: env, now: now, probeTimeout: probeTimeout, openCodePool: openCodePool)
         context = ctx
         builtIn = DriverTable.builtIn()
         drivers = builtIn

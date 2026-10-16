@@ -14,6 +14,7 @@ The project uses [Semantic Versioning](https://semver.org/).
 - The Codex driver: `codex app-server` over JSON-RPC (threads, turns, steer, interrupt, approvals), a paged model list and a limits read.
 - The ACP drivers for Copilot, Cursor and Gemini: the handshake with the session load and the authentication, prompts, cancel, permissions, the client file system and the session models.
 - The pi driver: `pi --mode rpc` with prompts, steer, abort, permissions, `set_model` and a model probe.
+- The OpenCode drivers: `opencode serve` over HTTP and server-sent events, for the 1.x wire (`opencode`) and the 2.x wire (`opencode2`). Sessions with the same binary, environment and arguments share one server. The pool stops an idle server after 60 s.
 
 ### Known behavior
 
@@ -26,6 +27,9 @@ The project uses [Semantic Versioning](https://semver.org/).
 - pi: the deltas of `message_update` and the full text of `message_end` both give assistant events. Use the `delta` flag to drop one.
 - pi: when `message_start` and `message_end` both have content, the blocks repeat.
 - pi: a steer works on the wire, but `Features.steer` stays false until a live turn proves it.
+- OpenCode: an `opencode` request on a 2.x binary uses the 2.x wire, and its session reports `opencode2`.
+- OpenCode: the result of a turn has no text and no usage. The `usage` events carry the usage.
+- OpenCode: a stopped or dead server ends each of its sessions with the error code `server_exited`.
 
 ### Changed on purpose (from the reference behavior)
 
@@ -42,3 +46,13 @@ The project uses [Semantic Versioning](https://semver.org/).
 - pi: a write error does not leave the turn active.
 - pi: an idle session that ends with code 0 gives no error, and the waiting commands fail at once on exit.
 - pi: a tool event also reads the documented keys `toolCallId`, `toolName`, `args`, `result` and `isError`.
+- OpenCode: the launch arguments go to `opencode serve`, and they are part of the server fingerprint.
+- OpenCode: the ledger row of a server has the key `<harness>:serve-<pid>`. Its sessions do not add rows.
+- OpenCode: an event stream that does not connect fails the start of the session.
+- OpenCode: the stream reconnect wait doubles up to 10 s, and a good connection resets it.
+- OpenCode 1.x: the `init` event comes from the driver, not from `session.created`.
+- OpenCode 1.x: a part text that gets shorter replaces the text. A text of the same length gives no event.
+- OpenCode 1.x: a `session.idle` event when no turn runs gives no event.
+- OpenCode 1.x: a `usage` event comes only when the message has a cost or a completion time.
+- OpenCode: a close sends an interrupt only when a turn runs.
+- OpenCode: a stopped server gives an `error` event only when a turn runs.

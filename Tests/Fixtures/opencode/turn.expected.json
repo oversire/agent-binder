@@ -1,0 +1,82 @@
+[
+  {
+    "kind": "status",
+    "status": "running"
+  },
+  {
+    "delta": false,
+    "kind": "assistant",
+    "text": "po"
+  },
+  {
+    "delta": true,
+    "kind": "assistant",
+    "text": "n"
+  },
+  {
+    "delta": true,
+    "kind": "assistant",
+    "text": "g"
+  },
+  {
+    "id": "prt_t",
+    "input": "{\"command\":\"ls\"}",
+    "kind": "tool",
+    "name": "bash",
+    "status": "started",
+    "tool_kind": "exec"
+  },
+  {
+    "id": "prt_t",
+    "input": "{\"command\":\"ls\"}",
+    "kind": "tool",
+    "name": "bash",
+    "output": "a.txt",
+    "status": "completed",
+    "tool_kind": "exec"
+  },
+  {
+    "id": "prt_e",
+    "input": "{\"filePath\":\"/tmp/a.txt\"}",
+    "kind": "tool",
+    "name": "edit",
+    "output": "denied",
+    "paths": [
+      "/tmp/a.txt"
+    ],
+    "status": "failed",
+    "tool_kind": "edit"
+  },
+  {
+    "id": "per_1",
+    "kind": "permission",
+    "question": "Run ls",
+    "tool": "bash",
+    "tool_kind": "exec"
+  },
+  {
+    "kind": "usage",
+    "usage": {
+      "cache_creation": 5,
+      "cache_read": 30,
+      "cost_usd": 0.002,
+      "input": 100,
+      "model": "kimi-k3",
+      "output": 20
+    }
+  },
+  {
+    "is_error": false,
+    "kind": "result",
+    "result_session_id": "ses_1",
+    "subtype": "success",
+    "text": "",
+    "usage": {
+      "cache_creation": 0,
+      "cache_read": 0,
+      "cost_usd": 0.0,
+      "input": 0,
+      "output": 0
+    }
+  }
+]
