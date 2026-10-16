@@ -1,0 +1,177 @@
+[
+  {
+    "kind": "init",
+    "session_id": "thr_1"
+  },
+  {
+    "kind": "status",
+    "status": "running"
+  },
+  {
+    "id": "c1",
+    "input": "ls -la",
+    "kind": "tool",
+    "name": "command",
+    "status": "started",
+    "tool_kind": "exec"
+  },
+  {
+    "id": "c1",
+    "input": "ls -la",
+    "kind": "tool",
+    "name": "command",
+    "output": "total 0\n",
+    "status": "completed",
+    "tool_kind": "exec"
+  },
+  {
+    "id": "c2",
+    "input": "false",
+    "kind": "tool",
+    "name": "command",
+    "status": "started",
+    "tool_kind": "exec"
+  },
+  {
+    "id": "c2",
+    "input": "false",
+    "kind": "tool",
+    "name": "command",
+    "output": "boom",
+    "status": "failed",
+    "tool_kind": "exec"
+  },
+  {
+    "id": "f1",
+    "kind": "tool",
+    "name": "fileChange",
+    "paths": [
+      "a.go",
+      "b.go"
+    ],
+    "status": "started",
+    "tool_kind": "edit"
+  },
+  {
+    "id": "f1",
+    "kind": "tool",
+    "name": "fileChange",
+    "paths": [
+      "a.go",
+      "b.go"
+    ],
+    "status": "completed",
+    "tool_kind": "edit"
+  },
+  {
+    "id": "m1",
+    "input": "{\"text\":\"hi\"}",
+    "kind": "tool",
+    "name": "mcp:echo",
+    "status": "started",
+    "tool_kind": "mcp"
+  },
+  {
+    "id": "m1",
+    "input": "{\"text\":\"hi\"}",
+    "kind": "tool",
+    "name": "mcp:echo",
+    "status": "completed",
+    "tool_kind": "mcp"
+  },
+  {
+    "id": "w1",
+    "kind": "tool",
+    "name": "web_search",
+    "status": "started",
+    "tool_kind": "search"
+  },
+  {
+    "id": "w1",
+    "kind": "tool",
+    "name": "web_search",
+    "status": "completed",
+    "tool_kind": "search"
+  },
+  {
+    "delta": true,
+    "kind": "assistant",
+    "text": "Hel"
+  },
+  {
+    "delta": true,
+    "kind": "assistant",
+    "text": "lo"
+  },
+  {
+    "delta": false,
+    "kind": "assistant",
+    "text": "Hello"
+  },
+  {
+    "kind": "usage",
+    "usage": {
+      "cache_creation": 2,
+      "cache_read": 3,
+      "cost_usd": 0.0,
+      "input": 11,
+      "output": 4
+    }
+  },
+  {
+    "kind": "limits",
+    "plan": "plus",
+    "windows": [
+      {
+        "key": "five_hour",
+        "minutes": 300,
+        "resets_at": 1789573800.0,
+        "used_percent": 12.5
+      },
+      {
+        "key": "weekly",
+        "minutes": 10080,
+        "resets_at": 1789884000.0,
+        "used_percent": 40.0
+      }
+    ]
+  },
+  {
+    "is_error": false,
+    "kind": "result",
+    "subtype": "success",
+    "text": "",
+    "usage": {
+      "cache_creation": 2,
+      "cache_read": 3,
+      "cost_usd": 0.0,
+      "input": 11,
+      "output": 4
+    }
+  },
+  {
+    "kind": "status",
+    "status": "running"
+  },
+  {
+    "code": "codex.unknown",
+    "end_reason": "unknown",
+    "kind": "error",
+    "message": "stream disconnected"
+  },
+  {
+    "code": "codex.rate_limited",
+    "end_reason": "limit",
+    "is_error": true,
+    "kind": "result",
+    "subtype": "failed",
+    "text": "You've hit your usage limit.",
+    "usage": {
+      "cache_creation": 0,
+      "cache_read": 0,
+      "cost_usd": 0.0,
+      "input": 0,
+      "output": 0
+    }
+  }
+]

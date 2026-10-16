@@ -8,6 +8,7 @@ The first set came once, as plain data, from the reference project trebi-ai/agen
 This repository owns the files now. It records new fixtures itself.
 `fake/` holds hand-written frames of the fake harness.
 `claude/shapes.ndjson` holds hand-written Claude frame shapes that the recorded streams do not have.
+`codex/notifications.ndjson` holds hand-written Codex app-server notifications. Record real Codex turns on the first live run.
 
 ## Layout
 

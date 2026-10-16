@@ -1,0 +1,24 @@
+{"jsonrpc":"2.0","method":"thread/started","params":{"thread":{"id":"thr_1"}}}
+{"jsonrpc":"2.0","method":"mcpServer/startupStatus/updated","params":{"name":"echo","status":"ready"}}
+{"jsonrpc":"2.0","method":"turn/started","params":{"threadId":"thr_1","turn":{"id":"turn_1","status":"inProgress"}}}
+{"jsonrpc":"2.0","method":"item/started","params":{"item":{"type":"reasoning","id":"r1"}}}
+{"jsonrpc":"2.0","method":"item/started","params":{"item":{"type":"commandExecution","id":"c1","command":"ls -la"}}}
+{"jsonrpc":"2.0","method":"item/completed","params":{"item":{"type":"commandExecution","id":"c1","command":"ls -la","aggregatedOutput":"total 0\n","exitCode":0}}}
+{"jsonrpc":"2.0","method":"item/started","params":{"item":{"type":"commandExecution","id":"c2","command":"false"}}}
+{"jsonrpc":"2.0","method":"item/completed","params":{"item":{"type":"commandExecution","id":"c2","command":"false","output":"boom","exitCode":2}}}
+{"jsonrpc":"2.0","method":"item/started","params":{"item":{"type":"fileChange","id":"f1","changes":[{"path":"a.go"},{"file":"b.go"}]}}}
+{"jsonrpc":"2.0","method":"item/completed","params":{"item":{"type":"fileChange","id":"f1","changes":[{"path":"a.go"},{"file":"b.go"}]}}}
+{"jsonrpc":"2.0","method":"item/started","params":{"item":{"type":"mcpToolCall","id":"m1","server":"echo","tool":"echo","arguments":{"text":"hi"}}}}
+{"jsonrpc":"2.0","method":"item/completed","params":{"item":{"type":"mcpToolCall","id":"m1","server":"echo","tool":"echo","arguments":{"text":"hi"}}}}
+{"jsonrpc":"2.0","method":"item/started","params":{"item":{"type":"webSearch","id":"w1","query":"swift"}}}
+{"jsonrpc":"2.0","method":"item/completed","params":{"item":{"type":"webSearch","id":"w1","query":"swift"}}}
+{"jsonrpc":"2.0","method":"item/agentMessage/delta","params":{"itemId":"a1","delta":"Hel"}}
+{"jsonrpc":"2.0","method":"item/agent_message/delta","params":{"itemId":"a1","delta":"lo"}}
+{"jsonrpc":"2.0","method":"item/agentMessage/delta","params":{"itemId":"a1","delta":""}}
+{"jsonrpc":"2.0","method":"item/completed","params":{"item":{"type":"agentMessage","id":"a1","text":"Hello"}}}
+{"jsonrpc":"2.0","method":"thread/tokenUsage/updated","params":{"threadId":"thr_1","turnId":"turn_1","tokenUsage":{"last":{"inputTokens":11,"outputTokens":4,"cachedInputTokens":3,"cacheWriteInputTokens":2},"total":{"inputTokens":11,"outputTokens":4,"cachedInputTokens":3,"cacheWriteInputTokens":2}}}}
+{"jsonrpc":"2.0","method":"account/rateLimits/updated","params":{"rateLimits":{"limitId":"codex","planType":"plus","primary":{"usedPercent":12.5,"windowDurationMins":300,"resetsAt":1789573800},"secondary":{"usedPercent":40,"windowDurationMins":10080,"resetsAt":1789884000}}}}
+{"jsonrpc":"2.0","method":"turn/completed","params":{"threadId":"thr_1","turn":{"id":"turn_1","status":"completed"}}}
+{"jsonrpc":"2.0","method":"turn/started","params":{"threadId":"thr_1","turn":{"id":"turn_2","status":"inProgress"}}}
+{"jsonrpc":"2.0","method":"error","params":{"error":{"message":"stream disconnected"},"willRetry":true}}
+{"jsonrpc":"2.0","method":"turn/completed","params":{"threadId":"thr_1","turn":{"id":"turn_2","status":"failed","error":{"message":"You've hit your usage limit."}}}}

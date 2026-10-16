@@ -157,8 +157,14 @@ final class JSONRPCPeer: Sendable {
     /// Sends a request without a waiter and returns its id. The adapter matches the reply itself.
     func send(_ method: String, params: JSONValue? = nil) async throws -> JSONValue {
         let id = nextID()
-        try await write(Self.frame(id: id, method: method, params: params))
+        try await send(id: id, method, params: params)
         return id
+    }
+
+    /// Sends a request without a waiter, with an id from ``nextID()``. Record the id before the call,
+    /// because the reply can come before the call returns.
+    func send(id: JSONValue, _ method: String, params: JSONValue? = nil) async throws {
+        try await write(Self.frame(id: id, method: method, params: params))
     }
 
     /// Sends a notification.

@@ -19,45 +19,6 @@ private func canUseTool(_ id: String, _ tool: String, _ input: String) -> Data {
 
 private func line(_ s: String) -> Data { Data(s.utf8) }
 
-extension [Event] {
-    fileprivate var tools: [ToolEvent] {
-        compactMap {
-            if case .tool(let t) = $0.kind { return t }
-            return nil
-        }
-    }
-
-    fileprivate var permissions: [PermissionRequest] {
-        compactMap {
-            if case .permission(let p) = $0.kind { return p }
-            return nil
-        }
-    }
-
-    fileprivate var results: [TurnResult] {
-        compactMap {
-            if case .result(let r) = $0.kind { return r }
-            return nil
-        }
-    }
-
-    fileprivate var errors: [WireError] {
-        compactMap {
-            if case .error(let e) = $0.kind { return e }
-            return nil
-        }
-    }
-
-    fileprivate var limits: [Limits] {
-        compactMap {
-            if case .limits(let l) = $0.kind { return l }
-            return nil
-        }
-    }
-
-    fileprivate func count(_ name: String) -> Int { filter { $0.kind.name == name }.count }
-}
-
 extension ScriptedPeer {
     fileprivate func frames(type: String) -> [JSONValue] { seen.filter { $0["type"]?.string == type } }
 }

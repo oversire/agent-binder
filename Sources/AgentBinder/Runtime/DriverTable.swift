@@ -2,6 +2,6 @@
 /// ``Runtime/setDriver(_:for:)``.
 enum DriverTable {
     static func builtIn() -> [Harness: any Driver] {
-        [.claude: ClaudeDriver(), .fake: FakeDriver()]
+        [.claude: ClaudeDriver(), .codex: CodexDriver(), .fake: FakeDriver()]
     }
 }
