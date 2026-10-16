@@ -50,6 +50,41 @@ enum JSONValue: Sendable, Equatable, Hashable {
 
     var jsonData: Data { Data(jsonString.utf8) }
 
+    /// The JSON text with two-space indents and sorted keys, for config files.
+    var prettyString: String {
+        var out = ""
+        writePretty(to: &out, level: 0)
+        return out
+    }
+
+    private func writePretty(to out: inout String, level: Int) {
+        let pad = String(repeating: "  ", count: level + 1)
+        let end = String(repeating: "  ", count: level)
+        switch self {
+        case .array(let a) where !a.isEmpty:
+            out += "[\n"
+            for (i, v) in a.enumerated() {
+                out += pad
+                v.writePretty(to: &out, level: level + 1)
+                out += i < a.count - 1 ? ",\n" : "\n"
+            }
+            out += end + "]"
+        case .object(let o) where !o.isEmpty:
+            out += "{\n"
+            let keys = o.keys.sorted()
+            for (i, k) in keys.enumerated() {
+                out += pad
+                JSONValue.writeString(k, to: &out)
+                out += ": "
+                o[k]!.writePretty(to: &out, level: level + 1)
+                out += i < keys.count - 1 ? ",\n" : "\n"
+            }
+            out += end + "}"
+        default:
+            write(to: &out)
+        }
+    }
+
     /// One NDJSON frame: the JSON text and a newline.
     var frame: Data { Data((jsonString + "\n").utf8) }
 

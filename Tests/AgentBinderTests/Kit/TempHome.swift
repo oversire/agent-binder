@@ -1,3 +1,4 @@
+import AgentBinder
 import Foundation
 
 /// A temp folder that goes away with the value.
@@ -33,3 +34,6 @@ final class TempDir: @unchecked Sendable {
         try? String(contentsOf: url.appendingPathComponent(relative), encoding: .utf8)
     }
 }
+
+/// `Testing.Attachment` hides the library type in files that import Testing.
+typealias PromptAttachment = Attachment
