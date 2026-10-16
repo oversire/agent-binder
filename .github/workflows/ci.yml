@@ -1,0 +1,71 @@
+name: CI
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+
+concurrency:
+  group: ci-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  test:
+    strategy:
+      fail-fast: false
+      matrix:
+        include:
+          - runner: macos-14
+            xcode: "16.2"
+          - runner: macos-15
+            xcode: "16.4"
+          - runner: macos-15
+            xcode: "26.0"
+    runs-on: ${{ matrix.runner }}
+    steps:
+      - uses: actions/checkout@v4
+      - run: sudo xcode-select -s /Applications/Xcode_${{ matrix.xcode }}.app
+      - uses: actions/cache@v4
+        with:
+          path: .build
+          key: build-${{ matrix.runner }}-${{ matrix.xcode }}-${{ hashFiles('Package.swift') }}
+      - run: swift build -Xswiftc -warnings-as-errors
+      - run: swift test --parallel
+
+  tsan:
+    runs-on: macos-15
+    steps:
+      - uses: actions/checkout@v4
+      - run: sudo xcode-select -s /Applications/Xcode_26.0.app
+      - run: swift test --sanitize=thread
+
+  coverage:
+    runs-on: macos-15
+    steps:
+      - uses: actions/checkout@v4
+      - run: sudo xcode-select -s /Applications/Xcode_26.0.app
+      - run: scripts/coverage.sh
+
+  lint:
+    runs-on: macos-15
+    steps:
+      - uses: actions/checkout@v4
+      - run: sudo xcode-select -s /Applications/Xcode_26.0.app
+      - run: swift format lint --strict -r Sources Tests
+      - name: Core target has no dependencies
+        run: "! grep -rn '^import MCP' Sources/AgentBinder"
+      - name: No Foundation.Process
+        run: "! grep -rnE '\\bProcess\\(\\)|Foundation\\.Process' Sources"
+      - name: No global mutable state
+        run: "! grep -rnE '^\\s*(public |internal |private |fileprivate )?(static |nonisolated\\(unsafe\\) )var ' Sources --include=*.swift | grep -v 'static var .*{' "
+      - run: scripts/api-check.sh
+
+  docs:
+    runs-on: macos-15
+    steps:
+      - uses: actions/checkout@v4
+      - run: sudo xcode-select -s /Applications/Xcode_26.0.app
+      - name: Build DocC
+        run: |
+          xcodebuild docbuild -scheme AgentBinder -destination 'platform=macOS' \
+            OTHER_DOCC_FLAGS="--warnings-as-errors" | tail -20
