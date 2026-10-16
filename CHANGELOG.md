@@ -15,6 +15,7 @@ The project uses [Semantic Versioning](https://semver.org/).
 - The ACP drivers for Copilot, Cursor and Gemini: the handshake with the session load and the authentication, prompts, cancel, permissions, the client file system and the session models.
 - The pi driver: `pi --mode rpc` with prompts, steer, abort, permissions, `set_model` and a model probe.
 - The OpenCode drivers: `opencode serve` over HTTP and server-sent events, for the 1.x wire (`opencode`) and the 2.x wire (`opencode2`). Sessions with the same binary, environment and arguments share one server. The pool stops an idle server after 60 s.
+- The native loop (`AgentBinderNative`): `NativeDriver` runs a model loop in process with the `Model` protocol, tool sets (`FileTools`, `MCPToolSet`, `FuncTool`), approvals, skills, a message store (`FileStore`, `MemoryStore`) and compaction (`SummaryCompactor`).
 
 ### Known behavior
 
@@ -30,6 +31,9 @@ The project uses [Semantic Versioning](https://semver.org/).
 - OpenCode: an `opencode` request on a 2.x binary uses the 2.x wire, and its session reports `opencode2`.
 - OpenCode: the result of a turn has no text and no usage. The `usage` events carry the usage.
 - OpenCode: a stopped or dead server ends each of its sessions with the error code `server_exited`.
+- Native: the built-in tools work on the disk. `Features.fileSystem` is false, and `StartRequest.fileSystem` has no effect.
+- Native: the `allowed-tools` key of a skill is read, but it does not limit the tools.
+- Native: an MCP tool call always needs approval, also when the server marks the tool read-only.
 
 ### Changed on purpose (from the reference behavior)
 
@@ -56,3 +60,26 @@ The project uses [Semantic Versioning](https://semver.org/).
 - OpenCode 1.x: a `usage` event comes only when the message has a cost or a completion time.
 - OpenCode: a close sends an interrupt only when a turn runs.
 - OpenCode: a stopped server gives an `error` event only when a turn runs.
+- Native: a `FuncTool` with a `String` output gives the text as it is, not as a JSON string.
+- Native: `Decision.updatedInput` replaces the input of the tool call.
+- Native: a permission request gives the status `waiting`, and the answer gives the status `running`.
+- Native: an MCP tool name has only `[a-zA-Z0-9_-]` and is at most 64 characters. A duplicate name gets a `_N` suffix.
+- Native: the `usage` of a result is the sum of all model calls of the turn.
+- Native: a symlink in the workspace that leads out of the root is refused.
+- Native: `prompt` returns when the turn starts. It does not wait for the result.
+- Native: a start with no session id makes a new id.
+- Native: a turn that reaches the call limit gives the result `error_max_turns` with `isError`.
+- Native: `activate_skill` is in the tool list only when the session has skills.
+
+### Fixed on purpose (from the reference behavior)
+
+- Native: the reasoning keeps its provider signature in the history, so the next call can send it back.
+- Native: the tool list keeps the insertion order, so the request bytes stay stable for prompt caching.
+- Native: a cancel between tool calls gives each open call a `cancelled` result, so the next prompt works.
+- Native: compaction does not split a tool call from its result.
+- Native: an empty model answer adds no message to the history.
+- Native: `bash` gets the full environment of the session, `PATH` too.
+- Native: the glob segment `**` matches zero or more segments.
+- Native: `MCPToolSet` follows `nextCursor`, and an HTTP server gets the headers on each request.
+- Native: a `bash` timeout kills the process group, so a background child cannot hold the output open.
+- Native: a permission event has the tool call id in `toolUseID`.

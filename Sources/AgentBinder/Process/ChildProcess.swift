@@ -2,15 +2,15 @@ import Darwin
 import Foundation
 
 /// How a child process ended.
-struct ExitStatus: Sendable, Equatable {
+package struct ExitStatus: Sendable, Equatable {
     /// The exit code, or 128 + the signal for a signal death.
-    var code: Int32
+    package var code: Int32
     /// The signal that killed the child, if a signal killed it.
-    var signal: Int32?
+    package var signal: Int32?
 }
 
 /// The stage of ``ChildProcess/gracefulClose(stageTimeout:)`` that ended the child.
-enum CloseStage: Int, Sendable {
+package enum CloseStage: Int, Sendable {
     case alreadyExited = 0
     case stdinClosed = 1
     case terminated = 2
@@ -18,7 +18,7 @@ enum CloseStage: Int, Sendable {
 }
 
 /// One read from a pipe.
-enum PipeRead: Sendable {
+package enum PipeRead: Sendable {
     case data(Data)
     case eof
     case failed(Int32)
@@ -28,15 +28,15 @@ enum PipeRead: Sendable {
 ///
 /// It is the only lifecycle mechanism for harness children. Blocking reads, writes and the wait
 /// run on private dispatch queues, so they never block the cooperative thread pool.
-final class ChildProcess: Sendable {
+package final class ChildProcess: Sendable {
     /// The size of the retained stderr tail.
     static let stderrTailMax = 32 << 10
     /// The default time of each close stage.
-    static let defaultStageTimeout: Duration = .seconds(5)
+    package static let defaultStageTimeout: Duration = .seconds(5)
 
-    let pid: pid_t
-    let pgid: pid_t
-    let argv: [String]
+    package let pid: pid_t
+    package let pgid: pid_t
+    package let argv: [String]
 
     private struct State {
         var stdin: Int32
@@ -72,7 +72,7 @@ final class ChildProcess: Sendable {
     }
 
     /// Spawns a child. The child is in its own process group.
-    static func spawn(_ o: SpawnOptions) throws -> ChildProcess {
+    package static func spawn(_ o: SpawnOptions) throws -> ChildProcess {
         let child = try Spawn.start(o)
         let p = ChildProcess(child: child, argv: [o.executable.path] + o.arguments)
         p.startStderrDrain(fd: child.stderr, onLine: o.onStderrLine)
@@ -83,7 +83,7 @@ final class ChildProcess: Sendable {
     // MARK: stdin
 
     /// Writes all bytes to the stdin of the child. It throws when the child closed its stdin.
-    func write(_ data: Data) async throws {
+    package func write(_ data: Data) async throws {
         try await withCheckedThrowingContinuation { (cont: CheckedContinuation<Void, any Error>) in
             stdinQueue.async { [self] in
                 let fd = state.withLock { $0.stdin }
@@ -113,7 +113,7 @@ final class ChildProcess: Sendable {
     }
 
     /// Closes the stdin of the child once, after the pending writes.
-    func closeStdin() {
+    package func closeStdin() {
         stdinQueue.async { [self] in
             let fd = state.withLock { s -> Int32 in
                 defer { s.stdin = -1 }
@@ -126,7 +126,7 @@ final class ChildProcess: Sendable {
     // MARK: stdout
 
     /// Reads the next chunk of stdout. The caller owns framing.
-    func readStdout(maxBytes: Int = 64 << 10) async -> PipeRead {
+    package func readStdout(maxBytes: Int = 64 << 10) async -> PipeRead {
         await withCheckedContinuation { (cont: CheckedContinuation<PipeRead, Never>) in
             stdoutQueue.async { [self] in
                 let fd = state.withLock { $0.stdout }
@@ -167,7 +167,7 @@ final class ChildProcess: Sendable {
     // MARK: stderr
 
     /// The last 32 KiB of stderr.
-    var stderrTail: String {
+    package var stderrTail: String {
         String(decoding: state.withLock { $0.stderrTail }, as: UTF8.self)
     }
 
@@ -232,24 +232,24 @@ final class ChildProcess: Sendable {
     }
 
     /// The exit status, or nil while the child is alive.
-    var exitStatus: ExitStatus? { state.withLock { $0.exit } }
+    package var exitStatus: ExitStatus? { state.withLock { $0.exit } }
 
     /// Waits for the child to exit and returns its exit code.
     @discardableResult
-    func waitForExit() async -> Int32 {
+    package func waitForExit() async -> Int32 {
         _ = await waitForExit(timeout: nil)
         return exitStatus?.code ?? -1
     }
 
     /// Waits up to `timeout` for the child to exit. It returns false when the child is still alive.
-    func waitForExit(timeout: Duration?) async -> Bool {
+    package func waitForExit(timeout: Duration?) async -> Bool {
         await exited.wait(timeout: timeout)
     }
 
     // MARK: signals
 
     /// Sends a signal to the process group, else to the process.
-    func signalGroup(_ sig: Int32) {
+    package func signalGroup(_ sig: Int32) {
         if pgid > 0 && killpg(pgid, sig) == 0 { return }
         if exitStatus == nil { _ = Darwin.kill(pid, sig) }
     }
@@ -259,7 +259,7 @@ final class ChildProcess: Sendable {
     /// A SIGTERM that comes too early can cut the vendor session file and lose the last
     /// assistant message, so each stage waits first.
     @discardableResult
-    func gracefulClose(stageTimeout: Duration = ChildProcess.defaultStageTimeout) async -> CloseStage {
+    package func gracefulClose(stageTimeout: Duration = ChildProcess.defaultStageTimeout) async -> CloseStage {
         if exitStatus != nil {
             reapGroup()
             return .alreadyExited
@@ -280,7 +280,7 @@ final class ChildProcess: Sendable {
     }
 
     /// Kills the process tree and waits for the child.
-    func killTree() async {
+    package func killTree() async {
         signalGroup(SIGKILL)
         await waitForExit()
     }

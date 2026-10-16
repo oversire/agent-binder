@@ -2,14 +2,25 @@ import Darwin
 import Foundation
 
 /// The description of one child process.
-struct SpawnOptions: Sendable {
-    var executable: URL
-    var arguments: [String] = []
-    var directory: URL?
+package struct SpawnOptions: Sendable {
+    package var executable: URL
+    package var arguments: [String]
+    package var directory: URL?
     /// The full child environment. Nil inherits the environment of this process.
-    var environment: [String: String]?
+    package var environment: [String: String]?
     /// Receives each stderr line. It runs on the drain thread, so it must not block.
-    var onStderrLine: (@Sendable (String) -> Void)?
+    package var onStderrLine: (@Sendable (String) -> Void)?
+
+    package init(
+        executable: URL, arguments: [String] = [], directory: URL? = nil, environment: [String: String]? = nil,
+        onStderrLine: (@Sendable (String) -> Void)? = nil
+    ) {
+        self.executable = executable
+        self.arguments = arguments
+        self.directory = directory
+        self.environment = environment
+        self.onStderrLine = onStderrLine
+    }
 }
 
 /// The descriptors and pid of a child that `posix_spawn` started.

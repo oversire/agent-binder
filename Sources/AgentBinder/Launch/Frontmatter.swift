@@ -4,12 +4,12 @@ import Foundation
 ///
 /// It reads flat `key: value` pairs, quoted values and the `>` and `|` block scalars.
 /// It skips nested mappings; it does not parse them wrong.
-struct Frontmatter: Equatable {
-    var values: [String: String]
+package struct Frontmatter: Equatable {
+    package var values: [String: String]
 
-    subscript(key: String) -> String? { values[key] }
+    package subscript(key: String) -> String? { values[key] }
 
-    init(_ text: String) {
+    package init(_ text: String) {
         values = [:]
         let lines = text.replacingOccurrences(of: "\r\n", with: "\n").components(separatedBy: "\n")
         guard let first = lines.first, first.trimmingCharacters(in: .whitespaces) == "---" else { return }

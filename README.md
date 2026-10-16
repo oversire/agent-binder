@@ -13,7 +13,16 @@ AgentBinder is a native Swift library for Mac apps. It drives the coding-agent C
 
 The app gets one event model for all harnesses. Each CLI uses its own login (Keychain, `~/.claude`, `~/.codex`). The library never reads, copies or stores a vendor token.
 
-The `AgentBinderNative` product runs a model loop in process, for an app with no CLI installed.
+The `AgentBinderNative` product runs a model loop in process, for an app with no CLI installed:
+
+```swift
+import AgentBinderNative
+
+await rt.setDriver(NativeDriver(NativeConfig(newModel: { creds, name in try makeModel(creds, name) }, builtinTools: true)), for: .native)
+let s = try await rt.start(StartRequest(harness: .native, workingDirectory: dir, credentials: creds))
+```
+
+The model comes from the app (a type that conforms to `Model`). The built-in tools (`bash`, `read`, `write`, `edit`, `glob`, `grep`) stay inside the working folder, and `bash` does not get the API keys of the host.
 
 ## Install
 

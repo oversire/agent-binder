@@ -26,9 +26,10 @@ extension Features {
                 mcpInject: .session, skillsInject: .instructions, instructions: true, attachments: true, resume: true,
                 permissions: true, fileSystem: true, models: true, setModel: true)
         case .native:
+            // The built-in tools work on the disk, not through StartRequest.fileSystem.
             return Features(
                 mcpInject: .session, skillsInject: .native, instructions: true, attachments: true, resume: true,
-                permissions: true, fileSystem: true)
+                permissions: true)
         case .fake:
             return Features(
                 skillsInject: .instructions, instructions: true, resume: true, permissions: true, models: true,

@@ -7,8 +7,10 @@ cd "$(dirname "$0")/.."
 out="$(mktemp -d)"
 trap 'rm -rf "$out"' EXIT
 swift build --target AgentBinder >/dev/null
+# The tool does not write a graph that did not change, so remove the old one first.
+find .build -name 'AgentBinder.symbols.json' -path '*symbolgraph*' -delete
 swift package dump-symbol-graph --minimum-access-level public >"$out/log" 2>&1 || { cat "$out/log"; exit 1; }
-graph="$(find .build -name 'AgentBinder.symbols.json' -newer Package.swift | head -1)"
+graph="$(find .build -name 'AgentBinder.symbols.json' -path '*symbolgraph*' | head -1)"
 python3 - "$graph" "$out/undocumented.txt" >"$out/symbols.txt" <<'PY'
 import json, sys
 g = json.load(open(sys.argv[1]))

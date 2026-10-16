@@ -10,7 +10,7 @@ protocol ProcessBacked {
 protocol SharedChildBacked {}
 
 /// A session that runs hooks after it ends.
-protocol CloseObserving {
+package protocol CloseObserving {
     func onClose(_ hook: @escaping @Sendable () -> Void)
 }
 

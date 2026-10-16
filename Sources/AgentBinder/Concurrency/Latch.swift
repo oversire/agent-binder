@@ -1,7 +1,7 @@
 import Foundation
 
 /// A one-way gate. Waiters resume when it opens. It never closes again.
-final class Latch: Sendable {
+package final class Latch: Sendable {
     private struct State {
         var open = false
         var waiters: [UInt64: CheckedContinuation<Bool, Never>] = [:]
@@ -10,12 +10,12 @@ final class Latch: Sendable {
 
     private let state = Locked(State())
 
-    init() {}
+    package init() {}
 
-    var isOpen: Bool { state.withLock { $0.open } }
+    package var isOpen: Bool { state.withLock { $0.open } }
 
     /// Opens the gate. A second call does nothing.
-    func open() {
+    package func open() {
         let waiters = state.withLock { s -> [CheckedContinuation<Bool, Never>] in
             if s.open { return [] }
             s.open = true
@@ -26,12 +26,12 @@ final class Latch: Sendable {
     }
 
     /// Waits for the gate to open. It also returns when the task is cancelled.
-    func wait() async {
+    package func wait() async {
         _ = await wait(timeout: nil)
     }
 
     /// Waits up to `timeout` for the gate. It returns false on a timeout or a task cancel.
-    func wait(timeout: Duration?) async -> Bool {
+    package func wait(timeout: Duration?) async -> Bool {
         let id = Locked<UInt64?>(nil)
         return await withTaskCancellationHandler {
             await withCheckedContinuation { (cont: CheckedContinuation<Bool, Never>) in
