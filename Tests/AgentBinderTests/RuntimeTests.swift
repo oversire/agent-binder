@@ -132,7 +132,7 @@ struct DetectTests {
 
     @Test func noDriverAndFake() async {
         let rt = await runtime(drivers: [])
-        #expect(await rt.detect(.claude).detail == .noDriver)
+        #expect(await rt.detect(Harness("custom")).detail == .noDriver)
         let fake = await rt.detect(.fake)
         #expect(fake.supported && fake.ready && fake.auth == .ok)
     }

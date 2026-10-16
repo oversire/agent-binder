@@ -298,7 +298,8 @@ struct FixtureTests {
     }
 
     @Test func importedFixturesParseAsJSON() throws {
-        let claude = Fixtures.list("claude")
+        // shapes.ndjson is hand-written and has a non-JSON line on purpose.
+        let claude = Fixtures.list("claude").filter { $0 != "claude/shapes.ndjson" }
         #expect(claude.count == 9)
         for rel in claude {
             for line in try Fixtures.lines(rel) { #expect(JSONValue.parse(line) != nil, "\(rel)") }

@@ -1,0 +1,99 @@
+[
+  {
+    "kind": "init",
+    "session_id": "11111111-2222-3333-4444-555555555555"
+  },
+  {
+    "kind": "usage",
+    "usage": {
+      "cache_creation": 0,
+      "cache_read": 0,
+      "cost_usd": 0.0,
+      "input": 3,
+      "output": 12
+    }
+  },
+  {
+    "id": "toolu_01AutoAllowMcp",
+    "input": "{}",
+    "kind": "tool",
+    "name": "mcp__trebi__job",
+    "status": "started",
+    "tool_kind": "mcp"
+  },
+  {
+    "id": "toolu_01AutoAllowMcp",
+    "input": "{\"action\":\"list\"}",
+    "kind": "tool",
+    "name": "mcp__trebi__job",
+    "status": "started",
+    "tool_kind": "mcp"
+  },
+  {
+    "kind": "usage",
+    "usage": {
+      "cache_creation": 0,
+      "cache_read": 0,
+      "cost_usd": 0.0,
+      "input": 3,
+      "output": 12
+    }
+  },
+  {
+    "id": "2a53d801-0b9a-49a1-8073-c1fb604130c3",
+    "input": "{\"action\":\"list\"}",
+    "kind": "permission",
+    "question": "list jobs",
+    "tool": "mcp__trebi__job",
+    "tool_kind": "mcp",
+    "tool_use_id": "toolu_01AutoAllowMcp"
+  },
+  {
+    "id": "toolu_01AutoAllowMcp",
+    "kind": "tool",
+    "name": "mcp__trebi__job",
+    "output": "[]",
+    "status": "completed",
+    "tool_kind": "mcp"
+  },
+  {
+    "kind": "usage",
+    "usage": {
+      "cache_creation": 0,
+      "cache_read": 0,
+      "cost_usd": 0.0,
+      "input": 5,
+      "output": 5
+    }
+  },
+  {
+    "delta": false,
+    "kind": "assistant",
+    "text": "DONE"
+  },
+  {
+    "kind": "usage",
+    "usage": {
+      "cache_creation": 0,
+      "cache_read": 0,
+      "cost_usd": 0.0,
+      "input": 5,
+      "output": 5
+    }
+  },
+  {
+    "is_error": false,
+    "kind": "result",
+    "result_session_id": "11111111-2222-3333-4444-555555555555",
+    "session_id": "11111111-2222-3333-4444-555555555555",
+    "subtype": "success",
+    "text": "DONE",
+    "usage": {
+      "cache_creation": 0,
+      "cache_read": 0,
+      "cost_usd": 0.01,
+      "input": 8,
+      "output": 17
+    }
+  }
+]

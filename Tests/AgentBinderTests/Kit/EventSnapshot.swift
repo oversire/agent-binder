@@ -71,6 +71,7 @@ extension Event.Kind {
                     })
             ]
             if let p = l.plan { o["plan"] = .string(p) }
+            if l.rejected { o["rejected"] = .bool(true) }
             return o
         case .exit(let c, let e, let ec):
             var o: [String: JSONValue] = [:]

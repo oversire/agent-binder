@@ -1,0 +1,154 @@
+[
+  {
+    "kind": "init",
+    "session_id": "11111111-2222-3333-4444-555555555555"
+  },
+  {
+    "kind": "status",
+    "status": "running",
+    "text": "requesting"
+  },
+  {
+    "kind": "limits",
+    "windows": [
+      {
+        "key": "five_hour",
+        "minutes": 300,
+        "resets_at": 1789573800.0,
+        "used_percent": 11.0
+      },
+      {
+        "key": "weekly",
+        "minutes": 10080,
+        "resets_at": 1789884000.0,
+        "used_percent": 44.0
+      }
+    ]
+  },
+  {
+    "kind": "usage",
+    "usage": {
+      "cache_creation": 0,
+      "cache_read": 33156,
+      "cost_usd": 0.0,
+      "input": 3,
+      "output": 22
+    }
+  },
+  {
+    "id": "toolu_017WxnhzMXpcsyEGWVuM4zgE",
+    "input": "{}",
+    "kind": "tool",
+    "name": "Write",
+    "status": "started",
+    "tool_kind": "edit"
+  },
+  {
+    "id": "toolu_017WxnhzMXpcsyEGWVuM4zgE",
+    "input": "{\"content\":\"hello\",\"file_path\":\"/tmp/ws/fixture-allow.txt\"}",
+    "kind": "tool",
+    "name": "Write",
+    "paths": [
+      "/tmp/ws/fixture-allow.txt"
+    ],
+    "status": "started",
+    "tool_kind": "edit"
+  },
+  {
+    "kind": "usage",
+    "usage": {
+      "cache_creation": 0,
+      "cache_read": 33156,
+      "cost_usd": 0.0,
+      "input": 3,
+      "output": 22
+    }
+  },
+  {
+    "kind": "usage",
+    "usage": {
+      "cache_creation": 0,
+      "cache_read": 33156,
+      "cost_usd": 0.0,
+      "input": 3,
+      "output": 100
+    }
+  },
+  {
+    "id": "840f2c99-d0ae-431d-bba7-47aa32a512d8",
+    "input": "{\"content\":\"hello\",\"file_path\":\"/tmp/ws/fixture-allow.txt\"}",
+    "kind": "permission",
+    "question": ".work/fixture-allow.txt",
+    "tool": "Write",
+    "tool_kind": "edit",
+    "tool_use_id": "toolu_017WxnhzMXpcsyEGWVuM4zgE"
+  },
+  {
+    "id": "toolu_017WxnhzMXpcsyEGWVuM4zgE",
+    "kind": "tool",
+    "name": "Write",
+    "output": "File created successfully at: /tmp/ws/fixture-allow.txt (file state is current in your context — no need to Read it back)",
+    "status": "completed",
+    "tool_kind": "edit"
+  },
+  {
+    "kind": "status",
+    "status": "running",
+    "text": "requesting"
+  },
+  {
+    "kind": "usage",
+    "usage": {
+      "cache_creation": 189,
+      "cache_read": 33156,
+      "cost_usd": 0.0,
+      "input": 5,
+      "output": 5
+    }
+  },
+  {
+    "delta": true,
+    "kind": "assistant",
+    "text": "DONE"
+  },
+  {
+    "delta": false,
+    "kind": "assistant",
+    "text": "DONE"
+  },
+  {
+    "kind": "usage",
+    "usage": {
+      "cache_creation": 189,
+      "cache_read": 33156,
+      "cost_usd": 0.0,
+      "input": 5,
+      "output": 5
+    }
+  },
+  {
+    "kind": "usage",
+    "usage": {
+      "cache_creation": 189,
+      "cache_read": 33156,
+      "cost_usd": 0.0,
+      "input": 5,
+      "output": 5
+    }
+  },
+  {
+    "is_error": false,
+    "kind": "result",
+    "result_session_id": "11111111-2222-3333-4444-555555555555",
+    "session_id": "11111111-2222-3333-4444-555555555555",
+    "subtype": "success",
+    "text": "DONE",
+    "usage": {
+      "cache_creation": 189,
+      "cache_read": 66312,
+      "cost_usd": 0.0085562,
+      "input": 8,
+      "output": 105
+    }
+  }
+]

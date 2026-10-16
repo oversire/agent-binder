@@ -1,0 +1,83 @@
+[
+  {
+    "kind": "limits",
+    "windows": [
+      {
+        "key": "five_hour",
+        "minutes": 300,
+        "resets_at": 1789573800.0,
+        "used_percent": 11.0
+      },
+      {
+        "key": "weekly",
+        "minutes": 10080,
+        "resets_at": 1789884000.0,
+        "used_percent": 44.0
+      }
+    ]
+  },
+  {
+    "kind": "init",
+    "session_id": "11111111-2222-3333-4444-555555555555"
+  },
+  {
+    "kind": "status",
+    "status": "running",
+    "text": "requesting"
+  },
+  {
+    "kind": "usage",
+    "usage": {
+      "cache_creation": 0,
+      "cache_read": 32848,
+      "cost_usd": 0.0,
+      "input": 3,
+      "output": 6
+    }
+  },
+  {
+    "delta": true,
+    "kind": "assistant",
+    "text": "PONG"
+  },
+  {
+    "delta": false,
+    "kind": "assistant",
+    "text": "PONG"
+  },
+  {
+    "kind": "usage",
+    "usage": {
+      "cache_creation": 0,
+      "cache_read": 32848,
+      "cost_usd": 0.0,
+      "input": 3,
+      "output": 6
+    }
+  },
+  {
+    "kind": "usage",
+    "usage": {
+      "cache_creation": 0,
+      "cache_read": 32848,
+      "cost_usd": 0.0,
+      "input": 3,
+      "output": 6
+    }
+  },
+  {
+    "is_error": false,
+    "kind": "result",
+    "result_session_id": "11111111-2222-3333-4444-555555555555",
+    "session_id": "11111111-2222-3333-4444-555555555555",
+    "subtype": "success",
+    "text": "PONG",
+    "usage": {
+      "cache_creation": 0,
+      "cache_read": 32848,
+      "cost_usd": 0.0042748000000000005,
+      "input": 3,
+      "output": 6
+    }
+  }
+]

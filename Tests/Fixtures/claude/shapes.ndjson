@@ -1,0 +1,19 @@
+npm notice: update available
+{"type":"system","subtype":"init","session_id":"99999999-0000-0000-0000-000000000000","model":"claude-opus-4-7"}
+{"type":"system","subtype":"session_state_changed","state":"running"}
+{"type":"system","subtype":"status","status":"compacting"}
+{"type":"system","subtype":"compact_boundary"}
+{"type":"system","subtype":"hook_started"}
+{"type":"control_request","request_id":"req_hook_1","request":{"subtype":"hook_callback","callback_id":"cb_1"}}
+{"type":"stream_event","event":{"type":"message_start","message":{"usage":{"input_tokens":3,"output_tokens":1,"model":"claude-opus-4-7"}}}}
+{"type":"stream_event","event":{"type":"content_block_start","content_block":{"type":"tool_use","id":"toolu_a","name":"Edit","input":{}}}}
+{"type":"stream_event","event":{"type":"content_block_delta","delta":{"type":"input_json_delta","partial_json":"{"}}}
+{"type":"stream_event","event":{"type":"content_block_delta","delta":{"type":"thinking_delta","thinking":"hmm"}}}
+{"type":"stream_event","event":{"type":"message_delta","usage":{"output_tokens":9}}}
+{"type":"assistant","message":{"content":[{"type":"tool_use","id":"toolu_a","name":"Edit","input":{"file_path":"/tmp/a.txt","old_string":"x","new_string":"y"}},{"type":"tool_use","id":"toolu_b","name":"Read","input":{"file_path":"/tmp/b.txt"}}]}}
+{"type":"user","message":{"content":[{"type":"tool_result","tool_use_id":"toolu_a","is_error":true,"content":[{"type":"text","text":"no match"},{"type":"text","text":"for x"}]}]}}
+{"type":"user","message":{"role":"user","content":"a queued prompt"}}
+{"type":"user","message":{"content":[{"type":"text","text":"a steer"}]}}
+{"type":"rate_limit_event","rate_limit_info":{"status":"allowed"}}
+{"type":"system","subtype":"session_state_changed","state":"idle"}
+{"type":"result","subtype":"error_max_turns","is_error":true,"session_id":"99999999-0000-0000-0000-000000000000"}

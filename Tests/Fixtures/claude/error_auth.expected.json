@@ -1,0 +1,23 @@
+[
+  {
+    "kind": "init",
+    "session_id": "deadbeef-0000-1111-2222-333344445556"
+  },
+  {
+    "code": "claude.invalid_credentials",
+    "end_reason": "auth",
+    "is_error": true,
+    "kind": "result",
+    "result_session_id": "deadbeef-0000-1111-2222-333344445556",
+    "session_id": "deadbeef-0000-1111-2222-333344445556",
+    "subtype": "error_during_execution",
+    "text": "401 Unauthorized: OAuth token has been revoked",
+    "usage": {
+      "cache_creation": 0,
+      "cache_read": 0,
+      "cost_usd": 0.0,
+      "input": 0,
+      "output": 0
+    }
+  }
+]

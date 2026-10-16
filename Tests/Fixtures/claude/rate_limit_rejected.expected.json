@@ -1,0 +1,54 @@
+[
+  {
+    "kind": "init",
+    "session_id": "deadbeef-0000-1111-2222-666677778888"
+  },
+  {
+    "kind": "limits",
+    "rejected": true,
+    "windows": [
+      {
+        "key": "five_hour",
+        "minutes": 300,
+        "resets_at": 1789573800.0,
+        "used_percent": 100.0
+      },
+      {
+        "key": "weekly",
+        "minutes": 10080,
+        "resets_at": 1789884000.0,
+        "used_percent": 62.0
+      },
+      {
+        "key": "weekly",
+        "minutes": 10080,
+        "resets_at": 1789884000.0,
+        "scope": "opus",
+        "used_percent": 30.0
+      }
+    ]
+  },
+  {
+    "code": "claude.rate_limited",
+    "end_reason": "limit",
+    "kind": "error",
+    "message": "claude rate limit rejected"
+  },
+  {
+    "code": "claude.rate_limited",
+    "end_reason": "limit",
+    "is_error": true,
+    "kind": "result",
+    "result_session_id": "deadbeef-0000-1111-2222-666677778888",
+    "session_id": "deadbeef-0000-1111-2222-666677778888",
+    "subtype": "error_during_execution",
+    "text": "You have hit your session limit. It will reset in 2 hours.",
+    "usage": {
+      "cache_creation": 0,
+      "cache_read": 0,
+      "cost_usd": 0.0,
+      "input": 0,
+      "output": 0
+    }
+  }
+]

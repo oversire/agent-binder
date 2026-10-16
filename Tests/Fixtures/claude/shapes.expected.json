@@ -1,0 +1,121 @@
+[
+  {
+    "kind": "status",
+    "status": "running",
+    "text": "npm notice: update available"
+  },
+  {
+    "kind": "init",
+    "session_id": "99999999-0000-0000-0000-000000000000"
+  },
+  {
+    "kind": "status",
+    "status": "running"
+  },
+  {
+    "kind": "status",
+    "status": "running",
+    "text": "compacting"
+  },
+  {
+    "kind": "status",
+    "status": "running",
+    "text": "compacting"
+  },
+  {
+    "kind": "usage",
+    "usage": {
+      "cache_creation": 0,
+      "cache_read": 0,
+      "cost_usd": 0.0,
+      "input": 3,
+      "model": "claude-opus-4-7",
+      "output": 1
+    }
+  },
+  {
+    "id": "toolu_a",
+    "input": "{}",
+    "kind": "tool",
+    "name": "Edit",
+    "status": "started",
+    "tool_kind": "edit"
+  },
+  {
+    "kind": "usage",
+    "usage": {
+      "cache_creation": 0,
+      "cache_read": 0,
+      "cost_usd": 0.0,
+      "input": 0,
+      "output": 9
+    }
+  },
+  {
+    "id": "toolu_a",
+    "input": "{\"file_path\":\"/tmp/a.txt\",\"new_string\":\"y\",\"old_string\":\"x\"}",
+    "kind": "tool",
+    "name": "Edit",
+    "paths": [
+      "/tmp/a.txt"
+    ],
+    "status": "started",
+    "tool_kind": "edit"
+  },
+  {
+    "id": "toolu_b",
+    "input": "{\"file_path\":\"/tmp/b.txt\"}",
+    "kind": "tool",
+    "name": "Read",
+    "status": "started",
+    "tool_kind": "read"
+  },
+  {
+    "id": "toolu_a",
+    "kind": "tool",
+    "name": "Edit",
+    "output": "no match\nfor x",
+    "status": "failed",
+    "tool_kind": "edit"
+  },
+  {
+    "kind": "user",
+    "text": "a queued prompt"
+  },
+  {
+    "kind": "user",
+    "text": "a steer"
+  },
+  {
+    "kind": "status",
+    "status": "running",
+    "text": "rate_limit:allowed"
+  },
+  {
+    "kind": "status",
+    "status": "idle"
+  },
+  {
+    "id": "toolu_b",
+    "kind": "tool",
+    "name": "",
+    "status": "cancelled",
+    "tool_kind": "other"
+  },
+  {
+    "code": "claude.error_max_turns",
+    "is_error": true,
+    "kind": "result",
+    "result_session_id": "99999999-0000-0000-0000-000000000000",
+    "session_id": "99999999-0000-0000-0000-000000000000",
+    "subtype": "error_max_turns",
+    "text": "error_max_turns",
+    "usage": {
+      "cache_creation": 0,
+      "cache_read": 0,
+      "cost_usd": 0.0,
+      "input": 0,
+      "output": 0
+    }
+  }
+]

@@ -166,7 +166,7 @@ public final class Tracker: Sendable {
         s.lastToolName = tool.name
         var id = tool.id
         switch tool.status {
-        case .completed, .failed:
+        case .completed, .failed, .cancelled:
             if id.isEmpty {
                 if s.pendingAuto.isEmpty {
                     // A completion with no start gets its own slot, so it cannot clear a named tool.

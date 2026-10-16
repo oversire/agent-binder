@@ -1,0 +1,35 @@
+[
+  {
+    "kind": "init",
+    "session_id": "aaaaaaaa-bbbb-cccc-dddd-eeeeeeeeeeee"
+  },
+  {
+    "id": "req_9_abc12345",
+    "input": "{\"command\":\"echo side-effect > /tmp/trebi-perm\"}",
+    "kind": "permission",
+    "question": "Claude wants to run a command",
+    "tool": "Bash",
+    "tool_kind": "exec",
+    "tool_use_id": "toolu_9"
+  },
+  {
+    "delta": false,
+    "kind": "assistant",
+    "text": "waiting for permission"
+  },
+  {
+    "is_error": false,
+    "kind": "result",
+    "result_session_id": "aaaaaaaa-bbbb-cccc-dddd-eeeeeeeeeeee",
+    "session_id": "aaaaaaaa-bbbb-cccc-dddd-eeeeeeeeeeee",
+    "subtype": "success",
+    "text": "allowed",
+    "usage": {
+      "cache_creation": 0,
+      "cache_read": 0,
+      "cost_usd": 0.0,
+      "input": 5,
+      "output": 7
+    }
+  }
+]

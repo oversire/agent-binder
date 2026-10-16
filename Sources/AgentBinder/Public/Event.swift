@@ -100,6 +100,8 @@ public enum ToolStatus: String, Sendable, Codable {
     case completed
     /// The tool failed.
     case failed
+    /// The turn or the process ended before the tool ended.
+    case cancelled
 }
 
 /// One tool call: its start or its end.

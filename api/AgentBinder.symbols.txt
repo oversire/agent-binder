@@ -105,6 +105,7 @@ swift.enum.case ToolKind.mcp :: case mcp
 swift.enum.case ToolKind.other :: case other
 swift.enum.case ToolKind.read :: case read
 swift.enum.case ToolKind.search :: case search
+swift.enum.case ToolStatus.cancelled :: case cancelled
 swift.enum.case ToolStatus.completed :: case completed
 swift.enum.case ToolStatus.failed :: case failed
 swift.enum.case ToolStatus.started :: case started

@@ -1,0 +1,23 @@
+[
+  {
+    "kind": "init",
+    "session_id": "deadbeef-0000-1111-2222-333344445555"
+  },
+  {
+    "code": "claude.rate_limited",
+    "end_reason": "limit",
+    "is_error": true,
+    "kind": "result",
+    "result_session_id": "deadbeef-0000-1111-2222-333344445555",
+    "session_id": "deadbeef-0000-1111-2222-333344445555",
+    "subtype": "error_during_execution",
+    "text": "You have hit your session limit. It will reset in 2 hours.",
+    "usage": {
+      "cache_creation": 0,
+      "cache_read": 0,
+      "cost_usd": 0.0,
+      "input": 0,
+      "output": 0
+    }
+  }
+]

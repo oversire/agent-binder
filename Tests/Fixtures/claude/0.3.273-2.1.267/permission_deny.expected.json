@@ -1,0 +1,393 @@
+[
+  {
+    "kind": "limits",
+    "windows": [
+      {
+        "key": "five_hour",
+        "minutes": 300,
+        "resets_at": 1789573800.0,
+        "used_percent": 11.0
+      },
+      {
+        "key": "weekly",
+        "minutes": 10080,
+        "resets_at": 1789884000.0,
+        "used_percent": 44.0
+      }
+    ]
+  },
+  {
+    "kind": "init",
+    "session_id": "11111111-2222-3333-4444-555555555555"
+  },
+  {
+    "kind": "status",
+    "status": "running",
+    "text": "requesting"
+  },
+  {
+    "kind": "usage",
+    "usage": {
+      "cache_creation": 0,
+      "cache_read": 33156,
+      "cost_usd": 0.0,
+      "input": 3,
+      "output": 22
+    }
+  },
+  {
+    "id": "toolu_01FnqpEYh5EejNeCmicAy5yM",
+    "input": "{}",
+    "kind": "tool",
+    "name": "Bash",
+    "status": "started",
+    "tool_kind": "exec"
+  },
+  {
+    "id": "toolu_01FnqpEYh5EejNeCmicAy5yM",
+    "input": "{\"command\":\"ls -la /tmp/Projects/trebi-workspace/trebi/scripts/gen-claude-fixtures/\",\"description\":\"Check the directory structure\"}",
+    "kind": "tool",
+    "name": "Bash",
+    "status": "started",
+    "tool_kind": "exec"
+  },
+  {
+    "kind": "usage",
+    "usage": {
+      "cache_creation": 0,
+      "cache_read": 33156,
+      "cost_usd": 0.0,
+      "input": 3,
+      "output": 22
+    }
+  },
+  {
+    "kind": "usage",
+    "usage": {
+      "cache_creation": 0,
+      "cache_read": 33156,
+      "cost_usd": 0.0,
+      "input": 3,
+      "output": 98
+    }
+  },
+  {
+    "id": "toolu_01FnqpEYh5EejNeCmicAy5yM",
+    "kind": "tool",
+    "name": "Bash",
+    "output": "total 144\ndrwxr-xr-x  8 fritz  staff   256B Sep 16 10:14 ./\ndrwxr-xr-x  9 fritz  staff   288B Sep 16 10:08 ../\ndrwxr-xr-x  3 fritz  staff    96B Sep 16 10:15 .work/\n-rw-r--r--  1 fritz  staff   1.6K Sep 16 10:08 conformance.mjs\n-rw-r--r--  1 fritz  staff   6.7K Sep 16 10:14 generate.mjs\n-rw-r--r--  1 fritz  staff    51K Sep 16 10:09 package-lock.json\n-rw-r--r--  1 fritz  staff   415B Sep 16 10:08 package.json\n-rw-r--r--  1 fritz  staff   1.2K Sep 16 10:09 README.md",
+    "status": "completed",
+    "tool_kind": "exec"
+  },
+  {
+    "kind": "status",
+    "status": "running",
+    "text": "requesting"
+  },
+  {
+    "kind": "usage",
+    "usage": {
+      "cache_creation": 381,
+      "cache_read": 33156,
+      "cost_usd": 0.0,
+      "input": 5,
+      "output": 2
+    }
+  },
+  {
+    "delta": true,
+    "kind": "assistant",
+    "text": "I see"
+  },
+  {
+    "delta": true,
+    "kind": "assistant",
+    "text": " the"
+  },
+  {
+    "delta": true,
+    "kind": "assistant",
+    "text": " `."
+  },
+  {
+    "delta": true,
+    "kind": "assistant",
+    "text": "work/` directory"
+  },
+  {
+    "delta": true,
+    "kind": "assistant",
+    "text": " already"
+  },
+  {
+    "delta": true,
+    "kind": "assistant",
+    "text": " exists. Now"
+  },
+  {
+    "delta": true,
+    "kind": "assistant",
+    "text": " I"
+  },
+  {
+    "delta": true,
+    "kind": "assistant",
+    "text": "'ll"
+  },
+  {
+    "delta": true,
+    "kind": "assistant",
+    "text": " create the file"
+  },
+  {
+    "delta": true,
+    "kind": "assistant",
+    "text": " with the content"
+  },
+  {
+    "delta": true,
+    "kind": "assistant",
+    "text": " \"hello\"."
+  },
+  {
+    "delta": false,
+    "kind": "assistant",
+    "text": "I see the `.work/` directory already exists. Now I'll create the file with the content \"hello\"."
+  },
+  {
+    "kind": "usage",
+    "usage": {
+      "cache_creation": 381,
+      "cache_read": 33156,
+      "cost_usd": 0.0,
+      "input": 5,
+      "output": 2
+    }
+  },
+  {
+    "id": "toolu_01Qrwk1xKGgegmSuKfMfWhBg",
+    "input": "{}",
+    "kind": "tool",
+    "name": "Write",
+    "status": "started",
+    "tool_kind": "edit"
+  },
+  {
+    "id": "toolu_01Qrwk1xKGgegmSuKfMfWhBg",
+    "input": "{\"content\":\"hello\",\"file_path\":\"/tmp/ws/fixture-deny.txt\"}",
+    "kind": "tool",
+    "name": "Write",
+    "paths": [
+      "/tmp/ws/fixture-deny.txt"
+    ],
+    "status": "started",
+    "tool_kind": "edit"
+  },
+  {
+    "kind": "usage",
+    "usage": {
+      "cache_creation": 381,
+      "cache_read": 33156,
+      "cost_usd": 0.0,
+      "input": 5,
+      "output": 2
+    }
+  },
+  {
+    "id": "7bb76142-6f83-411b-8e95-93e22101783e",
+    "input": "{\"content\":\"hello\",\"file_path\":\"/tmp/ws/fixture-deny.txt\"}",
+    "kind": "permission",
+    "question": ".work/fixture-deny.txt",
+    "tool": "Write",
+    "tool_kind": "edit",
+    "tool_use_id": "toolu_01Qrwk1xKGgegmSuKfMfWhBg"
+  },
+  {
+    "kind": "usage",
+    "usage": {
+      "cache_creation": 381,
+      "cache_read": 33156,
+      "cost_usd": 0.0,
+      "input": 5,
+      "output": 123
+    }
+  },
+  {
+    "id": "toolu_01Qrwk1xKGgegmSuKfMfWhBg",
+    "kind": "tool",
+    "name": "Write",
+    "output": "denied by fixture recorder",
+    "status": "failed",
+    "tool_kind": "edit"
+  },
+  {
+    "kind": "status",
+    "status": "running",
+    "text": "requesting"
+  },
+  {
+    "kind": "usage",
+    "usage": {
+      "cache_creation": 173,
+      "cache_read": 33537,
+      "cost_usd": 0.0,
+      "input": 7,
+      "output": 4
+    }
+  },
+  {
+    "delta": true,
+    "kind": "assistant",
+    "text": "DONE\n\nThe"
+  },
+  {
+    "delta": true,
+    "kind": "assistant",
+    "text": " Write"
+  },
+  {
+    "delta": true,
+    "kind": "assistant",
+    "text": " tool was"
+  },
+  {
+    "delta": true,
+    "kind": "assistant",
+    "text": " denied"
+  },
+  {
+    "delta": true,
+    "kind": "assistant",
+    "text": " by"
+  },
+  {
+    "delta": true,
+    "kind": "assistant",
+    "text": " a"
+  },
+  {
+    "delta": true,
+    "kind": "assistant",
+    "text": " fixture recorder hook"
+  },
+  {
+    "delta": true,
+    "kind": "assistant",
+    "text": ","
+  },
+  {
+    "delta": true,
+    "kind": "assistant",
+    "text": " which"
+  },
+  {
+    "delta": true,
+    "kind": "assistant",
+    "text": " prevented"
+  },
+  {
+    "delta": true,
+    "kind": "assistant",
+    "text": " the"
+  },
+  {
+    "delta": true,
+    "kind": "assistant",
+    "text": " file from being created"
+  },
+  {
+    "delta": true,
+    "kind": "assistant",
+    "text": ". This"
+  },
+  {
+    "delta": true,
+    "kind": "assistant",
+    "text": " appears"
+  },
+  {
+    "delta": true,
+    "kind": "assistant",
+    "text": " to be an intent"
+  },
+  {
+    "delta": true,
+    "kind": "assistant",
+    "text": "ional fixture recording"
+  },
+  {
+    "delta": true,
+    "kind": "assistant",
+    "text": " mechanism"
+  },
+  {
+    "delta": true,
+    "kind": "assistant",
+    "text": " in"
+  },
+  {
+    "delta": true,
+    "kind": "assistant",
+    "text": " place"
+  },
+  {
+    "delta": true,
+    "kind": "assistant",
+    "text": " for"
+  },
+  {
+    "delta": true,
+    "kind": "assistant",
+    "text": " this"
+  },
+  {
+    "delta": true,
+    "kind": "assistant",
+    "text": " directory"
+  },
+  {
+    "delta": true,
+    "kind": "assistant",
+    "text": "."
+  },
+  {
+    "delta": false,
+    "kind": "assistant",
+    "text": "DONE\n\nThe Write tool was denied by a fixture recorder hook, which prevented the file from being created. This appears to be an intentional fixture recording mechanism in place for this directory."
+  },
+  {
+    "kind": "usage",
+    "usage": {
+      "cache_creation": 173,
+      "cache_read": 33537,
+      "cost_usd": 0.0,
+      "input": 7,
+      "output": 4
+    }
+  },
+  {
+    "kind": "usage",
+    "usage": {
+      "cache_creation": 173,
+      "cache_read": 33537,
+      "cost_usd": 0.0,
+      "input": 7,
+      "output": 41
+    }
+  },
+  {
+    "is_error": false,
+    "kind": "result",
+    "result_session_id": "11111111-2222-3333-4444-555555555555",
+    "session_id": "11111111-2222-3333-4444-555555555555",
+    "subtype": "success",
+    "text": "DONE\n\nThe Write tool was denied by a fixture recorder hook, which prevented the file from being created. This appears to be an intentional fixture recording mechanism in place for this directory.",
+    "usage": {
+      "cache_creation": 554,
+      "cache_read": 99849,
+      "cost_usd": 0.0134269,
+      "input": 15,
+      "output": 262
+    }
+  }
+]

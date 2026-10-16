@@ -1,0 +1,48 @@
+[
+  {
+    "kind": "init",
+    "session_id": "11111111-2222-3333-4444-555555555555"
+  },
+  {
+    "delta": false,
+    "kind": "assistant",
+    "text": "hello from claude"
+  },
+  {
+    "delta": true,
+    "kind": "assistant",
+    "text": "more "
+  },
+  {
+    "id": "toolu_1",
+    "input": "{\"command\":\"echo hi\"}",
+    "kind": "tool",
+    "name": "Bash",
+    "status": "started",
+    "tool_kind": "exec"
+  },
+  {
+    "id": "toolu_1",
+    "kind": "tool",
+    "name": "Bash",
+    "output": "hi\n",
+    "status": "completed",
+    "tool_kind": "exec"
+  },
+  {
+    "is_error": false,
+    "kind": "result",
+    "result_session_id": "11111111-2222-3333-4444-555555555555",
+    "session_id": "11111111-2222-3333-4444-555555555555",
+    "subtype": "success",
+    "text": "done",
+    "usage": {
+      "cache_creation": 5,
+      "cache_read": 10,
+      "cost_usd": 0.0123,
+      "input": 100,
+      "model": "claude-sonnet-4-5",
+      "output": 25
+    }
+  }
+]

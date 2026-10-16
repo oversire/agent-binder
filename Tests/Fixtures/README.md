@@ -7,6 +7,7 @@ Recorded vendor frames for the driver tests.
 The first set came once, as plain data, from the reference project trebi-ai/agent-wire at commit `ed24a97` (2026-10-16): `testdata/claude/**` and `testdata/models/*.json`.
 This repository owns the files now. It records new fixtures itself.
 `fake/` holds hand-written frames of the fake harness.
+`claude/shapes.ndjson` holds hand-written Claude frame shapes that the recorded streams do not have.
 
 ## Layout
 
