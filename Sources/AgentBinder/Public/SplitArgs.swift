@@ -3,7 +3,7 @@ import Foundation
 /// POSIX shell word splitting, without expansion.
 ///
 /// Unquoted white space separates words. Single quotes are literal. Double quotes keep white space
-/// and honor a backslash before `"`, `\`, `$`, `` ` `` and a newline. A backslash outside quotes
+/// and honor a backslash before a double quote, a backslash, a dollar sign, a backtick and a newline. A backslash outside quotes
 /// escapes the next character. A path with spaces or a literal backslash thus stays one argument.
 public enum ShellWords {
     /// Splits a command line into arguments.

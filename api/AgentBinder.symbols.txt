@@ -1,0 +1,543 @@
+swift.class Runtime :: actor Runtime
+swift.class Tracker :: final class Tracker
+swift.enum AgentBinder :: enum AgentBinder
+swift.enum AgentBinderError :: enum AgentBinderError
+swift.enum Attachment.Source :: enum Source
+swift.enum AuthState :: enum AuthState
+swift.enum Classifier :: enum Classifier
+swift.enum Credentials.Format :: enum Format
+swift.enum Delivery :: enum Delivery
+swift.enum Detection.Detail :: enum Detail
+swift.enum EndReason :: enum EndReason
+swift.enum Event.Kind :: enum Kind
+swift.enum FailureClass :: enum FailureClass
+swift.enum MCPCapability :: enum MCPCapability
+swift.enum MCPRender :: enum MCPRender
+swift.enum MCPServer.Transport :: enum Transport
+swift.enum PermissionPolicy.Mode :: enum Mode
+swift.enum RawValue :: enum RawValue
+swift.enum SessionStatus :: enum SessionStatus
+swift.enum ShellWords :: enum ShellWords
+swift.enum SkillSupport :: enum SkillSupport
+swift.enum ToolKind :: enum ToolKind
+swift.enum ToolStatus :: enum ToolStatus
+swift.enum WindowKey :: enum WindowKey
+swift.enum.case AgentBinderError.belowVersionFloor(_:version:floor:) :: case belowVersionFloor(Harness, version: String, floor: String)
+swift.enum.case AgentBinderError.binaryNotFound(_:searched:) :: case binaryNotFound(Harness, searched: [String])
+swift.enum.case AgentBinderError.frameTooLarge :: case frameTooLarge
+swift.enum.case AgentBinderError.handshakeFailed(_:) :: case handshakeFailed(String)
+swift.enum.case AgentBinderError.handshakeTimeout :: case handshakeTimeout
+swift.enum.case AgentBinderError.homeRequired(feature:) :: case homeRequired(feature: String)
+swift.enum.case AgentBinderError.invalidRequest(_:) :: case invalidRequest(String)
+swift.enum.case AgentBinderError.launch(_:) :: case launch(String)
+swift.enum.case AgentBinderError.noActiveTurn :: case noActiveTurn
+swift.enum.case AgentBinderError.noDriver(_:) :: case noDriver(Harness)
+swift.enum.case AgentBinderError.resumeUnsupported :: case resumeUnsupported
+swift.enum.case AgentBinderError.sandboxed :: case sandboxed
+swift.enum.case AgentBinderError.sessionClosed :: case sessionClosed
+swift.enum.case AgentBinderError.timeout(_:) :: case timeout(String)
+swift.enum.case AgentBinderError.turnActive :: case turnActive
+swift.enum.case AgentBinderError.unsupported(_:) :: case unsupported(String)
+swift.enum.case AgentBinderError.vendor(code:message:) :: case vendor(code: Int, message: String)
+swift.enum.case Attachment.Source.data(_:) :: case data(Data)
+swift.enum.case Attachment.Source.file(_:) :: case file(URL)
+swift.enum.case AuthState.missing :: case missing
+swift.enum.case AuthState.ok :: case ok
+swift.enum.case AuthState.unknown :: case unknown
+swift.enum.case Credentials.Format.anthropic :: case anthropic
+swift.enum.case Credentials.Format.openai :: case openai
+swift.enum.case Delivery.held :: case held
+swift.enum.case Delivery.prompted :: case prompted
+swift.enum.case Delivery.steered :: case steered
+swift.enum.case Detection.Detail.belowFloor(_:) :: case belowFloor(String)
+swift.enum.case Detection.Detail.noDriver :: case noDriver
+swift.enum.case Detection.Detail.notInstalled :: case notInstalled
+swift.enum.case Detection.Detail.sandboxed :: case sandboxed
+swift.enum.case EndReason.auth :: case auth
+swift.enum.case EndReason.entitlement :: case entitlement
+swift.enum.case EndReason.failed :: case failed
+swift.enum.case EndReason.launch :: case launch
+swift.enum.case EndReason.limit :: case limit
+swift.enum.case EndReason.overloaded :: case overloaded
+swift.enum.case EndReason.protocol :: case `protocol`
+swift.enum.case EndReason.unknown :: case unknown
+swift.enum.case Event.Kind.assistant(text:delta:) :: case assistant(text: String, delta: Bool)
+swift.enum.case Event.Kind.error(_:) :: case error(WireError)
+swift.enum.case Event.Kind.exit(code:error:errorCode:) :: case exit(code: Int32?, error: String?, errorCode: String?)
+swift.enum.case Event.Kind.initialized :: case initialized
+swift.enum.case Event.Kind.limits(_:) :: case limits(Limits)
+swift.enum.case Event.Kind.permission(_:) :: case permission(PermissionRequest)
+swift.enum.case Event.Kind.result(_:) :: case result(TurnResult)
+swift.enum.case Event.Kind.status(_:text:) :: case status(SessionStatus, text: String?)
+swift.enum.case Event.Kind.thought(text:delta:) :: case thought(text: String, delta: Bool)
+swift.enum.case Event.Kind.tool(_:) :: case tool(ToolEvent)
+swift.enum.case Event.Kind.usage(_:) :: case usage(Usage)
+swift.enum.case Event.Kind.user(text:) :: case user(text: String)
+swift.enum.case FailureClass.auth :: case auth
+swift.enum.case FailureClass.entitlement :: case entitlement
+swift.enum.case FailureClass.limit :: case limit
+swift.enum.case FailureClass.none :: case none
+swift.enum.case FailureClass.overloaded :: case overloaded
+swift.enum.case FailureClass.protocol :: case `protocol`
+swift.enum.case FailureClass.unknown :: case unknown
+swift.enum.case MCPCapability.flags :: case flags
+swift.enum.case MCPCapability.none :: case none
+swift.enum.case MCPCapability.session :: case session
+swift.enum.case MCPServer.Transport.http(url:headers:) :: case http(url: URL, headers: [String : String])
+swift.enum.case MCPServer.Transport.stdio(command:args:env:) :: case stdio(command: String, args: [String], env: [String : String])
+swift.enum.case PermissionPolicy.Mode.ask :: case ask
+swift.enum.case PermissionPolicy.Mode.auto :: case auto
+swift.enum.case PermissionPolicy.Mode.autoEdit :: case autoEdit
+swift.enum.case PermissionPolicy.Mode.inherit :: case inherit
+swift.enum.case RawValue.bool(_:) :: case bool(Bool)
+swift.enum.case RawValue.string(_:) :: case string(String)
+swift.enum.case SessionStatus.idle :: case idle
+swift.enum.case SessionStatus.running :: case running
+swift.enum.case SessionStatus.unknown :: case unknown
+swift.enum.case SessionStatus.waiting :: case waiting
+swift.enum.case SkillSupport.instructions :: case instructions
+swift.enum.case SkillSupport.native :: case native
+swift.enum.case SkillSupport.none :: case none
+swift.enum.case SkillSupport.overlay :: case overlay
+swift.enum.case ToolKind.edit :: case edit
+swift.enum.case ToolKind.exec :: case exec
+swift.enum.case ToolKind.mcp :: case mcp
+swift.enum.case ToolKind.other :: case other
+swift.enum.case ToolKind.read :: case read
+swift.enum.case ToolKind.search :: case search
+swift.enum.case ToolStatus.completed :: case completed
+swift.enum.case ToolStatus.failed :: case failed
+swift.enum.case ToolStatus.started :: case started
+swift.enum.case WindowKey.custom :: case custom
+swift.enum.case WindowKey.daily :: case daily
+swift.enum.case WindowKey.fiveHour :: case fiveHour
+swift.enum.case WindowKey.monthly :: case monthly
+swift.enum.case WindowKey.weekly :: case weekly
+swift.func.op AgentBinderError.!=(_:_:) :: static func != (lhs: Self, rhs: Self) -> Bool
+swift.func.op Attachment.!=(_:_:) :: static func != (lhs: Self, rhs: Self) -> Bool
+swift.func.op Attachment.Source.!=(_:_:) :: static func != (lhs: Self, rhs: Self) -> Bool
+swift.func.op AuthState.!=(_:_:) :: static func != (lhs: Self, rhs: Self) -> Bool
+swift.func.op Classification.!=(_:_:) :: static func != (lhs: Self, rhs: Self) -> Bool
+swift.func.op Credentials.!=(_:_:) :: static func != (lhs: Self, rhs: Self) -> Bool
+swift.func.op Credentials.Format.!=(_:_:) :: static func != (lhs: Self, rhs: Self) -> Bool
+swift.func.op Decision.!=(_:_:) :: static func != (lhs: Self, rhs: Self) -> Bool
+swift.func.op Delivery.!=(_:_:) :: static func != (lhs: Self, rhs: Self) -> Bool
+swift.func.op Detection.!=(_:_:) :: static func != (lhs: Self, rhs: Self) -> Bool
+swift.func.op Detection.Detail.!=(_:_:) :: static func != (lhs: Self, rhs: Self) -> Bool
+swift.func.op Effort.!=(_:_:) :: static func != (lhs: Self, rhs: Self) -> Bool
+swift.func.op EndReason.!=(_:_:) :: static func != (lhs: Self, rhs: Self) -> Bool
+swift.func.op FailureClass.!=(_:_:) :: static func != (lhs: Self, rhs: Self) -> Bool
+swift.func.op Features.!=(_:_:) :: static func != (lhs: Self, rhs: Self) -> Bool
+swift.func.op Harness.!=(_:_:) :: static func != (lhs: Self, rhs: Self) -> Bool
+swift.func.op LimitWindow.!=(_:_:) :: static func != (lhs: Self, rhs: Self) -> Bool
+swift.func.op Limits.!=(_:_:) :: static func != (lhs: Self, rhs: Self) -> Bool
+swift.func.op MCPCapability.!=(_:_:) :: static func != (lhs: Self, rhs: Self) -> Bool
+swift.func.op MCPServer.!=(_:_:) :: static func != (lhs: Self, rhs: Self) -> Bool
+swift.func.op MCPServer.Transport.!=(_:_:) :: static func != (lhs: Self, rhs: Self) -> Bool
+swift.func.op ModelInfo.!=(_:_:) :: static func != (lhs: Self, rhs: Self) -> Bool
+swift.func.op OneShot.!=(_:_:) :: static func != (lhs: Self, rhs: Self) -> Bool
+swift.func.op PermissionPolicy.!=(_:_:) :: static func != (lhs: Self, rhs: Self) -> Bool
+swift.func.op PermissionPolicy.Mode.!=(_:_:) :: static func != (lhs: Self, rhs: Self) -> Bool
+swift.func.op PermissionRequest.!=(_:_:) :: static func != (lhs: Self, rhs: Self) -> Bool
+swift.func.op Prompt.!=(_:_:) :: static func != (lhs: Self, rhs: Self) -> Bool
+swift.func.op RawValue.!=(_:_:) :: static func != (lhs: Self, rhs: Self) -> Bool
+swift.func.op SessionStatus.!=(_:_:) :: static func != (lhs: Self, rhs: Self) -> Bool
+swift.func.op Skill.!=(_:_:) :: static func != (lhs: Self, rhs: Self) -> Bool
+swift.func.op SkillSupport.!=(_:_:) :: static func != (lhs: Self, rhs: Self) -> Bool
+swift.func.op ToolEvent.!=(_:_:) :: static func != (lhs: Self, rhs: Self) -> Bool
+swift.func.op ToolKind.!=(_:_:) :: static func != (lhs: Self, rhs: Self) -> Bool
+swift.func.op ToolStatus.!=(_:_:) :: static func != (lhs: Self, rhs: Self) -> Bool
+swift.func.op Tracker.Snapshot.!=(_:_:) :: static func != (lhs: Self, rhs: Self) -> Bool
+swift.func.op TurnResult.!=(_:_:) :: static func != (lhs: Self, rhs: Self) -> Bool
+swift.func.op Usage.!=(_:_:) :: static func != (lhs: Self, rhs: Self) -> Bool
+swift.func.op WindowKey.!=(_:_:) :: static func != (lhs: Self, rhs: Self) -> Bool
+swift.func.op WireError.!=(_:_:) :: static func != (lhs: Self, rhs: Self) -> Bool
+swift.init Attachment.init(mime:source:) :: init(mime: String? = nil, source: Attachment.Source)
+swift.init AuthState.init(from:) :: init(from decoder: any Decoder) throws
+swift.init AuthState.init(rawValue:) :: init?(rawValue: String)
+swift.init Classification.init(cls:code:message:) :: init(cls: FailureClass, code: String, message: String = "")
+swift.init Credentials.Format.init(from:) :: init(from decoder: any Decoder) throws
+swift.init Credentials.Format.init(rawValue:) :: init?(rawValue: String)
+swift.init Credentials.init(format:apiKey:baseURL:headers:) :: init(format: Credentials.Format, apiKey: String, baseURL: URL? = nil, headers: [String : String] = [:])
+swift.init Decision.init(allow:message:updatedInput:) :: init(allow: Bool, message: String? = nil, updatedInput: Data? = nil)
+swift.init Delivery.init(from:) :: init(from decoder: any Decoder) throws
+swift.init Delivery.init(rawValue:) :: init?(rawValue: String)
+swift.init Detection.init(harness:path:version:supported:ready:auth:authDetail:features:detail:) :: init(harness: Harness, path: URL? = nil, version: String? = nil, supported: Bool = false, ready: Bool = false, auth: AuthState = .unknown, authDetail: String? = nil, features: Features = Features(), detail: Detection.Detail? = nil)
+swift.init Effort.init(from:) :: init(from decoder: any Decoder) throws
+swift.init Effort.init(rawValue:) :: init(rawValue: String)
+swift.init EndReason.init(from:) :: init(from decoder: any Decoder) throws
+swift.init EndReason.init(rawValue:) :: init?(rawValue: String)
+swift.init Event.init(_:at:turn:sessionID:raw:) :: init(_ kind: Event.Kind, at: Date = Date(), turn: Int = 0, sessionID: String? = nil, raw: Data? = nil)
+swift.init FailureClass.init(from:) :: init(from decoder: any Decoder) throws
+swift.init FailureClass.init(rawValue:) :: init?(rawValue: String)
+swift.init FakeDriver.init(script:workingDirectory:modelList:steers:) :: init(script: String? = nil, workingDirectory: URL? = nil, modelList: [ModelInfo] = [], steers: Bool = true)
+swift.init Features.init(mcpInject:skillsInject:instructions:attachments:resume:permissions:fileSystem:models:setModel:steer:) :: init(mcpInject: MCPCapability = .none, skillsInject: SkillSupport = .none, instructions: Bool = false, attachments: Bool = false, resume: Bool = false, permissions: Bool = false, fileSystem: Bool = false, models: Bool = false, setModel: Bool = false, steer: Bool = false)
+swift.init Harness.init(_:) :: init(_ rawValue: String)
+swift.init Harness.init(from:) :: init(from decoder: any Decoder) throws
+swift.init Harness.init(rawValue:) :: init(rawValue: String)
+swift.init LimitWindow.init(key:scope:minutes:usedPercent:resetsAt:) :: init(key: WindowKey, scope: String? = nil, minutes: Int = 0, usedPercent: Double = 0, resetsAt: Date? = nil)
+swift.init Limits.init(plan:rejected:windows:) :: init(plan: String? = nil, rejected: Bool = false, windows: [LimitWindow] = [])
+swift.init MCPCapability.init(from:) :: init(from decoder: any Decoder) throws
+swift.init MCPCapability.init(rawValue:) :: init?(rawValue: String)
+swift.init MCPServer.init(name:transport:) :: init(name: String, transport: MCPServer.Transport)
+swift.init ModelInfo.init(from:) :: init(from decoder: any Decoder) throws
+swift.init ModelInfo.init(id:name:description:isDefault:) :: init(id: String, name: String? = nil, description: String? = nil, isDefault: Bool = false)
+swift.init ModelQuery.init(binary:home:environment:workingDirectory:) :: init(binary: URL? = nil, home: URL? = nil, environment: [String : String] = [:], workingDirectory: URL? = nil)
+swift.init OneShot.init(prompt:) :: init(prompt: String)
+swift.init PermissionPolicy.Mode.init(from:) :: init(from decoder: any Decoder) throws
+swift.init PermissionPolicy.Mode.init(rawValue:) :: init?(rawValue: String)
+swift.init PermissionPolicy.init(mode:allowTools:) :: init(mode: PermissionPolicy.Mode = .ask, allowTools: [String] = [])
+swift.init PermissionRequest.init(id:tool:kind:question:input:options:toolUseID:) :: init(id: String, tool: String = "", kind: ToolKind = .other, question: String = "", input: String = "", options: [String] = [], toolUseID: String? = nil)
+swift.init Prompt.init(_:kind:attachments:) :: init(_ text: String, kind: String? = nil, attachments: [Attachment] = [])
+swift.init Runtime.Options.init(clientName:clientVersion:ledger:logger:fingerprintIgnoreEnvironment:maxFrameBytes:onStderr:authCacheTTL:modelCacheTTL:binarySearchPaths:useLoginShellPath:environment:) :: init(clientName: String = "agentbinder", clientVersion: String = "", ledger: URL? = nil, logger: Logger? = nil, fingerprintIgnoreEnvironment: [String] = [], maxFrameBytes: Int = 16 << 20, onStderr: ((Harness, String) -> Void)? = nil, authCacheTTL: Duration = .seconds(300), modelCacheTTL: Duration = .seconds(600), binarySearchPaths: [URL]? = nil, useLoginShellPath: Bool = true, environment: [String : String]? = nil)
+swift.init Runtime.init(options:) :: convenience init(options: Runtime.Options = .init())
+swift.init SessionStatus.init(from:) :: init(from decoder: any Decoder) throws
+swift.init SessionStatus.init(rawValue:) :: init?(rawValue: String)
+swift.init Skill.init(name:directory:) :: init(name: String? = nil, directory: URL)
+swift.init SkillSupport.init(from:) :: init(from decoder: any Decoder) throws
+swift.init SkillSupport.init(rawValue:) :: init?(rawValue: String)
+swift.init StartRequest.init(harness:workingDirectory:binary:environment:home:sessionID:model:effort:instructions:permissions:mcpServers:skills:credentials:oneShot:handshakeTimeout:extraArguments:baseCommand:raw:frameLog:fileSystem:onStderr:) :: init(harness: Harness = .claude, workingDirectory: URL, binary: URL? = nil, environment: [String : String] = [:], home: URL? = nil, sessionID: String? = nil, model: String? = nil, effort: Effort? = nil, instructions: String? = nil, permissions: PermissionPolicy = PermissionPolicy(), mcpServers: [MCPServer] = [], skills: [Skill] = [], credentials: Credentials? = nil, oneShot: OneShot? = nil, handshakeTimeout: Duration? = nil, extraArguments: [String] = [], baseCommand: [String]? = nil, raw: [String : RawValue] = [:], frameLog: URL? = nil, fileSystem: (any FileSystemAccess)? = nil, onStderr: ((Harness, String) -> Void)? = nil)
+swift.init ToolEvent.init(id:name:kind:input:output:status:paths:exitCode:) :: init(id: String = "", name: String = "", kind: ToolKind = .other, input: String = "", output: String = "", status: ToolStatus = .started, paths: [String] = [], exitCode: Int32? = nil)
+swift.init ToolKind.init(from:) :: init(from decoder: any Decoder) throws
+swift.init ToolKind.init(rawValue:) :: init?(rawValue: String)
+swift.init ToolStatus.init(from:) :: init(from decoder: any Decoder) throws
+swift.init ToolStatus.init(rawValue:) :: init?(rawValue: String)
+swift.init Tracker.init(now:) :: init(now: @escaping () -> Date = Date.init)
+swift.init TurnResult.init(subtype:isError:text:sessionID:usage:endReason:code:) :: init(subtype: String = "success", isError: Bool = false, text: String = "", sessionID: String? = nil, usage: Usage = Usage(), endReason: EndReason? = nil, code: String? = nil)
+swift.init Usage.init(from:) :: init(from decoder: any Decoder) throws
+swift.init Usage.init(input:output:cacheRead:cacheCreation:model:costUSD:) :: init(input: Int64 = 0, output: Int64 = 0, cacheRead: Int64 = 0, cacheCreation: Int64 = 0, model: String? = nil, costUSD: Double = 0)
+swift.init WindowKey.init(from:) :: init(from decoder: any Decoder) throws
+swift.init WindowKey.init(minutes:) :: init(minutes: Int)
+swift.init WindowKey.init(rawValue:) :: init?(rawValue: String)
+swift.init WireError.init(message:code:endReason:text:) :: init(message: String, code: String, endReason: EndReason? = nil, text: String? = nil)
+swift.method AuthState.encode(to:) :: func encode(to encoder: any Encoder) throws
+swift.method AuthState.hash(into:) :: func hash(into hasher: inout Hasher)
+swift.method Credentials.Format.encode(to:) :: func encode(to encoder: any Encoder) throws
+swift.method Credentials.Format.hash(into:) :: func hash(into hasher: inout Hasher)
+swift.method Delivery.encode(to:) :: func encode(to encoder: any Encoder) throws
+swift.method Delivery.hash(into:) :: func hash(into hasher: inout Hasher)
+swift.method Driver.resume(_:runtime:) :: func resume(_ r: StartRequest, runtime: RuntimeContext) async throws -> any Session
+swift.method Driver.start(_:runtime:) :: func start(_ r: StartRequest, runtime: RuntimeContext) async throws -> any Session
+swift.method Effort.encode(to:) :: func encode(to encoder: any Encoder) throws
+swift.method Effort.hash(into:) :: func hash(into hasher: inout Hasher)
+swift.method EndReason.encode(to:) :: func encode(to encoder: any Encoder) throws
+swift.method EndReason.hash(into:) :: func hash(into hasher: inout Hasher)
+swift.method FailureClass.encode(to:) :: func encode(to encoder: any Encoder) throws
+swift.method FailureClass.hash(into:) :: func hash(into hasher: inout Hasher)
+swift.method FakeDriver.models(_:runtime:) :: func models(_ q: ModelQuery, runtime: RuntimeContext) async throws -> [ModelInfo]
+swift.method FakeDriver.resume(_:runtime:) :: func resume(_ r: StartRequest, runtime: RuntimeContext) async throws -> any Session
+swift.method FakeDriver.start(_:runtime:) :: func start(_ r: StartRequest, runtime: RuntimeContext) async throws -> any Session
+swift.method FileSystemAccess.readTextFile(_:) :: func readTextFile(_ path: String) async throws -> String
+swift.method FileSystemAccess.writeTextFile(_:content:) :: func writeTextFile(_ path: String, content: String) async throws
+swift.method Harness.encode(to:) :: func encode(to encoder: any Encoder) throws
+swift.method Harness.hash(into:) :: func hash(into hasher: inout Hasher)
+swift.method LimitsReading.readLimits(_:runtime:) :: func readLimits(_ q: ModelQuery, runtime: RuntimeContext) async throws -> Limits
+swift.method MCPCapability.encode(to:) :: func encode(to encoder: any Encoder) throws
+swift.method MCPCapability.hash(into:) :: func hash(into hasher: inout Hasher)
+swift.method ModelInfo.encode(to:) :: func encode(to encoder: any Encoder) throws
+swift.method ModelListing.models(_:runtime:) :: func models(_ q: ModelQuery, runtime: RuntimeContext) async throws -> [ModelInfo]
+swift.method ModelSettable.setModel(_:) :: func setModel(_ id: String) async throws
+swift.method PermissionPolicy.Mode.encode(to:) :: func encode(to encoder: any Encoder) throws
+swift.method PermissionPolicy.Mode.hash(into:) :: func hash(into hasher: inout Hasher)
+swift.method PermissionPolicy.answer(kind:tool:) :: func answer(kind: ToolKind, tool: String) -> Decision?
+swift.method Runtime.close() :: func close() async
+swift.method Runtime.detect(_:) :: func detect(_ h: Harness) async -> Detection
+swift.method Runtime.detectAll() :: func detectAll() async -> [Detection]
+swift.method Runtime.driver(for:) :: func driver(for h: Harness) -> (any Driver)?
+swift.method Runtime.invalidateDetect(_:) :: func invalidateDetect(_ h: Harness)
+swift.method Runtime.invalidateModels(_:) :: func invalidateModels(_ h: Harness)
+swift.method Runtime.limits(_:query:) :: func limits(_ h: Harness, query: ModelQuery = .init()) async throws -> Limits
+swift.method Runtime.models(_:query:) :: func models(_ h: Harness, query: ModelQuery = .init()) async throws -> [ModelInfo]
+swift.method Runtime.reconcile() :: func reconcile()
+swift.method Runtime.resume(_:) :: func resume(_ r: StartRequest) async throws -> any Session
+swift.method Runtime.setDriver(_:for:) :: func setDriver(_ d: (any Driver)?, for h: Harness)
+swift.method Runtime.start(_:) :: func start(_ r: StartRequest) async throws -> any Session
+swift.method RuntimeContext.childEnvironment(_:) :: func childEnvironment(_ overrides: [String : String]) async -> [String : String]
+swift.method RuntimeContext.helpText(of:) :: func helpText(of binary: URL) async -> String
+swift.method RuntimeContext.nextID() :: func nextID() -> Int
+swift.method RuntimeContext.onRuntimeClose(_:) :: func onRuntimeClose(_ hook: @escaping () async -> Void)
+swift.method RuntimeContext.resolveBinary(_:override:) :: func resolveBinary(_ h: Harness, override: URL? = nil) async throws -> URL
+swift.method RuntimeContext.supportsFlag(_:binary:) :: func supportsFlag(_ flag: String, binary: URL) async -> Bool
+swift.method RuntimeContext.track(key:harness:pid:pgid:argv:) :: func track(key: String, harness: Harness, pid: Int32, pgid: Int32?, argv: [String])
+swift.method RuntimeContext.untrack(key:) :: func untrack(key: String)
+swift.method RuntimeContext.version(of:) :: func version(of binary: URL) async -> String?
+swift.method SelfDetecting.detect(runtime:) :: func detect(runtime: RuntimeContext) async throws -> Detection
+swift.method Session.answer(_:_:) :: func answer(_ permissionID: String, _ d: Decision) async throws
+swift.method Session.close() :: func close() async
+swift.method Session.interrupt() :: func interrupt() async throws
+swift.method Session.kill() :: func kill() async
+swift.method Session.prompt(_:) :: func prompt(_ p: Prompt) async throws
+swift.method Session.send(_:) :: func send(_ p: Prompt) async throws -> Delivery
+swift.method SessionStatus.encode(to:) :: func encode(to encoder: any Encoder) throws
+swift.method SessionStatus.hash(into:) :: func hash(into hasher: inout Hasher)
+swift.method SkillSupport.encode(to:) :: func encode(to encoder: any Encoder) throws
+swift.method SkillSupport.hash(into:) :: func hash(into hasher: inout Hasher)
+swift.method StartRequest.rawBool(_:) :: func rawBool(_ key: String) -> Bool?
+swift.method StartRequest.rawString(_:) :: func rawString(_ key: String) -> String?
+swift.method Steerable.steer(_:) :: func steer(_ p: Prompt) async throws
+swift.method ToolKind.encode(to:) :: func encode(to encoder: any Encoder) throws
+swift.method ToolKind.hash(into:) :: func hash(into hasher: inout Hasher)
+swift.method ToolStatus.encode(to:) :: func encode(to encoder: any Encoder) throws
+swift.method ToolStatus.hash(into:) :: func hash(into hasher: inout Hasher)
+swift.method Tracker.observe(_:) :: @discardableResult func observe(_ e: Event) -> Tracker.Snapshot
+swift.method Tracker.permissionAdded(id:) :: @discardableResult func permissionAdded(id: String) -> Tracker.Snapshot
+swift.method Tracker.permissionDecided(id:) :: @discardableResult func permissionDecided(id: String) -> Tracker.Snapshot
+swift.method Tracker.promptWritten() :: func promptWritten()
+swift.method WindowKey.encode(to:) :: func encode(to encoder: any Encoder) throws
+swift.method WindowKey.hash(into:) :: func hash(into hasher: inout Hasher)
+swift.property AgentBinderError.code :: var code: String { get }
+swift.property AgentBinderError.description :: var description: String { get }
+swift.property AgentBinderError.localizedDescription :: var localizedDescription: String { get }
+swift.property Attachment.mime :: var mime: String?
+swift.property Attachment.source :: var source: Attachment.Source
+swift.property AuthState.hashValue :: var hashValue: Int { get }
+swift.property Classification.cls :: var cls: FailureClass
+swift.property Classification.code :: var code: String
+swift.property Classification.endReason :: var endReason: EndReason { get }
+swift.property Classification.message :: var message: String
+swift.property Credentials.Format.hashValue :: var hashValue: Int { get }
+swift.property Credentials.apiKey :: var apiKey: String
+swift.property Credentials.baseURL :: var baseURL: URL?
+swift.property Credentials.format :: var format: Credentials.Format
+swift.property Credentials.headers :: var headers: [String : String]
+swift.property Decision.allow :: var allow: Bool
+swift.property Decision.message :: var message: String?
+swift.property Decision.updatedInput :: var updatedInput: Data?
+swift.property Delivery.hashValue :: var hashValue: Int { get }
+swift.property Detection.auth :: var auth: AuthState
+swift.property Detection.authDetail :: var authDetail: String?
+swift.property Detection.detail :: var detail: Detection.Detail?
+swift.property Detection.features :: var features: Features
+swift.property Detection.harness :: var harness: Harness
+swift.property Detection.path :: var path: URL?
+swift.property Detection.ready :: var ready: Bool
+swift.property Detection.supported :: var supported: Bool
+swift.property Detection.version :: var version: String?
+swift.property Driver.name :: var name: String { get }
+swift.property Effort.hashValue :: var hashValue: Int { get }
+swift.property Effort.rawValue :: let rawValue: String
+swift.property EndReason.hashValue :: var hashValue: Int { get }
+swift.property Event.Kind.name :: var name: String { get }
+swift.property Event.at :: var at: Date
+swift.property Event.kind :: var kind: Event.Kind
+swift.property Event.raw :: var raw: Data?
+swift.property Event.sessionID :: var sessionID: String?
+swift.property Event.turn :: var turn: Int
+swift.property FailureClass.hashValue :: var hashValue: Int { get }
+swift.property FakeDriver.modelList :: var modelList: [ModelInfo]
+swift.property FakeDriver.name :: var name: String { get }
+swift.property FakeDriver.script :: var script: String?
+swift.property FakeDriver.steers :: var steers: Bool
+swift.property FakeDriver.workingDirectory :: var workingDirectory: URL?
+swift.property Features.attachments :: var attachments: Bool
+swift.property Features.fileSystem :: var fileSystem: Bool
+swift.property Features.instructions :: var instructions: Bool
+swift.property Features.mcpInject :: var mcpInject: MCPCapability
+swift.property Features.models :: var models: Bool
+swift.property Features.permissions :: var permissions: Bool
+swift.property Features.resume :: var resume: Bool
+swift.property Features.setModel :: var setModel: Bool
+swift.property Features.skillsInject :: var skillsInject: SkillSupport
+swift.property Features.steer :: var steer: Bool
+swift.property Harness.binaryName :: var binaryName: String { get }
+swift.property Harness.description :: var description: String { get }
+swift.property Harness.hashValue :: var hashValue: Int { get }
+swift.property Harness.rawValue :: let rawValue: String
+swift.property LimitWindow.key :: var key: WindowKey
+swift.property LimitWindow.minutes :: var minutes: Int
+swift.property LimitWindow.resetsAt :: var resetsAt: Date?
+swift.property LimitWindow.scope :: var scope: String?
+swift.property LimitWindow.usedPercent :: var usedPercent: Double
+swift.property Limits.plan :: var plan: String?
+swift.property Limits.rejected :: var rejected: Bool
+swift.property Limits.windows :: var windows: [LimitWindow]
+swift.property MCPCapability.hashValue :: var hashValue: Int { get }
+swift.property MCPServer.name :: var name: String
+swift.property MCPServer.transport :: var transport: MCPServer.Transport
+swift.property ModelInfo.description :: var description: String?
+swift.property ModelInfo.id :: var id: String
+swift.property ModelInfo.isDefault :: var isDefault: Bool
+swift.property ModelInfo.name :: var name: String?
+swift.property ModelQuery.binary :: var binary: URL?
+swift.property ModelQuery.environment :: var environment: [String : String]
+swift.property ModelQuery.home :: var home: URL?
+swift.property ModelQuery.workingDirectory :: var workingDirectory: URL?
+swift.property OneShot.prompt :: var prompt: String
+swift.property PermissionPolicy.Mode.hashValue :: var hashValue: Int { get }
+swift.property PermissionPolicy.allowTools :: var allowTools: [String]
+swift.property PermissionPolicy.mode :: var mode: PermissionPolicy.Mode
+swift.property PermissionRequest.id :: var id: String
+swift.property PermissionRequest.input :: var input: String
+swift.property PermissionRequest.kind :: var kind: ToolKind
+swift.property PermissionRequest.options :: var options: [String]
+swift.property PermissionRequest.question :: var question: String
+swift.property PermissionRequest.tool :: var tool: String
+swift.property PermissionRequest.toolUseID :: var toolUseID: String?
+swift.property Prompt.attachments :: var attachments: [Attachment]
+swift.property Prompt.kind :: var kind: String?
+swift.property Prompt.text :: var text: String
+swift.property Runtime.Options.authCacheTTL :: var authCacheTTL: Duration
+swift.property Runtime.Options.binarySearchPaths :: var binarySearchPaths: [URL]?
+swift.property Runtime.Options.clientName :: var clientName: String
+swift.property Runtime.Options.clientVersion :: var clientVersion: String
+swift.property Runtime.Options.environment :: var environment: [String : String]?
+swift.property Runtime.Options.fingerprintIgnoreEnvironment :: var fingerprintIgnoreEnvironment: [String]
+swift.property Runtime.Options.ledger :: var ledger: URL?
+swift.property Runtime.Options.logger :: var logger: Logger?
+swift.property Runtime.Options.maxFrameBytes :: var maxFrameBytes: Int
+swift.property Runtime.Options.modelCacheTTL :: var modelCacheTTL: Duration
+swift.property Runtime.Options.onStderr :: var onStderr: ((Harness, String) -> Void)?
+swift.property Runtime.Options.useLoginShellPath :: var useLoginShellPath: Bool
+swift.property Runtime.context :: nonisolated let context: RuntimeContext
+swift.property RuntimeContext.clientName :: let clientName: String
+swift.property RuntimeContext.clientVersion :: let clientVersion: String
+swift.property RuntimeContext.logger :: let logger: Logger?
+swift.property RuntimeContext.maxFrameBytes :: let maxFrameBytes: Int
+swift.property Session.events :: var events: AsyncStream<Event> { get }
+swift.property Session.harness :: var harness: Harness { get }
+swift.property Session.id :: var id: String? { get }
+swift.property Session.lastError :: var lastError: WireError? { get }
+swift.property Session.pid :: var pid: Int32? { get }
+swift.property SessionModelListing.offeredModels :: var offeredModels: [ModelInfo] { get async }
+swift.property SessionStatus.hashValue :: var hashValue: Int { get }
+swift.property Skill.directory :: var directory: URL
+swift.property Skill.name :: var name: String?
+swift.property SkillSupport.hashValue :: var hashValue: Int { get }
+swift.property StartRequest.baseCommand :: var baseCommand: [String]?
+swift.property StartRequest.binary :: var binary: URL?
+swift.property StartRequest.credentials :: var credentials: Credentials?
+swift.property StartRequest.effort :: var effort: Effort?
+swift.property StartRequest.environment :: var environment: [String : String]
+swift.property StartRequest.extraArguments :: var extraArguments: [String]
+swift.property StartRequest.fileSystem :: var fileSystem: (any FileSystemAccess)?
+swift.property StartRequest.frameLog :: var frameLog: URL?
+swift.property StartRequest.handshakeTimeout :: var handshakeTimeout: Duration?
+swift.property StartRequest.harness :: var harness: Harness
+swift.property StartRequest.home :: var home: URL?
+swift.property StartRequest.instructions :: var instructions: String?
+swift.property StartRequest.mcpServers :: var mcpServers: [MCPServer]
+swift.property StartRequest.model :: var model: String?
+swift.property StartRequest.onStderr :: var onStderr: ((Harness, String) -> Void)?
+swift.property StartRequest.oneShot :: var oneShot: OneShot?
+swift.property StartRequest.permissions :: var permissions: PermissionPolicy
+swift.property StartRequest.raw :: var raw: [String : RawValue]
+swift.property StartRequest.sessionID :: var sessionID: String?
+swift.property StartRequest.skills :: var skills: [Skill]
+swift.property StartRequest.workingDirectory :: var workingDirectory: URL
+swift.property ToolEvent.exitCode :: var exitCode: Int32?
+swift.property ToolEvent.id :: var id: String
+swift.property ToolEvent.input :: var input: String
+swift.property ToolEvent.kind :: var kind: ToolKind
+swift.property ToolEvent.name :: var name: String
+swift.property ToolEvent.output :: var output: String
+swift.property ToolEvent.paths :: var paths: [String]
+swift.property ToolEvent.status :: var status: ToolStatus
+swift.property ToolKind.hashValue :: var hashValue: Int { get }
+swift.property ToolStatus.hashValue :: var hashValue: Int { get }
+swift.property Tracker.Snapshot.exited :: var exited: Bool
+swift.property Tracker.Snapshot.exitedAt :: var exitedAt: Date?
+swift.property Tracker.Snapshot.idleSince :: var idleSince: Date?
+swift.property Tracker.Snapshot.inflightTools :: var inflightTools: Int
+swift.property Tracker.Snapshot.lastEventAt :: var lastEventAt: Date
+swift.property Tracker.Snapshot.lastEventKind :: var lastEventKind: String?
+swift.property Tracker.Snapshot.lastResult :: var lastResult: TurnResult?
+swift.property Tracker.Snapshot.lastToolName :: var lastToolName: String?
+swift.property Tracker.Snapshot.openApprovals :: var openApprovals: Int
+swift.property Tracker.Snapshot.progressing :: var progressing: Bool
+swift.property Tracker.Snapshot.stallSince :: var stallSince: Date?
+swift.property Tracker.Snapshot.stalled :: var stalled: Bool
+swift.property Tracker.Snapshot.state :: var state: SessionStatus
+swift.property Tracker.Snapshot.turnActive :: var turnActive: Bool
+swift.property Tracker.Snapshot.waitingSince :: var waitingSince: Date?
+swift.property Tracker.inflightCount :: var inflightCount: Int { get }
+swift.property Tracker.oldestApprovalID :: var oldestApprovalID: String? { get }
+swift.property Tracker.snapshot :: var snapshot: Tracker.Snapshot { get }
+swift.property TurnResult.code :: var code: String?
+swift.property TurnResult.endReason :: var endReason: EndReason?
+swift.property TurnResult.isError :: var isError: Bool
+swift.property TurnResult.sessionID :: var sessionID: String?
+swift.property TurnResult.subtype :: var subtype: String
+swift.property TurnResult.text :: var text: String
+swift.property TurnResult.usage :: var usage: Usage
+swift.property Usage.cacheCreation :: var cacheCreation: Int64
+swift.property Usage.cacheRead :: var cacheRead: Int64
+swift.property Usage.costUSD :: var costUSD: Double
+swift.property Usage.input :: var input: Int64
+swift.property Usage.model :: var model: String?
+swift.property Usage.output :: var output: Int64
+swift.property WindowKey.hashValue :: var hashValue: Int { get }
+swift.property WireError.code :: var code: String
+swift.property WireError.endReason :: var endReason: EndReason?
+swift.property WireError.message :: var message: String
+swift.property WireError.text :: var text: String?
+swift.protocol Driver :: protocol Driver : Sendable
+swift.protocol FileSystemAccess :: protocol FileSystemAccess : Sendable
+swift.protocol LimitsReading :: protocol LimitsReading : Driver
+swift.protocol ModelListing :: protocol ModelListing : Driver
+swift.protocol ModelSettable :: protocol ModelSettable : Session
+swift.protocol SelfDetecting :: protocol SelfDetecting : Driver
+swift.protocol Session :: protocol Session : AnyObject, Sendable
+swift.protocol SessionModelListing :: protocol SessionModelListing : Session
+swift.protocol Steerable :: protocol Steerable : Session
+swift.struct Attachment :: struct Attachment
+swift.struct Classification :: struct Classification
+swift.struct Credentials :: struct Credentials
+swift.struct Decision :: struct Decision
+swift.struct Detection :: struct Detection
+swift.struct Effort :: struct Effort
+swift.struct Event :: struct Event
+swift.struct FakeDriver :: struct FakeDriver
+swift.struct Features :: struct Features
+swift.struct Harness :: struct Harness
+swift.struct LimitWindow :: struct LimitWindow
+swift.struct Limits :: struct Limits
+swift.struct MCPServer :: struct MCPServer
+swift.struct ModelInfo :: struct ModelInfo
+swift.struct ModelQuery :: struct ModelQuery
+swift.struct OneShot :: struct OneShot
+swift.struct PermissionPolicy :: struct PermissionPolicy
+swift.struct PermissionRequest :: struct PermissionRequest
+swift.struct Prompt :: struct Prompt
+swift.struct Runtime.Options :: struct Options
+swift.struct RuntimeContext :: struct RuntimeContext
+swift.struct Skill :: struct Skill
+swift.struct StartRequest :: struct StartRequest
+swift.struct ToolEvent :: struct ToolEvent
+swift.struct Tracker.Snapshot :: struct Snapshot
+swift.struct TurnResult :: struct TurnResult
+swift.struct Usage :: struct Usage
+swift.struct WireError :: struct WireError
+swift.type.method Attachment.data(_:mime:) :: static func data(_ data: Data, mime: String) -> Attachment
+swift.type.method Attachment.file(_:mime:) :: static func file(_ url: URL, mime: String? = nil) -> Attachment
+swift.type.method Classifier.classify(_:harness:) :: static func classify(_ r: TurnResult, harness: Harness? = nil) -> Classification
+swift.type.method Classifier.classify(_:status:harness:) :: static func classify(_ text: String, status: Int? = nil, harness: Harness? = nil) -> Classification
+swift.type.method Decision.allow(message:updatedInput:) :: static func allow(message: String? = nil, updatedInput: Data? = nil) -> Decision
+swift.type.method Decision.deny(_:) :: static func deny(_ message: String? = nil) -> Decision
+swift.type.method MCPRender.claudeConfig(_:) :: static func claudeConfig(_ servers: [MCPServer]) -> String
+swift.type.method MCPRender.codexArguments(_:) :: static func codexArguments(_ servers: [MCPServer]) -> [String]
+swift.type.method MCPRender.codexEnvironment(_:) :: static func codexEnvironment(_ servers: [MCPServer]) throws -> [String : String]
+swift.type.method MCPRender.headerVariable(_:_:) :: static func headerVariable(_ server: String, _ header: String) -> String
+swift.type.method MCPRender.openCodeConfigContent(_:) :: static func openCodeConfigContent(_ servers: [MCPServer]) -> String
+swift.type.method MCPServer.http(name:url:headers:) :: static func http(name: String, url: URL, headers: [String : String] = [:]) -> MCPServer
+swift.type.method MCPServer.stdio(name:command:args:env:) :: static func stdio(name: String, command: String, args: [String] = [], env: [String : String] = [:]) -> MCPServer
+swift.type.method ShellWords.split(_:) :: static func split(_ command: String) -> [String]
+swift.type.property AgentBinder.version :: static let version: String
+swift.type.property Effort.high :: static let high: Effort
+swift.type.property Effort.low :: static let low: Effort
+swift.type.property Effort.max :: static let max: Effort
+swift.type.property Effort.medium :: static let medium: Effort
+swift.type.property FakeDriver.defaultScript :: static let defaultScript: String
+swift.type.property FakeDriver.modelsEnvironmentKey :: static let modelsEnvironmentKey: String
+swift.type.property FakeDriver.scriptEnvironmentKey :: static let scriptEnvironmentKey: String
+swift.type.property Harness.allBuiltIn :: static var allBuiltIn: [Harness] { get }
+swift.type.property Harness.claude :: static let claude: Harness
+swift.type.property Harness.codex :: static let codex: Harness
+swift.type.property Harness.copilot :: static let copilot: Harness
+swift.type.property Harness.cursor :: static let cursor: Harness
+swift.type.property Harness.fake :: static let fake: Harness
+swift.type.property Harness.gemini :: static let gemini: Harness
+swift.type.property Harness.native :: static let native: Harness
+swift.type.property Harness.opencode :: static let opencode: Harness
+swift.type.property Harness.opencode2 :: static let opencode2: Harness
+swift.type.property Harness.pi :: static let pi: Harness
+swift.type.property Tracker.stallThreshold :: static let stallThreshold: TimeInterval
