@@ -1,0 +1,15 @@
+{"type":"session_start","session_id":"ses_9"}
+{"type":"message_start","message":{"role":"assistant","content":[{"type":"toolCall","id":"call_1","name":"bash","arguments":{"command":"ls"}}]}}
+{"type":"message_end","message":{"role":"assistant","content":[{"type":"text","text":"all done"},{"type":"toolResult","id":"call_1","name":"bash","content":[{"type":"text","text":"ok"}]}],"usage":{"input":10,"output":4,"cacheRead":2,"cacheWrite":1,"cost":{"total":0.25}}}}
+{"type":"message_start","message":{"role":"user","content":[{"type":"text","text":"hi"}]}}
+{"type":"message_update","assistantMessageEvent":{"type":"text_delta","delta":"PO"}}
+{"type":"message_update","assistantMessageEvent":{"type":"tool_use","id":"call_9","name":"Edit"}}
+{"type":"message_update","assistantMessageEvent":{"type":"tool_result","id":"call_9","name":"Edit"}}
+{"type":"message_update","assistantMessageEvent":{"type":"message_stop"}}
+{"type":"message_update","event":{"type":"text","text":"whole"}}
+{"type":"message","text":"hello"}
+{"type":"tool_execution_start","toolCallId":"t1","toolName":"edit","args":{"path":"/tmp/a.txt"}}
+{"type":"tool_execution_end","toolCallId":"t1","toolName":"edit","result":{"content":[{"type":"text","text":"done"}]},"isError":false}
+{"type":"tool_execution_end","id":"t2","tool":"bash","output":"boom","isError":true}
+{"type":"agent_settled"}
+not json

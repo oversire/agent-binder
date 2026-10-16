@@ -176,6 +176,16 @@ enum JSONValue: Sendable, Equatable, Hashable {
         return nil
     }
 
+    /// The text of a content value: a string as it is, or the text fields of a block list.
+    var flattenedText: String {
+        switch self {
+        case .string(let s): return s
+        case .array(let items):
+            return items.compactMap { $0["text"]?.string }.filter { !$0.isEmpty }.joined(separator: "\n")
+        default: return ""
+        }
+    }
+
     var int: Int64? {
         switch self {
         case .int(let i): return i

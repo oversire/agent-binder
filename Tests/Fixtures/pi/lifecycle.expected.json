@@ -1,0 +1,38 @@
+[
+  {
+    "kind": "status",
+    "status": "running"
+  },
+  {
+    "kind": "status",
+    "status": "running"
+  },
+  {
+    "delta": false,
+    "kind": "assistant",
+    "text": "PONG"
+  },
+  {
+    "kind": "usage",
+    "usage": {
+      "cache_creation": 0,
+      "cache_read": 3,
+      "cost_usd": 0.001,
+      "input": 1,
+      "output": 2
+    }
+  },
+  {
+    "is_error": false,
+    "kind": "result",
+    "subtype": "success",
+    "text": "",
+    "usage": {
+      "cache_creation": 0,
+      "cache_read": 0,
+      "cost_usd": 0.0,
+      "input": 0,
+      "output": 0
+    }
+  }
+]

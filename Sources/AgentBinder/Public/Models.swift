@@ -43,6 +43,16 @@ public struct ModelInfo: Sendable, Codable, Hashable {
     }
 }
 
+extension ModelInfo {
+    /// The context window as description text, for example `"256K context"`. It is empty for zero.
+    static func contextText(_ tokens: Int) -> String {
+        if tokens <= 0 { return "" }
+        if tokens >= 1_000_000 && tokens % 1_000_000 == 0 { return "\(tokens / 1_000_000)M context" }
+        if tokens >= 1000 { return "\(tokens / 1000)K context" }
+        return "\(tokens) context"
+    }
+}
+
 /// The install and config home that a model list or a limits read is for.
 public struct ModelQuery: Sendable {
     /// The executable. Nil lets the binary resolver search for it.

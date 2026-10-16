@@ -1,0 +1,10 @@
+{"type":"response","command":"prompt","success":true}
+{"type":"agent_start"}
+{"type":"turn_start"}
+{"type":"message_start","message":{"role":"user","content":[{"type":"text","text":"Reply with exactly PONG."}],"timestamp":1}}
+{"type":"message_end","message":{"role":"user","content":[{"type":"text","text":"Reply with exactly PONG."}],"timestamp":1}}
+{"type":"message_start","message":{"role":"assistant","content":[],"provider":"xai","model":"grok-4.5","usage":{"input":1,"output":2,"cacheRead":3,"cacheWrite":0,"totalTokens":6,"cost":{"total":0.001}},"stopReason":null,"timestamp":2}}
+{"type":"message_end","message":{"role":"assistant","content":[{"type":"text","text":"PONG"}],"provider":"xai","model":"grok-4.5","usage":{"input":1,"output":2,"cacheRead":3,"cacheWrite":0,"totalTokens":6,"cost":{"total":0.001}},"stopReason":"stop","timestamp":2}}
+{"type":"turn_end","message":{"role":"assistant","content":[{"type":"text","text":"PONG"}]},"toolResults":[]}
+{"type":"agent_end","messages":[],"willRetry":false}
+{"type":"agent_settled"}

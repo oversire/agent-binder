@@ -1,0 +1,93 @@
+[
+  {
+    "kind": "init",
+    "session_id": "ses_9"
+  },
+  {
+    "id": "call_1",
+    "input": "{\"command\":\"ls\"}",
+    "kind": "tool",
+    "name": "bash",
+    "status": "started",
+    "tool_kind": "exec"
+  },
+  {
+    "delta": false,
+    "kind": "assistant",
+    "text": "all done"
+  },
+  {
+    "id": "call_1",
+    "kind": "tool",
+    "name": "bash",
+    "output": "ok",
+    "status": "completed",
+    "tool_kind": "exec"
+  },
+  {
+    "kind": "usage",
+    "usage": {
+      "cache_creation": 1,
+      "cache_read": 2,
+      "cost_usd": 0.25,
+      "input": 10,
+      "output": 4
+    }
+  },
+  {
+    "delta": true,
+    "kind": "assistant",
+    "text": "PO"
+  },
+  {
+    "id": "call_9",
+    "kind": "tool",
+    "name": "Edit",
+    "status": "started",
+    "tool_kind": "edit"
+  },
+  {
+    "id": "call_9",
+    "kind": "tool",
+    "name": "Edit",
+    "status": "completed",
+    "tool_kind": "edit"
+  },
+  {
+    "delta": false,
+    "kind": "assistant",
+    "text": "whole"
+  },
+  {
+    "delta": false,
+    "kind": "assistant",
+    "text": "hello"
+  },
+  {
+    "id": "t1",
+    "input": "{\"path\":\"/tmp/a.txt\"}",
+    "kind": "tool",
+    "name": "edit",
+    "paths": [
+      "/tmp/a.txt"
+    ],
+    "status": "started",
+    "tool_kind": "edit"
+  },
+  {
+    "id": "t1",
+    "kind": "tool",
+    "name": "edit",
+    "output": "done",
+    "status": "completed",
+    "tool_kind": "edit"
+  },
+  {
+    "id": "t2",
+    "kind": "tool",
+    "name": "bash",
+    "output": "boom",
+    "status": "failed",
+    "tool_kind": "exec"
+  }
+]

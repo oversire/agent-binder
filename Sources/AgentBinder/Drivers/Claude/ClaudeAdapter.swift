@@ -191,7 +191,7 @@ final class ClaudeAdapter: WireAdapter, InterruptEncoding, TurnStateReporting, S
                         .tool(
                             ToolEvent(
                                 id: id, name: name, kind: ToolClassifier.kind(for: name),
-                                output: ClaudeFrames.flatten(b["content"]),
+                                output: b["content"]?.flattenedText ?? "",
                                 status: b["is_error"]?.bool == true ? .failed : .completed))))
             case "text":
                 if let t = b["text"]?.string, !t.isEmpty { out.append(Event(.user(text: t))) }

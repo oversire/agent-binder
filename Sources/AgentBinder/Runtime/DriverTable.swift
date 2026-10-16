@@ -3,7 +3,8 @@
 enum DriverTable {
     static func builtIn() -> [Harness: any Driver] {
         [
-            .claude: ClaudeDriver(), .codex: CodexDriver(), .copilot: ACPDriver(.copilot), .cursor: ACPDriver(.cursor),
+            .claude: ClaudeDriver(), .codex: CodexDriver(), .pi: PiDriver(), .copilot: ACPDriver(.copilot),
+            .cursor: ACPDriver(.cursor),
             .gemini: ACPDriver(.gemini), .fake: FakeDriver(),
         ]
     }

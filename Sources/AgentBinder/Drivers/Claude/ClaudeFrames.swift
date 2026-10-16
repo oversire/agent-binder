@@ -73,16 +73,6 @@ enum ClaudeFrames {
         return u
     }
 
-    /// The text of a tool result: a string as it is, or the text fields of a block list.
-    static func flatten(_ v: JSONValue?) -> String {
-        switch v {
-        case .string(let s): return s
-        case .array(let items):
-            return items.compactMap { $0["text"]?.string }.filter { !$0.isEmpty }.joined(separator: "\n")
-        default: return ""
-        }
-    }
-
     /// The text of a result frame. Success results get text too.
     static func resultText(_ m: JSONValue) -> String {
         var errors: [String] = []

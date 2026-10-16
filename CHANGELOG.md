@@ -13,6 +13,7 @@ The project uses [Semantic Versioning](https://semver.org/).
 - `ToolStatus.cancelled`: a tool that was open when the turn or the process ended.
 - The Codex driver: `codex app-server` over JSON-RPC (threads, turns, steer, interrupt, approvals), a paged model list and a limits read.
 - The ACP drivers for Copilot, Cursor and Gemini: the handshake with the session load and the authentication, prompts, cancel, permissions, the client file system and the session models.
+- The pi driver: `pi --mode rpc` with prompts, steer, abort, permissions, `set_model` and a model probe.
 
 ### Known behavior
 
@@ -22,6 +23,9 @@ The project uses [Semantic Versioning](https://semver.org/).
 - Codex: a session that saw one `turn/completed` gives no classified error when the process ends in a later turn.
 - ACP: `usage_update` puts the used context in `input` and the context size in `output`.
 - ACP: a one-shot turn closes the standard input after the prompt.
+- pi: the deltas of `message_update` and the full text of `message_end` both give assistant events. Use the `delta` flag to drop one.
+- pi: when `message_start` and `message_end` both have content, the blocks repeat.
+- pi: a steer works on the wire, but `Features.steer` stays false until a live turn proves it.
 
 ### Changed on purpose (from the reference behavior)
 
@@ -33,3 +37,8 @@ The project uses [Semantic Versioning](https://semver.org/).
 - ACP: the waiting requests fail at once when the process ends.
 - ACP: an idle session that ends with code 0 gives no error.
 - ACP: the config key `auth_method` is an alias of `acp_auth_method`.
+- pi: the error of one turn does not fail the next turn.
+- pi: the prompt frame has an id. A refused prompt gives an error and ends the turn.
+- pi: a write error does not leave the turn active.
+- pi: an idle session that ends with code 0 gives no error, and the waiting commands fail at once on exit.
+- pi: a tool event also reads the documented keys `toolCallId`, `toolName`, `args`, `result` and `isError`.
