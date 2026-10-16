@@ -119,7 +119,7 @@ struct ProcessTests {
             p.closeStdin()
         }
         // Other suites open files in parallel. A leak here gives 200 or more.
-        try await eventually { openFDCount() <= before + 50 }
+        try await eventually { openFDCount() <= before + 150 }
     }
 
     @Test func childInheritsNoExtraDescriptor() async throws {

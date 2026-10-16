@@ -16,6 +16,7 @@ The project uses [Semantic Versioning](https://semver.org/).
 - The pi driver: `pi --mode rpc` with prompts, steer, abort, permissions, `set_model` and a model probe.
 - The OpenCode drivers: `opencode serve` over HTTP and server-sent events, for the 1.x wire (`opencode`) and the 2.x wire (`opencode2`). Sessions with the same binary, environment and arguments share one server. The pool stops an idle server after 60 s.
 - The native loop (`AgentBinderNative`): `NativeDriver` runs a model loop in process with the `Model` protocol, tool sets (`FileTools`, `MCPToolSet`, `FuncTool`), approvals, skills, a message store (`FileStore`, `MemoryStore`) and compaction (`SummaryCompactor`).
+- The native providers: `AnthropicModel` (Messages API) and `OpenAIModel` (Chat Completions API and compatible gateways), on `URLSession` with server-sent events. They retry before the first byte of the response, and a failure is a `ProviderError` with a stable `code`.
 
 ### Known behavior
 
@@ -70,6 +71,15 @@ The project uses [Semantic Versioning](https://semver.org/).
 - Native: a start with no session id makes a new id.
 - Native: a turn that reaches the call limit gives the result `error_max_turns` with `isError`.
 - Native: `activate_skill` is in the tool list only when the session has skills.
+- Native: an Anthropic effort sends `thinking: {type: "adaptive"}` and `output_config.effort`, not a thinking budget. The current models refuse `budget_tokens`. The effort `xhigh` is accepted.
+- Native: the default Anthropic `max_tokens` is 64000, not 8192.
+- Native: Anthropic web search uses the tool `web_search_20260209`.
+- Native: Anthropic prompt caching is on by default (top-level `cache_control`).
+- Native: on the first-party Anthropic endpoint, refusal fallback is on by default for the models that take it (`fallbacks: "default"` and the beta header). A `fallback` stream part removes the reasoning and the tool calls of the declined attempt.
+- Native: on the first-party Anthropic endpoint, client tools send `eager_input_streaming: true`.
+- Native: OpenAI sends `max_completion_tokens` on api.openai.com and `max_tokens` on a gateway.
+- Native: `OpenAIModel` needs a model name. There is no default.
+- Native: an Anthropic reasoning part with no signature is not sent back.
 
 ### Fixed on purpose (from the reference behavior)
 
@@ -83,3 +93,11 @@ The project uses [Semantic Versioning](https://semver.org/).
 - Native: `MCPToolSet` follows `nextCursor`, and an HTTP server gets the headers on each request.
 - Native: a `bash` timeout kills the process group, so a background child cannot hold the output open.
 - Native: a permission event has the tool call id in `toolUseID`.
+- Native: Anthropic `signature_delta` is kept, so the thinking block can go back on the next call.
+- Native: the assistant message keeps the arrival order of reasoning, text and tool calls.
+- Native: consecutive Anthropic messages of the same role merge into one message.
+- Native: an Anthropic stream that ends with no stop reason is a failure.
+- Native: OpenAI sends `stream_options.include_usage`, so the stream reports the usage.
+- Native: OpenAI sends `tool_choice` only with tools.
+- Native: an OpenAI tool call with an empty input sends `"{}"`.
+- Native: the providers never read the environment (base URLs, tokens, organization ids).

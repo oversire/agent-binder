@@ -67,6 +67,9 @@ public enum StreamPart: Sendable, Equatable {
     case toolInputDelta(id: String, fragment: String)
     /// A tool call is complete.
     case toolCallDone(ToolCall)
+    /// The provider ran the request again on a fallback model. The reasoning and the tool calls
+    /// before it belong to the declined attempt.
+    case fallback(model: String)
     /// The call ended. It is the last part.
     case finish(Finish)
 }

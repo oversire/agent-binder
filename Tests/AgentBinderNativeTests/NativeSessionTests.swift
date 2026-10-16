@@ -345,6 +345,51 @@ struct NativeSessionTests {
         await rt.close()
     }
 
+    // Fixed on purpose: the history keeps the arrival order of reasoning and text.
+    @Test func partsKeepArrivalOrder() async throws {
+        let m = ScriptedModel([
+            .parts([
+                .reasoningDelta("a"), .reasoningSignature("s1"), .textDelta("x"), .reasoningDelta("b"),
+                .reasoningSignature("s2"), .textDelta("y"), .stop,
+            ]),
+            .parts(StreamPart.text("ok")),
+        ])
+        let rt = await runtime(config(m))
+        let s = try await rt.start(request())
+        let sink = Sink(s)
+        try await s.prompt(Prompt("go"))
+        try await sink.waitResults(1)
+        try await s.prompt(Prompt("next"))
+        try await sink.waitResults(2)
+        #expect(
+            m.requests.value[1].messages[1].parts == [
+                .reasoning(ReasoningPart(text: "a", signature: "s1")), .text("x"),
+                .reasoning(ReasoningPart(text: "b", signature: "s2")), .text("y"),
+            ])
+        await rt.close()
+    }
+
+    @Test func fallbackDropsTheDeclinedAttempt() async throws {
+        let m = ScriptedModel([
+            .parts([
+                .reasoningDelta("r"), .reasoningSignature("s"), .textDelta("Hi "),
+                .toolCallDone(.call("t", "echo", #"{"text":"x"}"#)), .fallback(model: "claude-opus-5-5"),
+                .textDelta("ok"), .stop,
+            ]),
+            .parts(StreamPart.text("done")),
+        ])
+        let rt = await runtime(config(m) { $0.toolSets = [StaticToolSet("t", [EchoTool()])] })
+        let s = try await rt.start(request())
+        let sink = Sink(s)
+        try await s.prompt(Prompt("go"))
+        try await sink.waitResults(1)
+        #expect(sink.tools.isEmpty && m.calls == 1)
+        try await s.prompt(Prompt("next"))
+        try await sink.waitResults(2)
+        #expect(m.requests.value[1].messages[1].parts == [.text("Hi "), .text("ok")])
+        await rt.close()
+    }
+
     @Test func resumeFromStore() async throws {
         let dir = try Scratch()
         let store = FileStore(directory: dir.url)

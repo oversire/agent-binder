@@ -311,24 +311,50 @@ actor NativeLoop {
         let req = ModelRequest(
             system: system, messages: history, tools: tools.specs, maxOutputTokens: config.maxOutputTokens,
             effort: effort)
+        // Fixed on purpose: the parts keep the arrival order. A provider refuses replayed thinking that moved.
+        var parts: [Part] = []
         var text = ""
         var thought = ""
-        var reasoning: [ReasoningPart] = []
         var calls: [ToolCall] = []
         var finish: Finish?
+        func closeText() {
+            if !text.isEmpty { parts.append(.text(text)) }
+            text = ""
+        }
+        func closeThought(_ signature: String?) {
+            if !thought.isEmpty || signature != nil {
+                parts.append(.reasoning(ReasoningPart(text: thought, signature: signature)))
+            }
+            thought = ""
+        }
         for try await p in model.stream(req) {
             switch p {
             case .textDelta(let t):
+                closeThought(nil)
                 text += t
                 emit(.assistant(text: t, delta: true))
             case .reasoningDelta(let t):
+                closeText()
                 thought += t
                 emit(.thought(text: t, delta: true))
             case .reasoningSignature(let s):
                 // Fixed on purpose: the signature stays with its block, so a later call with tool results works.
-                reasoning.append(ReasoningPart(text: thought, signature: s))
+                closeText()
+                closeThought(s)
+            case .toolCallDone(let c):
+                closeText()
+                closeThought(nil)
+                calls.append(c)
+                parts.append(.toolCall(c))
+            case .fallback:
+                // The declined attempt keeps only its text.
+                closeThought(nil)
+                parts.removeAll {
+                    if case .text = $0 { return false }
+                    return true
+                }
                 thought = ""
-            case .toolCallDone(let c): calls.append(c)
+                calls = []
             case .finish(let f): finish = f
             case .toolInputStart, .toolInputDelta: break
             }
@@ -343,11 +369,10 @@ actor NativeLoop {
         case .contentFilter: throw NativeError("content_filtered", "model response was blocked by a content filter")
         default: break
         }
-        if !thought.isEmpty { reasoning.append(ReasoningPart(text: thought)) }
-        if !text.isEmpty { emit(.assistant(text: text, delta: false)) }
-        var parts = reasoning.map(Part.reasoning)
-        if !text.isEmpty { parts.append(.text(text)) }
-        parts += calls.map(Part.toolCall)
+        closeThought(nil)
+        closeText()
+        let full = parts.compactMap { if case .text(let t) = $0 { t } else { nil } }.joined()
+        if !full.isEmpty { emit(.assistant(text: full, delta: false)) }
         return (Message(role: .assistant, parts: parts), finish.usage, calls)
     }
 

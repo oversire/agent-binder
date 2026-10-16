@@ -11,6 +11,7 @@ This repository owns the files now. It records new fixtures itself.
 `codex/notifications.ndjson` holds hand-written Codex app-server notifications. Record real Codex turns on the first live run.
 `acp/updates.ndjson` holds hand-written ACP `session/update` notifications. The Copilot, Cursor and Gemini drivers share it. Record real turns on the first live run.
 `pi/lifecycle.ndjson` is a pi 0.84.1 turn from the reference project. `pi/shapes.ndjson` holds hand-written pi frame shapes.
+`native/*.sse` hold hand-written provider streams: Anthropic Messages (`anthropic-*`) and OpenAI Chat Completions (`openai-*`). Record real streams on the first live run.
 `opencode/turn.ndjson` and `opencode2/turn.ndjson` hold hand-written bus events of one turn on the 1.x and the 2.x wire. Record real turns on the first live run.
 
 ## Layout
@@ -18,6 +19,7 @@ This repository owns the files now. It records new fixtures itself.
 - `<harness>/<name>.ndjson`: one vendor frame on each line.
 - `<harness>/<name>.expected.json`: the event list that the driver must emit for the frames (golden file).
 - `models/*.json`: replies of the model-list requests.
+- `native/<provider>-<name>.sse`: one provider response body (server-sent events).
 
 ## Record a new fixture
 

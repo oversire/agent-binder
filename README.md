@@ -18,11 +18,21 @@ The `AgentBinderNative` product runs a model loop in process, for an app with no
 ```swift
 import AgentBinderNative
 
-await rt.setDriver(NativeDriver(NativeConfig(newModel: { creds, name in try makeModel(creds, name) }, builtinTools: true)), for: .native)
+let config = NativeConfig(
+    newModel: { creds, name in
+        switch creds.format {
+        case .anthropic: return try AnthropicModel(credentials: creds, model: name)
+        case .openai: return try OpenAIModel(credentials: creds, model: name)
+        }
+    },
+    builtinTools: true)
+await rt.setDriver(NativeDriver(config), for: .native)
 let s = try await rt.start(StartRequest(harness: .native, workingDirectory: dir, credentials: creds))
 ```
 
-The model comes from the app (a type that conforms to `Model`). The built-in tools (`bash`, `read`, `write`, `edit`, `glob`, `grep`) stay inside the working folder, and `bash` does not get the API keys of the host.
+`AnthropicModel` calls the Anthropic Messages API. `OpenAIModel` calls the OpenAI Chat Completions API and the gateways that copy it (Ollama, OpenRouter, vLLM, Groq, LM Studio). An app can also bring its own type that conforms to `Model`.
+
+On the first-party Anthropic endpoint, `AnthropicModel` turns on two features by default. Prompt caching sends a top-level `cache_control`. Refusal fallback sends `fallbacks: "default"`: when a model refuses a request, the API runs it again on the recommended model in the same stream. Set `Options.promptCaching` or `Options.refusalFallback` to false to stop them. The built-in tools (`bash`, `read`, `write`, `edit`, `glob`, `grep`) stay inside the working folder, and `bash` does not get the API keys of the host.
 
 ## Install
 
