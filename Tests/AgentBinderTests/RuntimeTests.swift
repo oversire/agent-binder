@@ -35,7 +35,7 @@ fileprivate struct FakeBin {
         let o = Runtime.Options(
             binarySearchPaths: [dir.url, URL(fileURLWithPath: "/usr/bin"), URL(fileURLWithPath: "/bin")],
             useLoginShellPath: false, environment: environment)
-        return Runtime(options: o, now: now)
+        return Runtime(options: o, now: now, probeTimeout: .testProbe)
     }
 }
 

@@ -19,19 +19,24 @@ final class ProbeCache: FlagProbing, Sendable {
     private let flight = SingleFlight<String, String>()
     private let environment: @Sendable () async -> [String: String]
     private let now: Now
+    private let timeout: Duration
 
     /// `environment` gives the child environment of a probe.
-    init(environment: @escaping @Sendable () async -> [String: String], now: @escaping Now = Date.init) {
+    init(
+        environment: @escaping @Sendable () async -> [String: String], now: @escaping Now = Date.init,
+        timeout: Duration = ProbeCache.timeout
+    ) {
         self.environment = environment
         self.now = now
+        self.timeout = timeout
     }
 
     /// The first line of `<bin> --version`, at most 120 characters. It is nil when the probe fails.
     /// A failure is not cached.
     func version(_ bin: URL) async -> String? {
         if let v = fresh(versions, bin.path) { return v }
-        let line = await flight.run("v:" + bin.path) { [environment] in
-            let out = await Probe.run(bin, ["--version"], environment: await environment(), timeout: Self.timeout)
+        let line = await flight.run("v:" + bin.path) { [environment, timeout] in
+            let out = await Probe.run(bin, ["--version"], environment: await environment(), timeout: timeout)
             guard out.code != nil else { return "" }
             let first = out.text.trimmingCharacters(in: .whitespacesAndNewlines).split(separator: "\n").first ?? ""
             return String(first.trimmingCharacters(in: .whitespaces).prefix(120))
@@ -44,8 +49,8 @@ final class ProbeCache: FlagProbing, Sendable {
     /// The `<bin> --help` text, for a choice between two flags.
     func help(_ bin: URL) async -> String {
         if let h = fresh(helps, bin.path) { return h }
-        let text = await flight.run("h:" + bin.path) { [environment] in
-            await Probe.run(bin, ["--help"], environment: await environment(), timeout: Self.timeout).text
+        let text = await flight.run("h:" + bin.path) { [environment, timeout] in
+            await Probe.run(bin, ["--help"], environment: await environment(), timeout: timeout).text
         }
         store(helps, bin.path, text)
         return text

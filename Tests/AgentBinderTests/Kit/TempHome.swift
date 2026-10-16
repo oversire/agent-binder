@@ -34,3 +34,8 @@ final class TempDir: @unchecked Sendable {
         try? String(contentsOf: url.appendingPathComponent(relative), encoding: .utf8)
     }
 }
+
+extension Duration {
+    /// The probe limit of a runtime with fake binaries. The first run of a new script can wait for a system scan.
+    static let testProbe: Duration = .seconds(30)
+}

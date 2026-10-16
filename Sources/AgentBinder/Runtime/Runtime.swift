@@ -79,9 +79,10 @@ public actor Runtime {
         self.init(options: options, now: Date.init)
     }
 
-    init(options: Options, now: @escaping Now) {
+    /// Tests raise `probeTimeout`: the first run of a new script can wait for a system scan.
+    init(options: Options, now: @escaping Now, probeTimeout: Duration = ProbeCache.timeout) {
         let env = options.environment ?? ProcessInfo.processInfo.environment
-        let ctx = RuntimeContext(options: options, environment: env, now: now)
+        let ctx = RuntimeContext(options: options, environment: env, now: now, probeTimeout: probeTimeout)
         context = ctx
         builtIn = DriverTable.builtIn()
         drivers = builtIn

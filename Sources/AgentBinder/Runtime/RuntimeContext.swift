@@ -23,7 +23,10 @@ public struct RuntimeContext: Sendable {
     let fingerprintIgnoreEnvironment: [String]
     private let ids: Locked<Int>
 
-    init(options o: Runtime.Options, environment: [String: String], now: @escaping Now) {
+    init(
+        options o: Runtime.Options, environment: [String: String], now: @escaping Now,
+        probeTimeout: Duration = ProbeCache.timeout
+    ) {
         clientName = o.clientName.isEmpty ? "agentbinder" : o.clientName
         clientVersion = o.clientVersion
         maxFrameBytes = o.maxFrameBytes > 0 ? o.maxFrameBytes : FrameReader.defaultMaxBytes
@@ -36,7 +39,7 @@ public struct RuntimeContext: Sendable {
         probes = ProbeCache(
             environment: {
                 ChildEnvironment.merge(base: environment, overrides: [:], path: await resolver.childPath())
-            }, now: now)
+            }, now: now, timeout: probeTimeout)
         ledger = Ledger(path: o.ledger)
         onStderr = o.onStderr
         fingerprintIgnoreEnvironment = o.fingerprintIgnoreEnvironment

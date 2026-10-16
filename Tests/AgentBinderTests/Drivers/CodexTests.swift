@@ -607,7 +607,7 @@ private struct FakeCodex {
             options: Runtime.Options(
                 binarySearchPaths: [dir.url, URL(fileURLWithPath: "/usr/bin"), URL(fileURLWithPath: "/bin")],
                 useLoginShellPath: false),
-            now: Date.init)
+            now: Date.init, probeTimeout: .testProbe)
     }
 
     func argv() -> [String] { (dir.read("argv.txt") ?? "").split(separator: "\n").map(String.init) }
