@@ -7,10 +7,12 @@ cd "$(dirname "$0")/.."
 out="$(mktemp -d)"
 trap 'rm -rf "$out"' EXIT
 swift build --target AgentBinder >/dev/null
-# The tool does not write a graph that did not change, so remove the old one first.
-find .build -name 'AgentBinder.symbols.json' -path '*symbolgraph*' -delete
-swift package dump-symbol-graph --minimum-access-level public >"$out/log" 2>&1 || { cat "$out/log"; exit 1; }
-graph="$(find .build -name 'AgentBinder.symbols.json' -path '*symbolgraph*' | head -1)"
+# dump-symbol-graph loads each module, also the test module of a clean checkout. Extract one module.
+bin="$(swift build --show-bin-path)"
+xcrun swift-symbolgraph-extract -module-name AgentBinder -target "$(uname -m)-apple-macosx13.0" \
+  -sdk "$(xcrun --show-sdk-path)" -I "$bin/Modules" -minimum-access-level public -output-dir "$out" \
+  >"$out/log" 2>&1 || { cat "$out/log"; exit 1; }
+graph="$out/AgentBinder.symbols.json"
 python3 - "$graph" "$out/undocumented.txt" >"$out/symbols.txt" <<'PY'
 import json, sys
 g = json.load(open(sys.argv[1]))

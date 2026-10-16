@@ -9,7 +9,7 @@ AgentBinder is a native Swift library for Mac apps. It drives the coding-agent C
 
 The `AgentBinderNative` product adds a model loop in process, for an app with no CLI installed.
 
-macOS only: macOS 13 or later, Swift 6.0 or later.
+macOS only: macOS 13 or later, Swift 6.1 or later (Xcode 16.3 or later).
 
 - [Install](#install)
 - [Quick start](#quick-start)

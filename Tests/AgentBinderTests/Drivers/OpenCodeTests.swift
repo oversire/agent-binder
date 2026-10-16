@@ -736,7 +736,8 @@ struct OpenCodeDriverTests {
         await #expect(throws: AgentBinderError.self) { _ = try await rt.start(request(dir.url)) }
         let servers = await pool.servers
         #expect(servers.count == 1)
-        if let s = servers.first { #expect(await pool.refs(s) == 0) }
+        // The lease releases the server in a task.
+        if let s = servers.first { try await eventually { await pool.refs(s) == 0 } }
         _ = bin
         await rt.close()
     }

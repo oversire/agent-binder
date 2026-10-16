@@ -111,15 +111,19 @@ struct ProcessTests {
             _ = await readAll(p)
             await p.waitForExit()
         }
-        let before = openFDCount()
-        for _ in 0..<200 {
-            let p = try spawnSh("echo x")
-            _ = await readAll(p)
-            await p.waitForExit()
-            p.closeStdin()
+        // Other suites open files in parallel, so one count is noisy. A leak grows each batch by 200 or more.
+        var growth: [Int] = []
+        for _ in 0..<3 {
+            let before = openFDCount()
+            for _ in 0..<200 {
+                let p = try spawnSh("echo x")
+                _ = await readAll(p)
+                await p.waitForExit()
+                p.closeStdin()
+            }
+            growth.append(openFDCount() - before)
         }
-        // Other suites open files in parallel. A leak here gives 200 or more.
-        try await eventually { openFDCount() <= before + 150 }
+        #expect(growth.min()! < 150, "\(growth)")
     }
 
     @Test func childInheritsNoExtraDescriptor() async throws {

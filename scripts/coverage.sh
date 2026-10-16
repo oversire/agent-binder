@@ -4,7 +4,11 @@ set -eu
 gate="${COVERAGE_GATE:-80}"
 cd "$(dirname "$0")/.."
 if [ "${SKIP_TEST:-0}" != "1" ]; then
-  swift test --enable-code-coverage --skip AgentBinderLiveTests >/dev/null
+  mkdir -p .build
+  swift test --enable-code-coverage --skip AgentBinderLiveTests >.build/coverage-test.log 2>&1 || {
+    grep -E "✘|error:" .build/coverage-test.log >&2
+    exit 1
+  }
 fi
 bin_dir="$(swift build --show-bin-path)"
 profdata="$bin_dir/codecov/default.profdata"

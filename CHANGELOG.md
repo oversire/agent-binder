@@ -10,6 +10,7 @@ The project uses [Semantic Versioning](https://semver.org/).
 
 ### Added
 
+- Swift 6.1 or later. The MCP Swift SDK 0.12 does not compile with Swift 6.0.
 - Package skeleton: the `AgentBinder` and `AgentBinderNative` products.
 - The Claude driver: stream-json with the control channel (initialize, `can_use_tool`, interrupt, `set_model`), steer, a model probe and rate-limit windows.
 - `ToolStatus.cancelled`: a tool that was open when the turn or the process ended.
