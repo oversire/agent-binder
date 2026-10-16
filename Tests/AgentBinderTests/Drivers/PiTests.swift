@@ -228,9 +228,9 @@ struct PiWireTests {
         peer.expect(type: "set_model") { [refused($0, "Model not found: nope/x")] }
         let (s, _) = try await session(peer)
         try await s.setModel("zai/glm-5.3")
-        #expect(
-            peer.frames(type: "set_model").first
-                == ["type": "set_model", "provider": "zai", "modelId": "glm-5.3", "id": "aw-1"])
+        var frame = peer.frames(type: "set_model").first?.object
+        frame?["id"] = nil
+        #expect(frame == ["type": "set_model", "provider": "zai", "modelId": "glm-5.3"])
         await #expect(throws: AgentBinderError.vendor(code: 0, message: "pi set_model: Model not found: nope/x")) {
             try await s.setModel("nope/x")
         }
@@ -284,6 +284,14 @@ struct PiWireTests {
         _ = try await s.send(Prompt("also"))
         try await eventually { !peer.frames(type: "steer").isEmpty }
         #expect(peer.frames(type: "prompt").count == 1)
+        await s.kill()
+    }
+
+    @Test func stateGivesTheSessionID() async throws {
+        let peer = ScriptedPeer()
+        peer.expect(type: "get_state") { [ok($0, #"{"sessionId":"01a1","isStreaming":false}"#)] }
+        let (s, _) = try await session(peer)
+        try await eventually { s.id == "01a1" }
         await s.kill()
     }
 

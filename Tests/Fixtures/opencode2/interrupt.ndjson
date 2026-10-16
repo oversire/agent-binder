@@ -1,0 +1,8 @@
+{"id":"evt_1","type":"session.execution.started","data":{"sessionID":"ses_2"}}
+{"id":"evt_2","type":"session.step.started","data":{"sessionID":"ses_2"}}
+{"id":"evt_3","type":"session.text.delta","data":{"sessionID":"ses_2","assistantMessageID":"msg_a","ordinal":0,"delta":"Bridges"}}
+{"id":"evt_4","type":"session.text.ended","data":{"sessionID":"ses_2","assistantMessageID":"msg_a","ordinal":0,"text":"Bridges"}}
+{"id":"evt_5","type":"session.step.streamed","data":{"sessionID":"ses_2"}}
+{"id":"evt_6","type":"session.step.failed","data":{"sessionID":"ses_2","assistantMessageID":"msg_a","error":{"type":"aborted","message":"Step interrupted"}}}
+{"id":"evt_7","type":"aborted","data":{"sessionID":"ses_2"}}
+{"id":"evt_8","type":"session.execution.interrupted","data":{"sessionID":"ses_2","reason":"user"}}

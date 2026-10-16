@@ -12,7 +12,7 @@ This repository owns the files now. It records new fixtures itself.
 `acp/updates.ndjson` holds hand-written ACP `session/update` notifications. The Copilot, Cursor and Gemini drivers share it. Record real turns on the first live run.
 `pi/lifecycle.ndjson` is a pi 0.84.1 turn from the reference project. `pi/shapes.ndjson` holds hand-written pi frame shapes.
 `native/*.sse` hold hand-written provider streams: Anthropic Messages (`anthropic-*`) and OpenAI Chat Completions (`openai-*`). Record real streams on the first live run.
-`opencode/turn.ndjson` and `opencode2/turn.ndjson` hold hand-written bus events of one turn on the 1.x and the 2.x wire. Record real turns on the first live run.
+`opencode/turn.ndjson` and `opencode2/turn.ndjson` hold hand-written bus events of one turn on the 1.x and the 2.x wire. `opencode2/interrupt.ndjson` holds the real 2.0.26 events of an interrupted turn, with shorter text.
 
 ## Layout
 

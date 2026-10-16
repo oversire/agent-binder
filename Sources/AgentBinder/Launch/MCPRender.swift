@@ -79,6 +79,27 @@ public enum MCPRender {
         return JSONValue.object(["mcp": .object(mcp)]).jsonString
     }
 
+    /// The OpenCode config content with a `permission` block. A nil block gives the MCP part only.
+    static func openCodeConfigContent(_ servers: [MCPServer], permission: JSONValue?) -> String {
+        guard let permission, var v = JSONValue.parse(Data(openCodeConfigContent(servers).utf8))?.object else {
+            return openCodeConfigContent(servers)
+        }
+        v["permission"] = permission
+        return JSONValue.object(v).jsonString
+    }
+
+    /// The Copilot `--additional-mcp-config` file. Each server needs a `type` and a `tools` list.
+    static func copilotConfig(_ servers: [MCPServer]) -> String {
+        let all = claudeServers(servers).object ?? [:]
+        let out = all.mapValues { v -> JSONValue in
+            guard var e = v.object else { return v }
+            e["type"] = e["type"] ?? "local"
+            e["tools"] = ["*"]
+            return .object(e)
+        }
+        return JSONValue.object(["mcpServers": .object(out)]).prettyString + "\n"
+    }
+
     /// The name of the env var that carries one header value, for example
     /// `AGENTBINDER_MCP_GITHUB_AUTHORIZATION`.
     public static func headerVariable(_ server: String, _ header: String) -> String {
@@ -117,17 +138,20 @@ public enum MCPRender {
             switch s.transport {
             case .http(let url, let headers):
                 guard http else { continue }
-                var e: [String: JSONValue] = [
-                    "name": .string(s.name), "type": "http", "url": .string(url.absoluteString),
-                ]
-                if !headers.isEmpty { e["headers"] = pairs(headers) }
-                out.append(.object(e))
+                out.append(
+                    [
+                        "name": .string(s.name), "type": "http", "url": .string(url.absoluteString),
+                        "headers": pairs(headers),
+                    ])
             case .stdio(let command, let args, let env):
                 guard !command.isEmpty else { continue }
-                var e: [String: JSONValue] = ["name": .string(s.name), "command": .string(command)]
-                if !args.isEmpty { e["args"] = .array(args.map(JSONValue.string)) }
-                if !env.isEmpty { e["env"] = pairs(env) }
-                out.append(.object(e))
+                // Quirk: Gemini rejects a stdio server without `env`. The ACP schema requires `args` and `env`.
+                out.append(
+                    [
+                        "name": .string(s.name), "command": .string(command),
+                        "args": .array(args.map(JSONValue.string)),
+                        "env": pairs(env),
+                    ])
             }
         }
         return .array(out)

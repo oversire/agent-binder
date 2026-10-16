@@ -68,6 +68,7 @@ struct LaunchBuilder: Sendable {
             addModelAndEffort(req, &l)
             addPermissionArguments(req, &l)
             try addMCPServers(req, &l)
+            addOpenCodeConfig(req, &l)
             let index = try await addSkills(req, &l)
             await addInstructions(req, &l, Instructions.join(req.instructions, skillIndex: index))
         } catch {
@@ -150,6 +151,17 @@ struct LaunchBuilder: Sendable {
         }
     }
 
+    // The config content is part of the server fingerprint, so a session never lands on a server that
+    // started for other MCP servers or another permission mode. The inherit mode with no servers keeps
+    // the config of the operator.
+    private func addOpenCodeConfig(_ req: StartRequest, _ l: inout Launch) {
+        guard req.harness == .opencode || req.harness == .opencode2 else { return }
+        let permission = req.permissions.openCodePermission
+        guard !req.mcpServers.isEmpty || permission != nil else { return }
+        l.environment["OPENCODE_CONFIG_CONTENT"] = MCPRender.openCodeConfigContent(
+            req.mcpServers, permission: permission)
+    }
+
     private func addMCPServers(_ req: StartRequest, _ l: inout Launch) throws {
         guard !req.mcpServers.isEmpty else { return }
         switch req.harness {
@@ -169,9 +181,15 @@ struct LaunchBuilder: Sendable {
             }
             l.arguments += MCPRender.codexArguments(req.mcpServers)
         case .opencode, .opencode2:
-            // The config content is part of the server fingerprint, so these servers never land on a
-            // server that started for another set.
-            l.environment["OPENCODE_CONFIG_CONTENT"] = MCPRender.openCodeConfigContent(req.mcpServers)
+            // addOpenCodeConfig sets the config content.
+            break
+        case .copilot:
+            // Quirk: Copilot ignores the stdio servers of ACP session/new. It loads this file.
+            let dir = try ConfigFiles.sessionDirectory(.copilot, purpose: "mcp")
+            l.tempPaths.append(dir)
+            let path = dir.appendingPathComponent("mcp-config.json")
+            try ConfigFiles.write(Data(MCPRender.copilotConfig(req.mcpServers).utf8), to: path)
+            l.arguments += ["--additional-mcp-config", "@" + path.path]
         case .pi:
             guard let home = req.home else { throw AgentBinderError.homeRequired(feature: "MCP injection") }
             try ConfigFiles.write(

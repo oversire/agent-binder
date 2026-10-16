@@ -20,6 +20,16 @@ extension PermissionPolicy {
         }
     }
 
+    /// The `permission` block of the OpenCode config. Without it OpenCode allows edits and commands.
+    var openCodePermission: JSONValue? {
+        switch mode {
+        case .ask: return ["edit": "ask", "bash": "ask", "webfetch": "ask"]
+        case .autoEdit: return ["edit": "allow", "bash": "ask", "webfetch": "ask"]
+        case .auto: return ["edit": "allow", "bash": "allow", "webfetch": "allow"]
+        case .inherit: return nil
+        }
+    }
+
     /// The Codex approval policy. The sandbox stays `workspace-write` in every mode:
     /// an unattended library must not give a child the whole disk.
     var codexApprovalPolicy: String {

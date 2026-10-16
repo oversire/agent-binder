@@ -1,0 +1,29 @@
+[
+  {
+    "kind": "status",
+    "status": "running"
+  },
+  {
+    "kind": "status",
+    "status": "running"
+  },
+  {
+    "delta": true,
+    "kind": "assistant",
+    "text": "Bridges"
+  },
+  {
+    "is_error": true,
+    "kind": "result",
+    "result_session_id": "ses_2",
+    "subtype": "interrupted",
+    "text": "turn interrupted",
+    "usage": {
+      "cache_creation": 0,
+      "cache_read": 0,
+      "cost_usd": 0.0,
+      "input": 0,
+      "output": 0
+    }
+  }
+]

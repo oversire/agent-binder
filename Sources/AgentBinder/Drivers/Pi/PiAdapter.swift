@@ -14,6 +14,7 @@ final class PiAdapter: WireAdapter, RequestPrompting, InterruptEncoding, TurnSta
         var turnActive = false
         /// The id of the open prompt frame, until its ack.
         var promptID: String?
+        var announced = false
     }
 
     let commands = PiCommands()
@@ -30,9 +31,12 @@ final class PiAdapter: WireAdapter, RequestPrompting, InterruptEncoding, TurnSta
 
     var turnActive: Bool { state.value.turnActive }
 
-    // pi has no handshake.
+    // pi has no handshake. Quirk: RPC mode sends no session event, so `get_state` gives the id.
+    // The reply comes later as an `initialized` event, so a slow reply does not hold the start.
     func handshake(_ w: FrameWriter) async throws -> [Event] {
         commands.attach(w)
+        let commands = commands
+        Task { _ = try? await commands.request(["type": "get_state"]) }
         return []
     }
 
@@ -156,11 +160,22 @@ final class PiAdapter: WireAdapter, RequestPrompting, InterruptEncoding, TurnSta
         }
         guard ack else {
             commands.deliver(m)
-            return []
+            return stateAnnounced(m)
         }
         guard case .failure(let e) = PiCommands.reply(m) else { return [] }
         endTurn()
         return [Event(.error(Self.classified("\(e)")))]
+    }
+
+    private func stateAnnounced(_ m: JSONValue) -> [Event] {
+        guard m["command"] == "get_state" else { return [] }
+        let id = m.at("data", "sessionId").stringValue
+        guard !id.isEmpty else { return [] }
+        let first = state.withLock { s in
+            defer { s.announced = true }
+            return !s.announced
+        }
+        return first ? [Event(.initialized, sessionID: id)] : []
     }
 
     private func message(_ msg: JSONValue?, end: Bool) -> [Event] {

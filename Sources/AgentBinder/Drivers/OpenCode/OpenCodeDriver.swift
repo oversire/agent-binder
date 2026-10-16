@@ -250,7 +250,7 @@ enum OpenCodeOpen {
         // Quirk: session.created comes during the create call, before the session is routable.
         s.markLive()
         do {
-            if let c = OpenCodeV2Dialect.instructionsCall(id, l.instructions) { try await http.call(c) }
+            try await http.callFirstFound(OpenCodeV2Dialect.instructionsCalls(id, l.instructions))
             if resume, let c = OpenCodeV2Dialect.setModelCall("/session/\(id)", r.model ?? "", effort) {
                 try await http.call(c)
             }

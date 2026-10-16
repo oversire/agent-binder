@@ -104,7 +104,11 @@ private func golden() -> [GoldenCase] {
             args: ["--effort", "low", "--permission-mode", "default", "--permission-prompt-tool=my-bridge"],
             env: claudeClient),
         GoldenCase(
-            name: "opencode auto has no stdio callback", req: r(.opencode) { $0.permissions = .init(mode: .auto) }),
+            name: "opencode auto has no stdio callback", req: r(.opencode) { $0.permissions = .init(mode: .auto) },
+            env: [
+                "OPENCODE_CONFIG_CONTENT":
+                    #"{"mcp":{},"permission":{"bash":"allow","edit":"allow","webfetch":"allow"}}"#
+            ]),
         GoldenCase(
             name: "claude isolated home", req: r(.claude) { $0.home = homeURL }, args: claudeTail,
             env: claudeHome(home)),
@@ -134,7 +138,10 @@ private func golden() -> [GoldenCase] {
         GoldenCase(name: "codex no home", req: r(.codex)),
         GoldenCase(
             name: "opencode isolated home", req: r(.opencode) { $0.home = homeURL },
-            env: ["OPENCODE_CONFIG_DIR": home]),
+            env: [
+                "OPENCODE_CONFIG_DIR": home,
+                "OPENCODE_CONFIG_CONTENT": #"{"mcp":{},"permission":{"bash":"ask","edit":"ask","webfetch":"ask"}}"#,
+            ]),
         GoldenCase(
             name: "pi new session id",
             req: r(.pi) {
@@ -381,6 +388,31 @@ struct MCPRenderTests {
         #expect(remote["url"]?.string == "https://example.test/mcp")
     }
 
+    @Test(arguments: [
+        (PermissionPolicy.Mode.ask, "ask", "ask"), (.autoEdit, "allow", "ask"), (.auto, "allow", "allow"),
+    ])
+    func openCodePermission(_ mode: PermissionPolicy.Mode, _ edit: String, _ bash: String) async throws {
+        var req = request(.opencode2)
+        req.permissions = PermissionPolicy(mode: mode)
+        let l = try await builder().prepare(req, resume: false)
+        let content = try #require(l.environment["OPENCODE_CONFIG_CONTENT"])
+        let cfg = try #require(JSONValue.parse(content))
+        #expect(cfg.at("permission", "edit")?.string == edit && cfg.at("permission", "bash")?.string == bash)
+        #expect(cfg["mcp"] == [:])
+    }
+
+    @Test func openCodeInheritKeepsTheOperatorConfig() async throws {
+        var req = request(.opencode)
+        req.permissions = PermissionPolicy(mode: .inherit)
+        req.environment = ["OPENCODE_CONFIG_CONTENT": "{}"]
+        #expect(try await builder().prepare(req, resume: false).environment["OPENCODE_CONFIG_CONTENT"] == "{}")
+        req.mcpServers = [stdioServer]
+        let cfg = try #require(
+            JSONValue.parse(
+                try await builder().prepare(req, resume: false).environment["OPENCODE_CONFIG_CONTENT"] ?? ""))
+        #expect(cfg["permission"] == nil && cfg.at("mcp", "local") != nil)
+    }
+
     @Test func piNeedsAHome() async throws {
         var req = request(.pi)
         req.mcpServers = [stdioServer]
@@ -398,7 +430,25 @@ struct MCPRenderTests {
         #expect(try mode(path) == 0o600)
     }
 
-    @Test(arguments: [Harness.copilot, .cursor, .gemini])
+    @Test func copilotConfigFile() async throws {
+        var req = request(.copilot)
+        req.mcpServers = [stdioServer, httpServer]
+        let l = try await builder().prepare(req, resume: false)
+        defer { l.cleanup() }
+        let flag = try #require(value(after: "--additional-mcp-config", in: l.arguments))
+        #expect(flag.hasPrefix("@"))
+        let path = String(flag.dropFirst())
+        #expect(try mode(path) == 0o600)
+        let doc = try #require(JSONValue.parse(try Data(contentsOf: URL(fileURLWithPath: path))))
+        let local = try #require(doc.at("mcpServers", "local"))
+        #expect(local["type"]?.string == "local")
+        #expect(local["command"]?.string == "cmd")
+        #expect(local["tools"] == ["*"])
+        #expect(doc.at("mcpServers", "remote", "type")?.string == "http")
+        #expect(doc.at("mcpServers", "remote", "tools") == ["*"])
+    }
+
+    @Test(arguments: [Harness.cursor, .gemini])
     func acpHarnessesRenderNothing(_ h: Harness) async throws {
         var req = request(h)
         req.mcpServers = [stdioServer, httpServer]

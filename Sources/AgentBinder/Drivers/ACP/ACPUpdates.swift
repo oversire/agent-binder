@@ -8,7 +8,7 @@ enum ACPUpdates {
             guard update.at("content", "type")?.string == "text", let t = update.at("content", "text")?.string,
                 !t.isEmpty
             else { return [] }
-            return [Event(.assistant(text: t, delta: false))]
+            return [Event(.assistant(text: t, delta: true))]
         case "agent_thought_chunk", "plan", "plan_update", "available_commands_update", "current_mode_update":
             // The thought text is dropped. The event only tells that the turn runs.
             return [Event(.status(.running, text: nil))]

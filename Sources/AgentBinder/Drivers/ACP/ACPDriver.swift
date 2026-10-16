@@ -63,7 +63,8 @@ struct ACPDriver: Driver, ModelListing {
         c.clientVersion = ctx.clientVersion
         c.cwd = r.workingDirectory.path
         c.model = r.model
-        c.mcpServers = r.mcpServers
+        // Copilot gets the servers in a launch flag.
+        c.mcpServers = variant.harness == .copilot ? [] : r.mcpServers
         c.instructions = l.instructions
         // auth_method is an alias.
         c.authMethod = r.rawString("acp_auth_method") ?? r.rawString("auth_method")

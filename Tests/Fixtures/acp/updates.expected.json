@@ -67,7 +67,7 @@
     "tool_kind": "other"
   },
   {
-    "delta": false,
+    "delta": true,
     "kind": "assistant",
     "text": "pong"
   },

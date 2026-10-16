@@ -23,6 +23,8 @@ let package = Package(
                 .product(name: "Logging", package: "swift-log"),
             ]
         ),
+        // A stdio MCP server for the live tests. It is not a product.
+        .executableTarget(name: "agentbinder-mcp-helper"),
         .testTarget(name: "AgentBinderTests", dependencies: ["AgentBinder"]),
         .testTarget(
             name: "AgentBinderNativeTests",
@@ -30,7 +32,7 @@ let package = Package(
         ),
         .testTarget(
             name: "AgentBinderLiveTests",
-            dependencies: ["AgentBinder", "AgentBinderNative"],
+            dependencies: ["AgentBinder", "AgentBinderNative", "agentbinder-mcp-helper"],
             path: "Tests/LiveTests"
         ),
     ],

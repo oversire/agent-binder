@@ -17,6 +17,7 @@ The project uses [Semantic Versioning](https://semver.org/).
 - The OpenCode drivers: `opencode serve` over HTTP and server-sent events, for the 1.x wire (`opencode`) and the 2.x wire (`opencode2`). Sessions with the same binary, environment and arguments share one server. The pool stops an idle server after 60 s.
 - The native loop (`AgentBinderNative`): `NativeDriver` runs a model loop in process with the `Model` protocol, tool sets (`FileTools`, `MCPToolSet`, `FuncTool`), approvals, skills, a message store (`FileStore`, `MemoryStore`) and compaction (`SummaryCompactor`).
 - The native providers: `AnthropicModel` (Messages API) and `OpenAIModel` (Chat Completions API and compatible gateways), on `URLSession` with server-sent events. They retry before the first byte of the response, and a failure is a `ProviderError` with a stable `code`.
+- The live tier (`scripts/test-live.sh`): it runs real turns on the local CLI logins and writes a report to `.build/live-report.md`. The `agentbinder-mcp-helper` executable is its stdio MCP server. It is not a product.
 
 ### Known behavior
 
@@ -32,6 +33,16 @@ The project uses [Semantic Versioning](https://semver.org/).
 - OpenCode: an `opencode` request on a 2.x binary uses the 2.x wire, and its session reports `opencode2`.
 - OpenCode: the result of a turn has no text and no usage. The `usage` events carry the usage.
 - OpenCode: a stopped or dead server ends each of its sessions with the error code `server_exited`.
+- OpenCode 2.x: an interrupt ends the turn with an `interrupted` result. The aborted step gives no error event.
+- OpenCode 2.x: the instructions go to the `/experimental` route of 2.0.26. On a 404 the driver uses the older route.
+- ACP: each stdio MCP server has `args` and `env`, and each HTTP server has `headers`, also when they are empty. Gemini rejects a server without `env`.
+- ACP: `authenticate` waits at most 15 s. A stale Cursor login never answers it, so the start fails with the vendor auth error, not a handshake timeout.
+- pi: RPC mode sends no session event. The driver reads the session id from `get_state`.
+- OpenCode: the permission mode goes to the `permission` block of `OPENCODE_CONFIG_CONTENT`. Without it OpenCode allows edits and commands with no question. The `inherit` mode with no MCP servers sets no config.
+- ACP: a model list with a repeated id keeps the first entry. Copilot 1.0.71 lists `auto` twice.
+- ACP: an `agent_message_chunk` gives an assistant event with `delta: true`. The chunks are parts of one message.
+- Copilot: the MCP servers go in a temp file for `--additional-mcp-config`. Copilot 1.0.98 ignores the stdio servers of ACP `session/new`, so the driver sends an empty list.
+- OpenCode 2.x: a permission answer sends `decision` for 2.0.26 and `reply` for older 2.x builds.
 - Native: the built-in tools work on the disk. `Features.fileSystem` is false, and `StartRequest.fileSystem` has no effect.
 - Native: the `allowed-tools` key of a skill is read, but it does not limit the tools.
 - Native: an MCP tool call always needs approval, also when the server marks the tool read-only.

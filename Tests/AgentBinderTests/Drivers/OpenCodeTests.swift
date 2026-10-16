@@ -388,7 +388,10 @@ struct OpenCodeSessionTests {
         let p = sink.events.permissions[0]
         #expect(p.id == "p1" && p.tool == "write" && p.kind == .edit && p.question == "Write it?")
         try await s.answer("p1", .allow())
-        #expect(rig.srv.requests("POST", "/api/session/ses_2/permission/p1/reply").first?.json == ["reply": "once"])
+        #expect(
+            rig.srv.requests("POST", "/api/session/ses_2/permission/p1/reply").first?.json == [
+                "decision": "once", "reply": "once",
+            ])
         await rig.server.stop()
     }
 
@@ -647,7 +650,8 @@ struct OpenCodeDriverTests {
     @Test func v2BinaryRoutesToV2() async throws {
         let srv = try await TestHTTPServer.start()
         srv.route("POST", "/api/session", .json(#"{"data":{"id":"ses_v2"}}"#))
-        srv.route("PUT", "/api/session/ses_v2/instructions/entries/agentbinder.instructions", .json("{}"))
+        srv.route(
+            "PUT", "/api/experimental/session/ses_v2/instructions/entries/agentbinder.instructions", .json("{}"))
         let dir = try TempDir()
         let f = FakeStarter(srv)
         let (rt, _) = try runtime(version: "opencode v2.0.26", f, dir)
@@ -661,9 +665,36 @@ struct OpenCodeDriverTests {
         let create = try #require(srv.requests("POST", "/api/session").first?.json)
         #expect(create.at("location", "directory")?.string == dir.path)
         #expect(create["model"] == ["providerID": "opencode-go", "id": "kimi-k3", "variant": "high"])
-        let put = srv.requests("PUT", "/api/session/ses_v2/instructions/entries/agentbinder.instructions")
+        let put = srv.requests(
+            "PUT", "/api/experimental/session/ses_v2/instructions/entries/agentbinder.instructions")
         #expect(put.first?.json == ["value": "be brief"])
         #expect(f.calls.value.map(\.0) == [.v2])
+        await rt.close()
+    }
+
+    @Test func v2InstructionsFallBackOn404() async throws {
+        let srv = try await TestHTTPServer.start()
+        srv.route("POST", "/api/session", .json(#"{"data":{"id":"ses_v2"}}"#))
+        srv.route("PUT", "/api/session/ses_v2/instructions/entries/agentbinder.instructions", .json("{}"))
+        let dir = try TempDir()
+        let (rt, _) = try runtime(version: "opencode v2.0.20", FakeStarter(srv), dir)
+        var r = request(dir.url)
+        r.instructions = "be brief"
+        _ = try await rt.start(r)
+        #expect(
+            srv.requests("PUT", "/api/session/ses_v2/instructions/entries/agentbinder.instructions").first?.json
+                == ["value": "be brief"])
+        await rt.close()
+    }
+
+    @Test func v2InstructionsFailWhenNoRouteIsFound() async throws {
+        let srv = try await TestHTTPServer.start()
+        srv.route("POST", "/api/session", .json(#"{"data":{"id":"ses_v2"}}"#))
+        let dir = try TempDir()
+        let (rt, _) = try runtime(version: "opencode v2.0.26", FakeStarter(srv), dir)
+        var r = request(dir.url)
+        r.instructions = "be brief"
+        await #expect(throws: AgentBinderError.self) { _ = try await rt.start(r) }
         await rt.close()
     }
 

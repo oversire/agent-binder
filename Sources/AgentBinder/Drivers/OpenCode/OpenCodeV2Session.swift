@@ -45,9 +45,10 @@ struct OpenCodeV2Dialect: OpenCodeDialect {
 
     var interrupt: OpenCodeCall { OpenCodeCall(path: base + "/interrupt") }
 
+    // Quirk: 2.0.26 reads `decision`; older 2.x builds read `reply`. Each ignores the other key.
     func answer(_ permissionID: String, _ d: Decision) -> OpenCodeCall {
-        OpenCodeCall(
-            path: base + "/permission/\(permissionID)/reply", body: ["reply": .string(d.allow ? "once" : "reject")])
+        let v: JSONValue = .string(d.allow ? "once" : "reject")
+        return OpenCodeCall(path: base + "/permission/\(permissionID)/reply", body: ["decision": v, "reply": v])
     }
 
     /// The running turn keeps its model.
@@ -60,13 +61,13 @@ struct OpenCodeV2Dialect: OpenCodeDialect {
         return OpenCodeCall(path: base + "/model", body: ["model": ref])
     }
 
-    /// The call that sets the instructions entry. It is nil for blank text.
-    static func instructionsCall(_ sessionID: String, _ text: String?) -> OpenCodeCall? {
+    /// The calls that set the instructions entry, in the order to try. It is empty for blank text.
+    /// Quirk: 2.0.26 moved the route under `/experimental`. Older 2.x builds give 404 there.
+    static func instructionsCalls(_ sessionID: String, _ text: String?) -> [OpenCodeCall] {
         let t = (text ?? "").trimmingCharacters(in: .whitespacesAndNewlines)
-        guard !t.isEmpty else { return nil }
-        return OpenCodeCall(
-            method: "PUT", path: "/session/\(sessionID)/instructions/entries/\(instructionKey)",
-            body: ["value": .string(t)])
+        guard !t.isEmpty else { return [] }
+        let path = "/session/\(sessionID)/instructions/entries/\(instructionKey)"
+        return ["/experimental" + path, path].map { OpenCodeCall(method: "PUT", path: $0, body: ["value": .string(t)]) }
     }
 
     /// `provider/model` splits at the first slash. Blank is nil.
@@ -131,8 +132,15 @@ struct OpenCodeV2Dialect: OpenCodeDialect {
                 ? TurnResult(subtype: "success", sessionID: sessionID)
                 : Self.result(t.lastError, Self.classified(t.lastError, status: 0, type: ""))
             return OpenCodeStep([Event(.result(r))], endsTurn: true)
+        case "session.execution.interrupted":
+            t.sawResult = true
+            t.busy = false
+            let r = TurnResult(subtype: "interrupted", isError: true, text: "turn interrupted", sessionID: sessionID)
+            return OpenCodeStep([Event(.result(r))], endsTurn: true)
         case "session.step.failed", "session.execution.failed":
             var (text, status, kind) = Self.failure(d)
+            // Quirk: an interrupt fails the step with type "aborted"; session.execution.interrupted ends the turn.
+            if kind == "aborted" { return OpenCodeStep() }
             if text.isEmpty { text = "opencode2 session error" }
             let w = Self.classified(text, status: status, type: kind)
             t.sawResult = true

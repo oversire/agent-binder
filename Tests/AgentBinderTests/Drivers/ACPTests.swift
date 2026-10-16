@@ -84,7 +84,7 @@ struct ACPFixtureTests {
         #expect(evs.compactMap(\.assistantText) == ["pong"])
         #expect(
             evs.filter { $0.assistantText != nil }.allSatisfy { e in
-                if case .assistant(_, let delta) = e.kind { return !delta }
+                if case .assistant(_, let delta) = e.kind { return delta }
                 return false
             })
         let usage = evs.compactMap { e -> Usage? in
@@ -312,7 +312,7 @@ struct ACPWireTests {
         )
         #expect(
             peer.frames(method: "session/new").first?["params"]?.jsonString
-                == #"{"cwd":"/w","mcpServers":[{"args":["a"],"command":"cmd","name":"local"}]}"#)
+                == #"{"cwd":"/w","mcpServers":[{"args":["a"],"command":"cmd","env":[],"name":"local"}]}"#)
         await s.kill()
     }
 
@@ -332,6 +332,17 @@ struct ACPWireTests {
         #expect(MCPRender.acpServers(servers, http: false).array?.count == 1)
     }
 
+    @Test func emptyFieldsAreSent() {
+        let servers = [
+            MCPServer(name: "remote", transport: .http(url: URL(string: "https://x/mcp")!, headers: [:])),
+            MCPServer(name: "local", transport: .stdio(command: "cmd", args: [], env: [:])),
+        ]
+        #expect(
+            MCPRender.acpServers(servers, http: true).jsonString
+                == #"[{"headers":[],"name":"remote","type":"http","url":"https://x/mcp"},{"args":[],"command":"cmd","env":[],"name":"local"}]"#
+        )
+    }
+
     @Test func setModelInTheHandshake() async throws {
         let peer = ScriptedPeer()
         peer.acpAgent(
@@ -344,6 +355,21 @@ struct ACPWireTests {
         if case .status(_, let text) = try #require(e).kind { #expect(text == "model b") }
         #expect(peer.frames(method: "session/set_model").first?["params"] == ["sessionId": "ses_1", "modelId": "b"])
         #expect(s.offeredModels == [ModelInfo(id: "a")])
+        await s.kill()
+    }
+
+    @Test func repeatedModelIDsAreDropped() async throws {
+        let peer = ScriptedPeer()
+        peer.acpAgent(
+            newSession:
+                #"{"sessionId":"ses_1","models":{"currentModelId":"auto","availableModels":[{"modelId":"auto","name":"Auto","description":"Let Copilot pick the best model"},{"modelId":"auto","name":"Auto","description":"Auto"}]}}"#
+        )
+        let (w, s, _) = try await session(peer, acpConfig(.copilot))
+        try await eventually { w.id == "ses_1" }
+        #expect(
+            s.offeredModels == [
+                ModelInfo(id: "auto", name: "Auto", description: "Let Copilot pick the best model", isDefault: true)
+            ])
         await s.kill()
     }
 
@@ -446,6 +472,18 @@ struct ACPWireTests {
         try await eventually { w.id == "ses_2" }
         #expect(peer.frames(method: "authenticate").first?["params"] == ["methodId": "cursor_login"])
         await s.kill()
+    }
+
+    @Test func silentAuthenticateGivesTheFirstError() async throws {
+        let peer = ScriptedPeer()
+        peer.expect(method: "initialize") { [result($0, initReply)] }
+        peer.expect(method: "session/new") { [failure($0, -32000, "Authentication required")] }
+        let a = ACPAdapter(acpConfig(.cursor) { $0.handshakeTimeout = .milliseconds(300) })
+        let w = try await peer.session(a, harness: .cursor)
+        _ = try await withTimeout { await w.events.next { $0.errorCode != nil } }
+        #expect(w.lastError?.message.contains("session/new") == true)
+        #expect(w.lastError?.message.contains("Authentication required") == true)
+        await w.kill()
     }
 
     @Test func preferredAuthMethod() async throws {
@@ -672,6 +710,21 @@ struct ACPDriverTests {
         let evs = try await withTimeout { await s.events.collect() }
         #expect(evs.results.count == 1 && evs.last?.isExit == true)
         #expect(evs.errors.isEmpty)
+        await rt.close()
+    }
+
+    @Test(arguments: [(Harness.copilot, true), (.gemini, false)])
+    func mcpServersRoute(_ h: Harness, _ flag: Bool) async throws {
+        let bin = try FakeACP()
+        let rt = bin.runtime()
+        var r = StartRequest(harness: h, workingDirectory: bin.dir.url)
+        r.mcpServers = [MCPServer(name: "local", transport: .stdio(command: "cmd", args: [], env: [:]))]
+        let s = try await rt.start(r)
+        try await eventually { bin.input().contains { $0["method"] == "session/new" } }
+        let servers = bin.input().first { $0["method"] == "session/new" }?.at("params", "mcpServers")
+        #expect(bin.argv().contains("--additional-mcp-config") == flag)
+        #expect((servers == []) == flag)
+        await s.close()
         await rt.close()
     }
 

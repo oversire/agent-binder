@@ -72,6 +72,18 @@ struct OpenCodeHTTP: Sendable {
         return wire.decode(body)
     }
 
+    /// Runs the first call that the server knows. A 404 tries the next call; the last 404 throws.
+    func callFirstFound(_ calls: [OpenCodeCall]) async throws {
+        for (i, c) in calls.enumerated() {
+            do {
+                try await call(c)
+                return
+            } catch AgentBinderError.vendor(code: 404, _) where i < calls.count - 1 {
+                continue
+            }
+        }
+    }
+
     /// The health verdict of one poll.
     enum Health: Equatable {
         case ready

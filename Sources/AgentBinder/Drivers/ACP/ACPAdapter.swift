@@ -22,6 +22,8 @@ struct ACPConfig: Sendable {
     var fileSystem: (any FileSystemAccess)?
 
     static let setModelWait: Duration = .seconds(10)
+    /// Quirk: Cursor never answers `authenticate` when its stored login is stale.
+    static let authenticateWait: Duration = .seconds(15)
     static let fileSystemWait: Duration = .seconds(30)
 }
 
@@ -169,8 +171,10 @@ final class ACPAdapter: WireAdapter, RequestPrompting, InterruptEncoding, TurnSt
             s.sessionID = id
             // A reply without the block keeps the old list.
             guard let m = r["models"], m.object != nil else { return }
+            // Quirk: Copilot 1.0.71 lists `auto` twice. The first entry wins.
+            var seen: Set<String> = []
             s.models = (m["availableModels"]?.array ?? []).compactMap { a in
-                guard let id = a["modelId"]?.string, !id.isEmpty else { return nil }
+                guard let id = a["modelId"]?.string, !id.isEmpty, seen.insert(id).inserted else { return nil }
                 return ModelInfo(id: id, name: a["name"]?.string, description: a["description"]?.string)
             }
             s.currentModel = m["currentModelId"]?.string
@@ -183,7 +187,9 @@ final class ACPAdapter: WireAdapter, RequestPrompting, InterruptEncoding, TurnSt
         guard let pick = s.authMethod ?? config.variant.authMethod(s.authMethods) else {
             throw AgentBinderError.handshakeFailed("\(kind): no auth methods")
         }
-        try await call("authenticate", ["methodId": .string(pick)])
+        try await peer.request(
+            "authenticate", params: ["methodId": .string(pick)],
+            timeout: min(ACPConfig.authenticateWait, config.handshakeTimeout))
         state.withLock { $0.authMethod = pick }
     }
 

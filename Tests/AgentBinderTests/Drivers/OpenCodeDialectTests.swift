@@ -83,6 +83,20 @@ struct OpenCodeFixtureTests {
         #expect(evs.results == [TurnResult(subtype: "success", sessionID: "ses_2")])
         #expect(steps.last?.endsTurn == true && !t.busy)
     }
+
+    @Test func v2Interrupt() throws {
+        var d = v2()
+        var t = OpenCodeTurn(busy: true)
+        let steps = feed(&d, .v2, try Fixtures.lines("opencode2/interrupt.ndjson"), &t)
+        let evs = steps.flatMap(\.events)
+        try Fixtures.expectGolden("opencode2/interrupt.ndjson", evs)
+        #expect(evs.errors.isEmpty)
+        #expect(
+            evs.results == [
+                TurnResult(subtype: "interrupted", isError: true, text: "turn interrupted", sessionID: "ses_2")
+            ])
+        #expect(steps.last?.endsTurn == true && !t.busy)
+    }
 }
 
 // MARK: wire
@@ -438,19 +452,23 @@ struct OpenCodeV2DialectTests {
     @Test func calls() {
         var d = OpenCodeV2Dialect(sessionID: "s", directory: "/w", variant: "high")
         #expect(d.interrupt == OpenCodeCall(path: "/session/s/interrupt"))
-        #expect(d.answer("p", .allow()) == OpenCodeCall(path: "/session/s/permission/p/reply", body: ["reply": "once"]))
-        #expect(d.answer("p", .deny()).body == ["reply": "reject"])
+        #expect(
+            d.answer("p", .allow())
+                == OpenCodeCall(path: "/session/s/permission/p/reply", body: ["decision": "once", "reply": "once"]))
+        #expect(d.answer("p", .deny()).body == ["decision": "reject", "reply": "reject"])
         #expect(
             d.setModel("opencode-go/kimi-k3")?.body == [
                 "model": ["providerID": "opencode-go", "id": "kimi-k3", "variant": "high"]
             ])
         #expect(d.setModel(" ") == nil)
+        let puts = OpenCodeV2Dialect.instructionsCalls("s", " be brief ")
         #expect(
-            OpenCodeV2Dialect.instructionsCall("s", " be brief ")
-                == OpenCodeCall(
-                    method: "PUT", path: "/session/s/instructions/entries/agentbinder.instructions",
-                    body: ["value": "be brief"]))
-        #expect(OpenCodeV2Dialect.instructionsCall("s", "  ") == nil)
+            puts.map(\.path) == [
+                "/experimental/session/s/instructions/entries/agentbinder.instructions",
+                "/session/s/instructions/entries/agentbinder.instructions",
+            ])
+        #expect(puts.allSatisfy { $0.method == "PUT" && $0.body == ["value": "be brief"] })
+        #expect(OpenCodeV2Dialect.instructionsCalls("s", "  ").isEmpty)
     }
 
     @Test func modelRefTable() {
