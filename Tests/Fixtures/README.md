@@ -11,6 +11,7 @@ This repository owns the files now. It records new fixtures itself.
 `codex/notifications.ndjson` holds hand-written Codex app-server notifications. Record real Codex turns on the first live run.
 `acp/updates.ndjson` holds hand-written ACP `session/update` notifications. The Copilot, Cursor and Gemini drivers share it. Record real turns on the first live run.
 `pi/lifecycle.ndjson` is a pi 0.84.1 turn from the reference project. `pi/shapes.ndjson` holds hand-written pi frame shapes.
+`claude/transcript/` holds the session-digest cases of the transcript reader: `<case>.jsonl` is a hand-written Claude transcript, and `<case>.expected.json` is the digest that the reader must give. The test drops the `source` field of the expected file. Keep these files equal to the cases of the consumer that owns the digest format.
 `native/*.sse` hold hand-written provider streams: Anthropic Messages (`anthropic-*`) and OpenAI Chat Completions (`openai-*`). Record real streams on the first live run.
 `opencode/turn.ndjson` and `opencode2/turn.ndjson` hold hand-written bus events of one turn on the 1.x and the 2.x wire. `opencode2/interrupt.ndjson` holds the real 2.0.26 events of an interrupted turn, with shorter text.
 

@@ -36,6 +36,13 @@ Each CLI uses its own login. The library never reads a vendor token.
 - ``ModelInfo``
 - ``Limits``
 
+### Transcripts
+
+- ``TranscriptReader``
+- ``TranscriptDigest``
+- ``TranscriptBudget``
+- ``TranscriptError``
+
 ### Errors
 
 - ``AgentBinderError``

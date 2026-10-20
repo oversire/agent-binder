@@ -6,6 +6,11 @@ The project uses [Semantic Versioning](https://semver.org/).
 
 ## [Unreleased]
 
+### Added
+
+- `TranscriptReader`: it reads a Claude Code transcript file and makes a `TranscriptDigest`. The earlier turns keep the prompt and the closing message. The last turns keep the full agent text. Tool output is left out. `TranscriptBudget` sets the counts and the text limit. Lengths count Unicode code points.
+- `TranscriptReader.locate(harness:sessionId:cwd:)` and `newest(harness:cwd:)` find a transcript under `<claudeHome>/projects`. Other harnesses throw `TranscriptError.unsupportedHarness`.
+
 ## [0.1.0] - 2026-10-16
 
 ### Added

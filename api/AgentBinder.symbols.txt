@@ -21,6 +21,7 @@ swift.enum ShellWords :: enum ShellWords
 swift.enum SkillSupport :: enum SkillSupport
 swift.enum ToolKind :: enum ToolKind
 swift.enum ToolStatus :: enum ToolStatus
+swift.enum TranscriptError :: enum TranscriptError
 swift.enum WindowKey :: enum WindowKey
 swift.enum.case AgentBinderError.belowVersionFloor(_:version:floor:) :: case belowVersionFloor(Harness, version: String, floor: String)
 swift.enum.case AgentBinderError.binaryNotFound(_:searched:) :: case binaryNotFound(Harness, searched: [String])
@@ -109,6 +110,8 @@ swift.enum.case ToolStatus.cancelled :: case cancelled
 swift.enum.case ToolStatus.completed :: case completed
 swift.enum.case ToolStatus.failed :: case failed
 swift.enum.case ToolStatus.started :: case started
+swift.enum.case TranscriptError.notFound(_:) :: case notFound(String)
+swift.enum.case TranscriptError.unsupportedHarness(_:) :: case unsupportedHarness(Harness)
 swift.enum.case WindowKey.custom :: case custom
 swift.enum.case WindowKey.daily :: case daily
 swift.enum.case WindowKey.fiveHour :: case fiveHour
@@ -149,6 +152,11 @@ swift.func.op ToolEvent.!=(_:_:) :: static func != (lhs: Self, rhs: Self) -> Boo
 swift.func.op ToolKind.!=(_:_:) :: static func != (lhs: Self, rhs: Self) -> Bool
 swift.func.op ToolStatus.!=(_:_:) :: static func != (lhs: Self, rhs: Self) -> Bool
 swift.func.op Tracker.Snapshot.!=(_:_:) :: static func != (lhs: Self, rhs: Self) -> Bool
+swift.func.op TranscriptBudget.!=(_:_:) :: static func != (lhs: Self, rhs: Self) -> Bool
+swift.func.op TranscriptDigest.!=(_:_:) :: static func != (lhs: Self, rhs: Self) -> Bool
+swift.func.op TranscriptDigest.EarlierTurn.!=(_:_:) :: static func != (lhs: Self, rhs: Self) -> Bool
+swift.func.op TranscriptDigest.LastTurn.!=(_:_:) :: static func != (lhs: Self, rhs: Self) -> Bool
+swift.func.op TranscriptError.!=(_:_:) :: static func != (lhs: Self, rhs: Self) -> Bool
 swift.func.op TurnResult.!=(_:_:) :: static func != (lhs: Self, rhs: Self) -> Bool
 swift.func.op Usage.!=(_:_:) :: static func != (lhs: Self, rhs: Self) -> Bool
 swift.func.op WindowKey.!=(_:_:) :: static func != (lhs: Self, rhs: Self) -> Bool
@@ -204,6 +212,15 @@ swift.init ToolKind.init(rawValue:) :: init?(rawValue: String)
 swift.init ToolStatus.init(from:) :: init(from decoder: any Decoder) throws
 swift.init ToolStatus.init(rawValue:) :: init?(rawValue: String)
 swift.init Tracker.init(now:) :: init(now: @escaping () -> Date = Date.init)
+swift.init TranscriptBudget.init(earlier:full:maxChars:) :: init(earlier: Int = 12, full: Int = 3, maxChars: Int = 4000)
+swift.init TranscriptBudget.init(from:) :: init(from decoder: any Decoder) throws
+swift.init TranscriptDigest.EarlierTurn.init(from:) :: init(from decoder: any Decoder) throws
+swift.init TranscriptDigest.EarlierTurn.init(prompt:closing:interrupted:) :: init(prompt: String, closing: String, interrupted: Bool = false)
+swift.init TranscriptDigest.LastTurn.init(from:) :: init(from decoder: any Decoder) throws
+swift.init TranscriptDigest.LastTurn.init(prompt:text:tools:interrupted:) :: init(prompt: String, text: String, tools: Int, interrupted: Bool = false)
+swift.init TranscriptDigest.init(from:) :: init(from decoder: any Decoder) throws
+swift.init TranscriptDigest.init(harness:sessionId:turns:earlier:last:truncated:) :: init(harness: Harness, sessionId: String, turns: Int, earlier: [TranscriptDigest.EarlierTurn], last: [TranscriptDigest.LastTurn], truncated: Bool)
+swift.init TranscriptReader.init(budget:claudeHome:) :: init(budget: TranscriptBudget = TranscriptBudget(), claudeHome: URL? = nil)
 swift.init TurnResult.init(subtype:isError:text:sessionID:usage:endReason:code:) :: init(subtype: String = "success", isError: Bool = false, text: String = "", sessionID: String? = nil, usage: Usage = Usage(), endReason: EndReason? = nil, code: String? = nil)
 swift.init Usage.init(from:) :: init(from decoder: any Decoder) throws
 swift.init Usage.init(input:output:cacheRead:cacheCreation:model:costUSD:) :: init(input: Int64 = 0, output: Int64 = 0, cacheRead: Int64 = 0, cacheCreation: Int64 = 0, model: String? = nil, costUSD: Double = 0)
@@ -284,6 +301,12 @@ swift.method Tracker.observe(_:) :: @discardableResult func observe(_ e: Event) 
 swift.method Tracker.permissionAdded(id:) :: @discardableResult func permissionAdded(id: String) -> Tracker.Snapshot
 swift.method Tracker.permissionDecided(id:) :: @discardableResult func permissionDecided(id: String) -> Tracker.Snapshot
 swift.method Tracker.promptWritten() :: func promptWritten()
+swift.method TranscriptDigest.EarlierTurn.encode(to:) :: func encode(to encoder: any Encoder) throws
+swift.method TranscriptDigest.LastTurn.encode(to:) :: func encode(to encoder: any Encoder) throws
+swift.method TranscriptReader.digest(data:harness:sessionId:) :: func digest(data: Data, harness: Harness = .claude, sessionId: String) throws -> TranscriptDigest
+swift.method TranscriptReader.digest(file:harness:) :: func digest(file: URL, harness: Harness = .claude) throws -> TranscriptDigest
+swift.method TranscriptReader.locate(harness:sessionId:cwd:) :: func locate(harness: Harness, sessionId: String, cwd: String? = nil) throws -> URL
+swift.method TranscriptReader.newest(harness:cwd:) :: func newest(harness: Harness, cwd: String) throws -> URL
 swift.method WindowKey.encode(to:) :: func encode(to encoder: any Encoder) throws
 swift.method WindowKey.hash(into:) :: func hash(into hasher: inout Hasher)
 swift.property AgentBinderError.code :: var code: String { get }
@@ -453,6 +476,27 @@ swift.property Tracker.Snapshot.waitingSince :: var waitingSince: Date?
 swift.property Tracker.inflightCount :: var inflightCount: Int { get }
 swift.property Tracker.oldestApprovalID :: var oldestApprovalID: String? { get }
 swift.property Tracker.snapshot :: var snapshot: Tracker.Snapshot { get }
+swift.property TranscriptBudget.earlier :: var earlier: Int
+swift.property TranscriptBudget.full :: var full: Int
+swift.property TranscriptBudget.maxChars :: var maxChars: Int
+swift.property TranscriptDigest.EarlierTurn.closing :: var closing: String
+swift.property TranscriptDigest.EarlierTurn.interrupted :: var interrupted: Bool
+swift.property TranscriptDigest.EarlierTurn.prompt :: var prompt: String
+swift.property TranscriptDigest.LastTurn.interrupted :: var interrupted: Bool
+swift.property TranscriptDigest.LastTurn.prompt :: var prompt: String
+swift.property TranscriptDigest.LastTurn.text :: var text: String
+swift.property TranscriptDigest.LastTurn.tools :: var tools: Int
+swift.property TranscriptDigest.earlier :: var earlier: [TranscriptDigest.EarlierTurn]
+swift.property TranscriptDigest.harness :: var harness: Harness
+swift.property TranscriptDigest.last :: var last: [TranscriptDigest.LastTurn]
+swift.property TranscriptDigest.sessionId :: var sessionId: String
+swift.property TranscriptDigest.truncated :: var truncated: Bool
+swift.property TranscriptDigest.turns :: var turns: Int
+swift.property TranscriptError.code :: var code: String { get }
+swift.property TranscriptError.description :: var description: String { get }
+swift.property TranscriptError.localizedDescription :: var localizedDescription: String { get }
+swift.property TranscriptReader.budget :: var budget: TranscriptBudget
+swift.property TranscriptReader.claudeHome :: var claudeHome: URL
 swift.property TurnResult.code :: var code: String?
 swift.property TurnResult.endReason :: var endReason: EndReason?
 swift.property TurnResult.isError :: var isError: Bool
@@ -505,6 +549,11 @@ swift.struct Skill :: struct Skill
 swift.struct StartRequest :: struct StartRequest
 swift.struct ToolEvent :: struct ToolEvent
 swift.struct Tracker.Snapshot :: struct Snapshot
+swift.struct TranscriptBudget :: struct TranscriptBudget
+swift.struct TranscriptDigest :: struct TranscriptDigest
+swift.struct TranscriptDigest.EarlierTurn :: struct EarlierTurn
+swift.struct TranscriptDigest.LastTurn :: struct LastTurn
+swift.struct TranscriptReader :: struct TranscriptReader
 swift.struct TurnResult :: struct TurnResult
 swift.struct Usage :: struct Usage
 swift.struct WireError :: struct WireError
@@ -522,6 +571,7 @@ swift.type.method MCPServer.stdio(name:command:args:env:) :: static func stdio(n
 swift.type.method PromptAttachment.data(_:mime:) :: static func data(_ data: Data, mime: String) -> PromptAttachment
 swift.type.method PromptAttachment.file(_:mime:) :: static func file(_ url: URL, mime: String? = nil) -> PromptAttachment
 swift.type.method ShellWords.split(_:) :: static func split(_ command: String) -> [String]
+swift.type.method TranscriptReader.projectFolderName(cwd:) :: static func projectFolderName(cwd: String) -> String
 swift.type.property AgentBinder.version :: static let version: String
 swift.type.property Effort.high :: static let high: Effort
 swift.type.property Effort.low :: static let low: Effort

@@ -219,6 +219,22 @@ let limits = try await rt.limits(.codex)     // the plan, and windows with the u
 
 `limits(_:query:)` reads the plan limits where the vendor gives them. Claude also sends `limits` events during a turn.
 
+## Transcripts
+
+`TranscriptReader` makes a short digest of the history of a session from its transcript file. Only Claude Code has a reader now.
+
+```swift
+let reader = TranscriptReader(budget: TranscriptBudget(earlier: 12, full: 3, maxChars: 4000))
+let file = try reader.newest(harness: .claude, cwd: repo.path)   // or locate(harness:sessionId:)
+let digest = try reader.digest(file: file)
+```
+
+- A turn is a human prompt and the agent output until the next human prompt. The reader skips meta lines, sidechain lines, compaction summaries, tool results and harness notices (a prompt that starts with `<`, but not `<pasted`).
+- `earlier` keeps the first 120 code points of the prompt and the first 700 code points of the last agent text block. `last` keeps the full agent text up to `maxChars`, and the number of tool calls.
+- `truncated` is true when the reader left out turns or cut a text.
+- The reader finds the files in `CLAUDE_CONFIG_DIR`, else `~/.claude`. Set `claudeHome` for an isolated home.
+- Other harnesses throw `TranscriptError.unsupportedHarness`. A missing file throws `TranscriptError.notFound`.
+
 ## Errors
 
 - `AgentBinderError` is the error of the API calls: `binaryNotFound`, `belowVersionFloor`, `sandboxed`, `handshakeTimeout`, `turnActive`, `noActiveTurn`, `resumeUnsupported`, `homeRequired` and more.
