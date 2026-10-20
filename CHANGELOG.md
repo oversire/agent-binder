@@ -6,6 +6,8 @@ The project uses [Semantic Versioning](https://semver.org/).
 
 ## [Unreleased]
 
+## [0.2.0] - 2026-10-20
+
 ### Added
 
 - `TranscriptReader`: it reads a Claude Code transcript file and makes a `TranscriptDigest`. The earlier turns keep the prompt and the closing message. The last turns keep the full agent text. Tool output is left out. `TranscriptBudget` sets the counts and the text limit. Lengths count Unicode code points.
@@ -121,5 +123,6 @@ The project uses [Semantic Versioning](https://semver.org/).
 - Native: an OpenAI tool call with an empty input sends `"{}"`.
 - Native: the providers never read the environment (base URLs, tokens, organization ids).
 
-[Unreleased]: https://github.com/oversire/agent-binder/compare/0.1.0...HEAD
+[Unreleased]: https://github.com/oversire/agent-binder/compare/0.2.0...HEAD
+[0.2.0]: https://github.com/oversire/agent-binder/releases/tag/0.2.0
 [0.1.0]: https://github.com/oversire/agent-binder/releases/tag/0.1.0
