@@ -74,6 +74,7 @@ struct SSEClient: Sendable {
     ) async throws {
         var r = http.request("GET", http.wire.eventPath, directory: directory, timeout: .greatestFiniteMagnitude)
         r.setValue("text/event-stream", forHTTPHeaderField: "Accept")
+        try http.checkOpen()
         let (bytes, resp) = try await http.session.bytes(for: r)
         let status = (resp as? HTTPURLResponse)?.statusCode ?? 0
         guard status < 400 else {

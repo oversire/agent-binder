@@ -11,6 +11,7 @@ struct OpenCodeHTTP: Sendable {
     let wire: OpenCodeWire
     let maxBytes: Int
     let session: URLSession
+    private let closed = Locked(false)
 
     init(base: URL, username: String, password: String, wire: OpenCodeWire, maxBytes: Int) {
         self.base = base
@@ -56,6 +57,7 @@ struct OpenCodeHTTP: Sendable {
         body: JSONValue? = nil
     ) async throws -> JSONValue {
         let r = request(method, wire.prefix + path, directory: directory, query: query, body: body)
+        try checkOpen()
         let (data, resp): (Data, URLResponse)
         do {
             (data, resp) = try await session.data(for: r)
@@ -94,7 +96,7 @@ struct OpenCodeHTTP: Sendable {
 
     func health() async -> Health {
         let r = request("GET", wire.healthPath, timeout: Self.healthTimeout)
-        guard let (data, resp) = try? await session.data(for: r), let h = resp as? HTTPURLResponse else {
+        guard !closed.value, let (data, resp) = try? await session.data(for: r), let h = resp as? HTTPURLResponse else {
             return .notYet
         }
         let type = h.value(forHTTPHeaderField: "Content-Type") ?? ""
@@ -105,5 +107,25 @@ struct OpenCodeHTTP: Sendable {
         return h.statusCode == 200 && wire.ready(data.prefix(64 << 10)) ? .ready : .notYet
     }
 
-    func close() { session.invalidateAndCancel() }
+    /// Throws after `close()`. A task on an invalidated session raises an exception that Swift cannot catch.
+    func checkOpen() throws {
+        if closed.value { throw AgentBinderError.vendor(code: 0, message: "\(wire.harness): the server is closed") }
+    }
+
+    /// Cancels the open tasks. A call that passed `checkOpen()` just before can still make its task,
+    /// so the invalidation waits a second and then cancels that task too.
+    func close() {
+        let first = closed.withLock { c in
+            let was = c
+            c = true
+            return !was
+        }
+        guard first else { return }
+        session.getAllTasks { $0.forEach { $0.cancel() } }
+        let s = session
+        Task {
+            try? await Task.sleep(nanoseconds: 1_000_000_000)
+            s.invalidateAndCancel()
+        }
+    }
 }

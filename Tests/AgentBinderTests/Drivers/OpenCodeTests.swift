@@ -127,6 +127,21 @@ struct OpenCodeHTTPTests {
         #expect(await http.health() == .notYet)
     }
 
+    // A task on an invalidated URLSession raises an exception that ends the process.
+    @Test func callAfterCloseThrows() async throws {
+        let srv = try await TestHTTPServer.start()
+        srv.route("GET", "/config", .json("{}"))
+        let http = srv.http(.v1)
+        try await http.call("GET", "/config")
+        http.close()
+        await #expect(throws: AgentBinderError.vendor(code: 0, message: "opencode: the server is closed")) {
+            try await http.call("GET", "/config")
+        }
+        #expect(await http.health() == .notYet)
+        try await Task.sleep(nanoseconds: 1_200_000_000)
+        await #expect(throws: AgentBinderError.self) { try await http.call("GET", "/config") }
+    }
+
     @Test func health() async throws {
         let srv = try await TestHTTPServer.start()
         #expect(await srv.http(.v1).health() == .wrongWire("/global/health answers HTTP 404 text/plain"))

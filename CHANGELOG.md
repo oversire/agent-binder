@@ -6,6 +6,12 @@ The project uses [Semantic Versioning](https://semver.org/).
 
 ## [Unreleased]
 
+## [0.2.1] - 2026-10-20
+
+### Fixed
+
+- OpenCode: a call after the server stopped made a task on an invalidated `URLSession`. That raised an uncaught exception and ended the host process. Now the call throws `AgentBinderError.vendor` with code 0.
+
 ## [0.2.0] - 2026-10-20
 
 ### Added
@@ -123,6 +129,7 @@ The project uses [Semantic Versioning](https://semver.org/).
 - Native: an OpenAI tool call with an empty input sends `"{}"`.
 - Native: the providers never read the environment (base URLs, tokens, organization ids).
 
-[Unreleased]: https://github.com/oversire/agent-binder/compare/0.2.0...HEAD
+[Unreleased]: https://github.com/oversire/agent-binder/compare/0.2.1...HEAD
+[0.2.1]: https://github.com/oversire/agent-binder/releases/tag/0.2.1
 [0.2.0]: https://github.com/oversire/agent-binder/releases/tag/0.2.0
 [0.1.0]: https://github.com/oversire/agent-binder/releases/tag/0.1.0
