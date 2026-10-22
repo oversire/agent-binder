@@ -31,7 +31,7 @@ macOS only: macOS 13 or later, Swift 6.1 or later (Xcode 16.3 or later).
 
 ```swift
 dependencies: [
-    .package(url: "https://github.com/oversire/agent-binder.git", from: "0.2.0"),
+    .package(url: "https://github.com/oversire/agent-binder.git", from: "0.3.0"),
 ],
 targets: [
     .target(name: "MyApp", dependencies: [

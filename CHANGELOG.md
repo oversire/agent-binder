@@ -6,6 +6,8 @@ The project uses [Semantic Versioning](https://semver.org/).
 
 ## [Unreleased]
 
+## [0.3.0] - 2026-10-22
+
 ### Added
 
 - `AgentBinderMCP`: a new product with `MCPToolSet`. It holds the MCP Swift SDK and swift-log.
@@ -140,7 +142,8 @@ The project uses [Semantic Versioning](https://semver.org/).
 - Native: an OpenAI tool call with an empty input sends `"{}"`.
 - Native: the providers never read the environment (base URLs, tokens, organization ids).
 
-[Unreleased]: https://github.com/oversire/agent-binder/compare/0.2.1...HEAD
+[Unreleased]: https://github.com/oversire/agent-binder/compare/0.3.0...HEAD
+[0.3.0]: https://github.com/oversire/agent-binder/releases/tag/0.3.0
 [0.2.1]: https://github.com/oversire/agent-binder/releases/tag/0.2.1
 [0.2.0]: https://github.com/oversire/agent-binder/releases/tag/0.2.0
 [0.1.0]: https://github.com/oversire/agent-binder/releases/tag/0.1.0
