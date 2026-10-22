@@ -14,6 +14,10 @@ public struct NativeConfig: Sendable {
     public var toolSets: [any ToolSet]
     /// Makes one tool set for each session. The session closes it.
     public var toolSetFactories: [@Sendable () async throws -> any ToolSet]
+    /// Makes the tool set of one server of `StartRequest.mcpServers`, with the child environment of the
+    /// runtime. The session closes it. Set it to `MCPToolSet.factory` of `AgentBinderMCP`. Nil fails a
+    /// request with MCP servers with ``NativeError/mcpUnavailable``.
+    public var mcpFactory: (@Sendable (MCPServer, [String: String]) async throws -> any ToolSet)?
     /// Adds ``FileTools`` with the root at `StartRequest.workingDirectory`.
     public var builtinTools: Bool
     /// The size limit of a file for ``FileTools``. Zero uses 10 MiB.
@@ -41,6 +45,7 @@ public struct NativeConfig: Sendable {
         credentials: (@Sendable () async throws -> Credentials)? = nil,
         toolSets: [any ToolSet] = [],
         toolSetFactories: [@Sendable () async throws -> any ToolSet] = [],
+        mcpFactory: (@Sendable (MCPServer, [String: String]) async throws -> any ToolSet)? = nil,
         builtinTools: Bool = false,
         maxFileBytes: Int64 = 0,
         store: (any MessageStore)? = nil,
@@ -56,6 +61,7 @@ public struct NativeConfig: Sendable {
         self.credentials = credentials
         self.toolSets = toolSets
         self.toolSetFactories = toolSetFactories
+        self.mcpFactory = mcpFactory
         self.builtinTools = builtinTools
         self.maxFileBytes = maxFileBytes
         self.store = store

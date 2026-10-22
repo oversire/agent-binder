@@ -165,5 +165,9 @@ public struct NativeError: Error, Sendable, Equatable, CustomStringConvertible {
     /// The store has no messages for the session.
     public static let notFound = NativeError("not_found", "native: no stored messages")
 
-    static func config(_ m: String) -> NativeError { NativeError("native_config", m) }
+    /// The request has MCP servers, but ``NativeConfig/mcpFactory`` is nil.
+    public static let mcpUnavailable = NativeError(
+        "mcp_unavailable", "Link AgentBinderMCP to use MCP servers with the native harness")
+
+    package static func config(_ m: String) -> NativeError { NativeError("native_config", m) }
 }

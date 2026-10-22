@@ -64,6 +64,7 @@ public final class NativeDriver: SelfDetecting {
 
     private func open(_ r: StartRequest, id: String, _ ctx: RuntimeContext) async throws -> any Session {
         if state.value.closed { throw NativeError.config("native driver is closed") }
+        if !r.mcpServers.isEmpty && config.mcpFactory == nil { throw NativeError.mcpUnavailable }
         let creds: Credentials
         if let c = r.credentials {
             creds = c
@@ -86,11 +87,13 @@ public final class NativeDriver: SelfDetecting {
                 owned.append(t)
                 sets.append(t)
             }
-            let parent = await ctx.childEnvironment([:])
-            for m in r.mcpServers {
-                let t = try await MCPToolSet.connect(m, environment: parent)
-                owned.append(t)
-                sets.append(t)
+            if let connect = config.mcpFactory, !r.mcpServers.isEmpty {
+                let parent = await ctx.childEnvironment([:])
+                for m in r.mcpServers {
+                    let t = try await connect(m, parent)
+                    owned.append(t)
+                    sets.append(t)
+                }
             }
             if config.builtinTools {
                 var env = await ctx.childEnvironment(r.environment)

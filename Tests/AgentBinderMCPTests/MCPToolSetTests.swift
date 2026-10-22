@@ -3,6 +3,7 @@ import MCP
 import Testing
 
 @testable import AgentBinder
+@testable import AgentBinderMCP
 @testable import AgentBinderNative
 
 @Suite("MCPToolSetTests")
@@ -123,9 +124,7 @@ struct MCPToolSetTests {
 
     @Test func sessionUsesMCPTools() async throws {
         let (set, server) = try await Self.connected()
-        let m = ScriptedModel([
-            .parts(StreamPart.calls(.call("1", "mcp__trebi__ping", #"{"n":1}"#))), .parts(StreamPart.text("ok")),
-        ])
+        let m = ScriptedModel([StreamPart.calls(.call("1", "mcp__trebi__ping", #"{"n":1}"#)), StreamPart.text("ok")])
         let rt = await runtime(config(m) { $0.toolSets = [set] })
         var r = request()
         r.permissions = PermissionPolicy(allowTools: ["mcp__trebi__*"])
@@ -139,5 +138,40 @@ struct MCPToolSetTests {
         await rt.close()
         await set.close()
         await server.stop()
+    }
+
+    // Fixed on purpose: with the factory, the servers of the request work as before the split.
+    @Test(.enabled(if: FileManager.default.isExecutableFile(atPath: "/usr/bin/python3")))
+    func requestServersUseFactory() async throws {
+        let dir = try Scratch()
+        let file = try dir.write("server.py", Self.script)
+        let m = ScriptedModel([StreamPart.calls(.call("1", "mcp__py__env")), StreamPart.text("ok")])
+        let rt = await runtime(
+            config(m) { $0.mcpFactory = MCPToolSet.factory }, environment: ["PATH": "/usr/bin:/bin", "X_TOKEN": "p"])
+        var r = request()
+        r.mcpServers = [.stdio(name: "py", command: "python3", args: ["-I", file.path], env: ["X_TOKEN": "t2"])]
+        r.permissions = PermissionPolicy(allowTools: ["mcp__py__*"])
+        let s = try await rt.start(r)
+        let sink = Sink(s)
+        try await s.prompt(Prompt("go"))
+        try await sink.waitResults(1)
+        #expect(m.requests.value[0].tools.map(\.name) == ["mcp__py__env"])
+        #expect(sink.tools.last?.output == "t2" && sink.tools.last?.kind == .mcp)
+        await rt.close()
+    }
+
+    @Test(.enabled(if: FileManager.default.isExecutableFile(atPath: "/usr/bin/python3")))
+    func factoriesConnectEachSession() async throws {
+        let dir = try Scratch()
+        let file = try dir.write("server.py", Self.script)
+        let fs = MCPToolSet.factories(
+            servers: [.stdio(name: "py", command: "python3", args: ["-I", file.path])],
+            environment: ["PATH": "/usr/bin:/bin", "X_TOKEN": "t3"])
+        #expect(fs.count == 1)
+        let set = try await fs[0]()
+        #expect(set.name == "py")
+        let tools = try await set.tools()
+        #expect(try await tools[0].call(nil).content.text == "t3")
+        await set.close()
     }
 }

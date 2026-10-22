@@ -1,11 +1,12 @@
 import AgentBinder
+import AgentBinderNative
 import Foundation
 import Logging
 import MCP
 
 /// The tools of one MCP server. Each tool is `mcp__<server>__<tool>`, and each call needs approval.
 ///
-/// It is the only file that imports the MCP SDK.
+/// Set ``factory`` on `NativeConfig.mcpFactory` to connect the servers of `StartRequest.mcpServers`.
 public final class MCPToolSet: ToolSet {
     static let maxPages = 100
 
@@ -58,6 +59,19 @@ public final class MCPToolSet: ToolSet {
         }
     }
 
+    /// Connects each server of `StartRequest.mcpServers`. Use it as `NativeConfig.mcpFactory`.
+    public static let factory: @Sendable (MCPServer, [String: String]) async throws -> any ToolSet = {
+        try await connect($0, environment: $1)
+    }
+
+    /// Makes one factory for each server, for `NativeConfig.toolSetFactories`. Each session then
+    /// connects to the servers. A stdio server gets `environment` with the server values on top.
+    public static func factories(
+        servers: [MCPServer], environment: [String: String] = ProcessInfo.processInfo.environment
+    ) -> [@Sendable () async throws -> any ToolSet] {
+        servers.map { s in { try await connect(s, environment: environment) } }
+    }
+
     static func executable(_ command: String, path: String?) throws -> URL {
         if command.contains("/") { return URL(fileURLWithPath: command) }
         for dir in (path ?? "").split(separator: ":") {
@@ -68,8 +82,8 @@ public final class MCPToolSet: ToolSet {
     }
 
     /// The tools of the server, from each page of `tools/list`.
-    public func tools() async throws -> [any Tool] {
-        var out: [any Tool] = []
+    public func tools() async throws -> [any AgentBinderNative.Tool] {
+        var out: [any AgentBinderNative.Tool] = []
         var cursor: String?
         var taken = Set<String>()
         // Fixed on purpose: the list follows `nextCursor`.
@@ -104,7 +118,7 @@ public final class MCPToolSet: ToolSet {
 }
 
 /// One tool on an MCP server. The call uses the real tool name.
-struct MCPTool: Tool {
+struct MCPTool: AgentBinderNative.Tool {
     let spec: ToolSpec
     let toolName: String
     let client: Client

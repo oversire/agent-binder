@@ -7,7 +7,7 @@
 
 AgentBinder is a native Swift library for Mac apps. It drives the coding-agent CLIs that are installed on the Mac over their own structured protocols. The app gets one event model for all of them. Each CLI uses its own login (Keychain, `~/.claude`, `~/.codex`). The library never reads, copies or stores a vendor token.
 
-The `AgentBinderNative` product adds a model loop in process, for an app with no CLI installed.
+The `AgentBinderNative` product adds a model loop in process, for an app with no CLI installed. The `AgentBinderMCP` product connects MCP servers to that loop.
 
 macOS only: macOS 13 or later, Swift 6.1 or later (Xcode 16.3 or later).
 
@@ -38,11 +38,13 @@ targets: [
         .product(name: "AgentBinder", package: "agent-binder"),
         // Only for the in-process model loop:
         .product(name: "AgentBinderNative", package: "agent-binder"),
+        // Only for MCP servers in the in-process model loop:
+        .product(name: "AgentBinderMCP", package: "agent-binder"),
     ]),
 ]
 ```
 
-`AgentBinder` has no dependencies. `AgentBinderNative` adds the MCP Swift SDK and swift-log.
+`AgentBinder` and `AgentBinderNative` have no external dependencies. `AgentBinderMCP` adds the MCP Swift SDK and swift-log.
 
 ## Quick start
 
@@ -91,7 +93,7 @@ The MCP column tells how the library adds the servers of `StartRequest.mcpServer
 
 - **flags**: a config file or command-line flags for this session only. Copilot gets a temp file in `--additional-mcp-config`.
 - **home**: a file in the isolated home. Pi needs `StartRequest.home` for MCP servers.
-- **session**: the servers go in the ACP `session/new` request, or the native loop connects to them.
+- **session**: the servers go in the ACP `session/new` request, or the native loop connects to them. The native loop needs `AgentBinderMCP` for this.
 
 The Skills column tells how the library adds `StartRequest.skills`:
 
@@ -268,7 +270,8 @@ let s = try await rt.start(StartRequest(
 
 - **Providers.** `AnthropicModel` calls the Anthropic Messages API. `OpenAIModel` calls the OpenAI Chat Completions API and the gateways that copy it (Ollama, OpenRouter, vLLM, Groq, LM Studio). For a gateway, set `Credentials.baseURL` to its `/v1` URL. An app can also bring its own type that conforms to `Model`.
 - **Anthropic defaults.** On the first-party endpoint, prompt caching is on (a top-level `cache_control`). Refusal fallback is also on: when a model refuses a request, the API runs it again on the recommended model in the same stream. Set `AnthropicModel.Options.promptCaching` or `refusalFallback` to false to stop them.
-- **Tools.** `builtinTools: true` adds `bash`, `read`, `write`, `edit`, `glob` and `grep`. They stay inside the working folder, and `bash` does not get the API keys of the host. Add your own tools with `FuncTool` in a `StaticToolSet`. Add MCP servers with `StartRequest.mcpServers` or `MCPToolSet.connect`.
+- **Tools.** `builtinTools: true` adds `bash`, `read`, `write`, `edit`, `glob` and `grep`. They stay inside the working folder, and `bash` does not get the API keys of the host. Add your own tools with `FuncTool` in a `StaticToolSet`.
+- **MCP servers.** Link `AgentBinderMCP` and set `mcpFactory: MCPToolSet.factory`. Then the loop connects the servers of `StartRequest.mcpServers` for each session. `MCPToolSet.factories(servers:environment:)` gives fixed servers for `toolSetFactories`. Without `mcpFactory`, a request with MCP servers fails at open with `NativeError.mcpUnavailable` (code `mcp_unavailable`).
 - **Approvals.** The `PermissionPolicy` of the request gates the tools. Set `NativeConfig.approver` for your own rules.
 - **History.** `FileStore` keeps one JSONL file for each session, so `rt.resume` works after a restart. `MemoryStore` keeps the history in memory. `SummaryCompactor(keepLast:)` folds old messages into a summary when the history is larger than `contextTokens`.
 - **Limits.** `maxTurns` limits the model calls of one turn. `beforeCall` and `afterCall` see each model call, for example for a budget.

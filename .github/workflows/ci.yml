@@ -53,6 +53,8 @@ jobs:
       - run: swift format lint --strict -r Sources Tests
       - name: Core target has no dependencies
         run: "! grep -rn '^import MCP' Sources/AgentBinder"
+      - name: Native target has no external dependencies
+        run: "! grep -rnE '^import (MCP|Logging)' Sources/AgentBinderNative"
       - name: No Foundation.Process
         run: "! grep -rnE '\\bProcess\\(\\)|Foundation\\.Process' Sources"
       - name: No global mutable state

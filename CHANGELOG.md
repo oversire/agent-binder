@@ -6,6 +6,17 @@ The project uses [Semantic Versioning](https://semver.org/).
 
 ## [Unreleased]
 
+### Added
+
+- `AgentBinderMCP`: a new product with `MCPToolSet`. It holds the MCP Swift SDK and swift-log.
+- `NativeConfig.mcpFactory`: it makes the tool set of each server of `StartRequest.mcpServers`. Set it to `MCPToolSet.factory`.
+- `MCPToolSet.factories(servers:environment:)`: one factory for each fixed server, for `NativeConfig.toolSetFactories`.
+- `NativeError.mcpUnavailable` (code `mcp_unavailable`): a native request with MCP servers and no `mcpFactory` fails at open.
+
+### Changed
+
+- `AgentBinderNative` has no external dependencies. `MCPToolSet` moved to `AgentBinderMCP`. To keep MCP servers in the native loop, link `AgentBinderMCP` and set `NativeConfig.mcpFactory`.
+
 ## [0.2.1] - 2026-10-20
 
 ### Fixed

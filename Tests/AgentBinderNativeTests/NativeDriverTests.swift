@@ -136,6 +136,37 @@ struct NativeDriverTests {
         await rt.close()
     }
 
+    @Test func mcpServersNeedFactory() async throws {
+        let rt = await runtime(config(ScriptedModel([])))
+        var r = request()
+        r.mcpServers = [.stdio(name: "x", command: "true")]
+        await #expect(throws: NativeError.mcpUnavailable) { _ = try await rt.start(r) }
+        #expect(NativeError.mcpUnavailable.code == "mcp_unavailable")
+        _ = try await rt.start(request(id: "s2"))
+        await rt.close()
+    }
+
+    @Test func mcpFactoryGetsEachServer() async throws {
+        let log = Locked<[String]>([])
+        let seen = Locked<[String]>([])
+        let rt = Runtime(options: .init(useLoginShellPath: false, environment: ["PATH": "/bin", "K": "v"]))
+        await rt.setDriver(
+            NativeDriver(
+                config(ScriptedModel([])) {
+                    $0.mcpFactory = { server, env in
+                        seen.withLock { $0.append("\(server.name):\(env["K"] ?? "-")") }
+                        return Closing(log: log, name: server.name)
+                    }
+                }), for: .native)
+        var r = request()
+        r.mcpServers = [.stdio(name: "a", command: "x"), .http(name: "b", url: URL(string: "http://h")!)]
+        let s = try await rt.start(r)
+        #expect(seen.value == ["a:v", "b:v"])
+        await s.close()
+        #expect(log.value == ["closed", "closed"])
+        await rt.close()
+    }
+
     @Test func toolTableKeepsOrder() {
         var t = ToolTable()
         t.add(EchoTool(name: "a"))

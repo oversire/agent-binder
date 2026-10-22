@@ -6,7 +6,7 @@ AgentBinder is a Swift library. It drives the coding-agent CLIs on a Mac over th
 
 - The library knows vendors. It does not know consumers. Do not add app paths or UI text.
 - Do not add global mutable state. All state belongs to one `Runtime`.
-- The `AgentBinder` target has no dependencies. Only `AgentBinderNative` imports the MCP SDK.
+- The `AgentBinder` target has no dependencies. `AgentBinderNative` has no external dependencies. Only `AgentBinderMCP` imports the MCP SDK and swift-log.
 - Do not use `Foundation.Process` in `Sources/`. Use `ChildProcess` (posix_spawn with a process group).
 - Give each vendor quirk a short comment and a fixture test.
 - Add a fixture in `Tests/Fixtures/<harness>/` for each new frame shape.
