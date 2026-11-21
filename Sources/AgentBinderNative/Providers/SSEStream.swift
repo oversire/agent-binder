@@ -24,14 +24,14 @@ struct SSEDecoder {
             return nil
         }
         if line.last == 0x0D { line.removeLast() }
-        defer { line = [] }
+        defer { line.removeAll(keepingCapacity: true) }
         return take(String(decoding: line, as: UTF8.self))
     }
 
     /// Ends the body. It returns an event that no blank line closed.
     mutating func finish() -> SSEEvent? {
         if !line.isEmpty, let e = take(String(decoding: line, as: UTF8.self)) { return e }
-        line = []
+        line.removeAll(keepingCapacity: true)
         return take("")
     }
 

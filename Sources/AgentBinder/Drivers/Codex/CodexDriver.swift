@@ -48,7 +48,7 @@ struct CodexDriver: Driver, ModelListing, LimitsReading {
 
     static func config(_ r: StartRequest, _ l: Launch, _ ctx: RuntimeContext) -> CodexConfig {
         var c = CodexConfig()
-        c.clientName = ctx.clientName.isEmpty ? "agentbinder" : ctx.clientName
+        c.clientName = ctx.clientName
         c.clientVersion = ctx.clientVersion
         c.model = r.model
         c.effort = r.effort?.rawValue
@@ -65,8 +65,8 @@ struct CodexDriver: Driver, ModelListing, LimitsReading {
 
     /// Lists the models of `model/list`, page by page. Hidden models are left out.
     func models(_ q: ModelQuery, runtime ctx: RuntimeContext) async throws -> [ModelInfo] {
-        let found = Locked<[ModelInfo]>([])
         try await probe(q, ctx) { peer in
+            var found: [ModelInfo] = []
             var cursor: String?
             for _ in 0..<Self.maxModelPages {
                 let params: JSONValue = cursor.map { ["cursor": .string($0)] } ?? [:]
@@ -81,43 +81,38 @@ struct CodexDriver: Driver, ModelListing, LimitsReading {
                         id: id, name: m["displayName"]?.string, description: m["description"]?.string,
                         isDefault: m["isDefault"]?.bool ?? false)
                 }
-                found.withLock { $0 += list }
+                found += list
                 cursor = page["nextCursor"]?.string
                 if (cursor ?? "").isEmpty { break }
             }
+            return found
         }
-        return found.value
     }
 
     /// Reads `account/rateLimits/read`. Unlike the live session, an error reply throws.
     func readLimits(_ q: ModelQuery, runtime ctx: RuntimeContext) async throws -> Limits {
-        let found = Locked(Limits())
         try await probe(q, ctx) { peer in
             let body = try await CodexAdapter.call(
                 peer, "account/rateLimits/read", ["excludeResetCreditDetails": true], timeout: Self.limitsWait)
-            if let l = Limits(codex: body) { found.withLock { $0 = l } }
+            return Limits(codex: body) ?? Limits()
         }
-        return found.value
     }
 
     // One short-lived app-server: initialize, initialized, then the body.
-    private func probe(
-        _ q: ModelQuery, _ ctx: RuntimeContext, _ body: @escaping @Sendable (JSONRPCPeer) async throws -> Void
-    ) async throws {
+    private func probe<T: Sendable>(
+        _ q: ModelQuery, _ ctx: RuntimeContext, _ body: @escaping @Sendable (JSONRPCPeer) async throws -> T
+    ) async throws -> T {
         let (r, done) = try Probe.request(.codex, q)
         defer { done() }
         var l = try await ctx.launchBuilder.prepare(r, resume: false)
         l.arguments.append("app-server")
         let info = Self.config(r, l, ctx).clientInfo
         let peer = JSONRPCPeer()
-        let adapter = ProbeAdapter(
-            run: { w in
-                peer.attach(w)
-                try await CodexAdapter.call(peer, "initialize", info, timeout: Self.modelPageWait)
-                try await peer.notify("initialized", params: [:])
-                try await body(peer)
-            },
-            parse: { _ = peer.handle($0) })
-        try await Probe.exchange(r, l, adapter: adapter, context: ctx)
+        return try await Probe.exchange(r, l, context: ctx, parse: { _ = peer.handle($0) }) { w in
+            peer.attach(w)
+            try await CodexAdapter.call(peer, "initialize", info, timeout: Self.modelPageWait)
+            try await peer.notify("initialized", params: [:])
+            return try await body(peer)
+        }
     }
 }

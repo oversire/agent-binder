@@ -47,21 +47,29 @@ enum Probe {
     }
 
     /// Starts a child with a probe adapter, runs its one exchange, then kills the tree.
-    static func exchange(
-        _ r: StartRequest, _ launch: Launch, adapter: ProbeAdapter, context: RuntimeContext
-    ) async throws {
+    static func exchange<T: Sendable>(
+        _ r: StartRequest, _ launch: Launch, context: RuntimeContext,
+        parse: @escaping @Sendable (Data) -> Void, run: @escaping @Sendable (FrameWriter) async throws -> T
+    ) async throws -> T {
+        let adapter = ProbeAdapter(run: run, parse: parse)
         let s = try await context.startWire(r, launch, adapter: adapter)
         await s.kill()
+        guard let value = adapter.value else { throw AgentBinderError.sessionClosed }
+        return value
     }
 }
 
 /// The wire adapter of a probe: one request exchange in the handshake, and no events.
-final class ProbeAdapter: WireAdapter {
-    typealias Run = @Sendable (FrameWriter) async throws -> Void
+/// The value of the exchange is in ``value`` after the handshake.
+final class ProbeAdapter<T: Sendable>: WireAdapter {
+    typealias Run = @Sendable (FrameWriter) async throws -> T
     typealias Parse = @Sendable (Data) -> Void
 
     private let run: Run
     private let parseLine: Parse
+    private let result = Locked<T?>(nil)
+
+    var value: T? { result.value }
 
     init(run: @escaping Run, parse: @escaping Parse) {
         self.run = run
@@ -69,7 +77,8 @@ final class ProbeAdapter: WireAdapter {
     }
 
     func handshake(_ w: FrameWriter) async throws -> [Event] {
-        try await run(w)
+        let v = try await run(w)
+        result.withLock { $0 = v }
         return []
     }
 

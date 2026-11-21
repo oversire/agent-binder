@@ -14,9 +14,7 @@ final class EventChannel: Sendable {
         var closing = false
         var finished = false
         var receiver: CheckedContinuation<Event?, Never>?
-        var senders: [UInt64: (Event, CheckedContinuation<Void, Never>)] = [:]
-        var senderOrder: [UInt64] = []
-        var nextSender: UInt64 = 0
+        var senders: [(Event, CheckedContinuation<Void, Never>)] = []
 
         var count: Int { buffer.count - head }
 
@@ -60,9 +58,7 @@ final class EventChannel: Sendable {
                     return .done
                 }
                 if s.closing { return .done }
-                s.nextSender += 1
-                s.senders[s.nextSender] = (e, cont)
-                s.senderOrder.append(s.nextSender)
+                s.senders.append((e, cont))
                 return .wait
             }
             switch step {
@@ -83,8 +79,8 @@ final class EventChannel: Sendable {
                     s -> (Event?, CheckedContinuation<Void, Never>?, Bool) in
                     if let e = s.pop() {
                         var release: CheckedContinuation<Void, Never>?
-                        if let first = s.senderOrder.first, let (pending, c) = s.senders.removeValue(forKey: first) {
-                            s.senderOrder.removeFirst()
+                        if !s.senders.isEmpty {
+                            let (pending, c) = s.senders.removeFirst()
                             s.buffer.append(pending)
                             release = c
                         }
@@ -110,12 +106,11 @@ final class EventChannel: Sendable {
         let released = state.withLock { s -> [CheckedContinuation<Void, Never>] in
             s.closing = true
             var out: [CheckedContinuation<Void, Never>] = []
-            for k in s.senderOrder {
-                guard let (e, c) = s.senders.removeValue(forKey: k) else { continue }
+            for (e, c) in s.senders {
                 if case .exit = e.kind { s.buffer.append(e) }
                 out.append(c)
             }
-            s.senderOrder.removeAll()
+            s.senders.removeAll()
             return out
         }
         for c in released { c.resume() }
@@ -129,9 +124,8 @@ final class EventChannel: Sendable {
             defer {
                 s.receiver = nil
                 s.senders.removeAll()
-                s.senderOrder.removeAll()
             }
-            return (s.receiver, s.senders.values.map(\.1))
+            return (s.receiver, s.senders.map(\.1))
         }
         receiver?.resume(returning: nil)
         for c in released { c.resume() }

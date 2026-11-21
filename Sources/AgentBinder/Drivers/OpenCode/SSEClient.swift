@@ -16,32 +16,35 @@ struct SSEParser {
     mutating func feed(_ bytes: some Sequence<UInt8>) -> [Data] {
         var out: [Data] = []
         for b in bytes {
-            if b == 0x0A {
-                if let f = endLine() { out.append(f) }
-                continue
-            }
-            if overflow { continue }
-            if line.count >= maxLine {
-                overflow = true
-                line = []
-                continue
-            }
-            line.append(b)
+            if let f = feed(b) { out.append(f) }
         }
         return out
+    }
+
+    /// Adds one byte. It returns the event that a blank line completed.
+    mutating func feed(_ b: UInt8) -> Data? {
+        if b == 0x0A { return endLine() }
+        if overflow { return nil }
+        if line.count >= maxLine {
+            overflow = true
+            line.removeAll(keepingCapacity: true)
+            return nil
+        }
+        line.append(b)
+        return nil
     }
 
     /// Ends the body. It returns the last event when no blank line closed it.
     mutating func finish() -> Data? {
         if !line.isEmpty && !overflow { _ = endLine() }
-        line = []
+        line.removeAll(keepingCapacity: true)
         overflow = false
         return flush()
     }
 
     private mutating func endLine() -> Data? {
         defer {
-            line = []
+            line.removeAll(keepingCapacity: true)
             overflow = false
         }
         if overflow { return nil }
@@ -55,7 +58,7 @@ struct SSEParser {
     }
 
     private mutating func flush() -> Data? {
-        defer { data = [] }
+        defer { data.removeAll(keepingCapacity: true) }
         while data.last == 0x0A { data.removeLast() }
         return data.isEmpty ? nil : Data(data)
     }
@@ -83,22 +86,14 @@ struct SSEClient: Sendable {
         }
         onOpen()
         var parser = SSEParser(maxLine: http.maxBytes)
-        var chunk: [UInt8] = []
-        chunk.reserveCapacity(4096)
         do {
             for try await b in bytes {
-                chunk.append(b)
-                // Only a line end can complete an event. The size check keeps a long line out of memory.
-                guard b == 0x0A || chunk.count >= 4096 else { continue }
-                for f in parser.feed(chunk) { onEvent(f) }
-                chunk.removeAll(keepingCapacity: true)
+                if let f = parser.feed(b) { onEvent(f) }
             }
         } catch {
-            _ = parser.feed(chunk)
             if let f = parser.finish() { onEvent(f) }
             throw error
         }
-        _ = parser.feed(chunk)
         if let f = parser.finish() { onEvent(f) }
     }
 }

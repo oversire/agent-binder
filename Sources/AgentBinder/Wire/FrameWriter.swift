@@ -1,22 +1,17 @@
 import Foundation
 
-/// The handle of an adapter on the stdin of the child, plus the session id.
+/// The handle of an adapter on the stdin of the child.
 ///
 /// Writes keep their order. One frame never interleaves with another.
 final class FrameWriter: Sendable {
     typealias Sink = @Sendable (Data) async throws -> Void
 
-    /// The harness of the session.
-    let harness: Harness
     private let sink: Sink
     private let log: FrameLog?
-    private let onSessionID: @Sendable (String) -> Void
     private let closed = Locked(false)
 
-    init(harness: Harness, log: FrameLog?, onSessionID: @escaping @Sendable (String) -> Void, sink: @escaping Sink) {
-        self.harness = harness
+    init(log: FrameLog?, sink: @escaping Sink) {
         self.log = log
-        self.onSessionID = onSessionID
         self.sink = sink
     }
 
@@ -32,11 +27,6 @@ final class FrameWriter: Sendable {
     /// Writes one JSON value as a frame.
     func write(_ value: JSONValue) async throws {
         try await write(value.frame)
-    }
-
-    /// Records the vendor session id that the adapter learned on the wire.
-    func setSessionID(_ id: String) {
-        if !id.isEmpty { onSessionID(id) }
     }
 
     /// Stops all later writes.

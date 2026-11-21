@@ -59,7 +59,7 @@ struct ACPDriver: Driver, ModelListing {
 
     func config(_ r: StartRequest, _ l: Launch, _ ctx: RuntimeContext, resume: Bool, fresh: Bool) -> ACPConfig {
         var c = ACPConfig(variant: variant)
-        c.clientName = ctx.clientName.isEmpty ? "agentbinder" : ctx.clientName
+        c.clientName = ctx.clientName
         c.clientVersion = ctx.clientVersion
         c.cwd = r.workingDirectory.path
         c.model = r.model
@@ -101,14 +101,11 @@ struct ACPDriver: Driver, ModelListing {
         var c = config(r, l, ctx, resume: false, fresh: false)
         c.mcpServers = []
         let adapter = ACPAdapter(c)
-        let probe = ProbeAdapter(
-            run: { w in
-                adapter.attach(w)
-                try await adapter.initialize()
-                _ = try await adapter.newSession()
-            },
-            parse: { adapter.route($0) })
-        try await Probe.exchange(r, l, adapter: probe, context: ctx)
+        try await Probe.exchange(r, l, context: ctx, parse: { adapter.route($0) }) { w in
+            adapter.attach(w)
+            try await adapter.initialize()
+            _ = try await adapter.newSession()
+        }
         let list = adapter.offeredModels
         guard !list.isEmpty else { throw AgentBinderError.unsupported("\(variant.rawValue) offered no models") }
         return list

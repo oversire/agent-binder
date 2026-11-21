@@ -270,9 +270,7 @@ extension OpenCodeHTTP {
 enum OpenCodeErrors {
     /// The shared rules: phrases, then the HTTP status.
     static func classified(_ text: String, status: Int = 0, harness: Harness) -> WireError {
-        let c = Classifier.classify(text, status: status == 0 ? nil : status, harness: harness)
-        return WireError(
-            message: text, code: c.code, endReason: c.cls == .none ? nil : EndReason(rawValue: c.cls.rawValue))
+        WireError(classifying: text, harness: harness, status: status == 0 ? nil : status)
     }
 
     /// The error result of a turn that recorded a failure.

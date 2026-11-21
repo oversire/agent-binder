@@ -69,12 +69,10 @@ final class JSONRPCPeer: Sendable {
     }
 
     private let state: Locked<State>
-    private let idPrefix: String?
 
     /// Makes a peer. Attach the writer later when the adapter gets it in the handshake.
-    init(writer: FrameWriter? = nil, idPrefix: String? = nil) {
-        state = Locked(State(writer: writer))
-        self.idPrefix = idPrefix
+    init() {
+        state = Locked(State())
     }
 
     func attach(_ writer: FrameWriter) {
@@ -93,7 +91,6 @@ final class JSONRPCPeer: Sendable {
             s.next += 1
             return s.next
         }
-        if let idPrefix { return .string("\(idPrefix)\(n)") }
         return .int(n)
     }
 
@@ -140,25 +137,6 @@ final class JSONRPCPeer: Sendable {
             resume(key, .failure(CancellationError()))
         }
         return try reply.get()
-    }
-
-    /// Sends a request and decodes its result.
-    func request<T: Decodable>(
-        _ method: String, params: JSONValue? = nil, timeout: Duration? = nil, as type: T.Type
-    ) async throws -> T {
-        let v = try await request(method, params: params, timeout: timeout)
-        do {
-            return try JSONDecoder().decode(T.self, from: v.jsonData)
-        } catch {
-            throw AgentBinderError.invalidRequest("\(method): decode result: \(error)")
-        }
-    }
-
-    /// Sends a request without a waiter and returns its id. The adapter matches the reply itself.
-    func send(_ method: String, params: JSONValue? = nil) async throws -> JSONValue {
-        let id = nextID()
-        try await send(id: id, method, params: params)
-        return id
     }
 
     /// Sends a request without a waiter, with an id from ``nextID()``. Record the id before the call,

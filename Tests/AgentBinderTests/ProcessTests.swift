@@ -96,6 +96,16 @@ struct ProcessTests {
         #expect(lines.value == ["one", "two", "three"])
     }
 
+    @Test func manyStderrLinesInOneChunk() async throws {
+        let lines = Locked<[String]>([])
+        let expected = (0..<1000).map { "line\($0)" }
+        let script = "printf '" + expected.map { $0 + "\\n" }.joined() + "' >&2"
+        let p = try spawnSh(script) { l in lines.withLock { $0.append(l) } }
+        await p.waitForExit()
+        try await eventually { lines.value.count == 1000 }
+        #expect(lines.value == expected)
+    }
+
     @Test func writeAfterDeathFailsWithoutSigpipe() async throws {
         let p = try spawnSh("exec 0<&-; exit 0")
         await p.waitForExit()

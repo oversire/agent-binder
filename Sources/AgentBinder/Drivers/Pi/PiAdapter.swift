@@ -144,7 +144,7 @@ final class PiAdapter: WireAdapter, RequestPrompting, InterruptEncoding, TurnSta
             let named = m["error"]?.string ?? m["message"]?.string ?? ""
             let text = named.isEmpty ? m["error"]?.jsonString ?? "pi error" : named
             state.withLock { $0.sawError = text }
-            return [Event(.error(Self.classified(text)))]
+            return [Event(.error(WireError(classifying: text, harness: .pi)))]
         default:
             return []
         }
@@ -164,7 +164,7 @@ final class PiAdapter: WireAdapter, RequestPrompting, InterruptEncoding, TurnSta
         }
         guard case .failure(let e) = PiCommands.reply(m) else { return [] }
         endTurn()
-        return [Event(.error(Self.classified("\(e)")))]
+        return [Event(.error(WireError(classifying: "\(e)", harness: .pi)))]
     }
 
     private func stateAnnounced(_ m: JSONValue) -> [Event] {
@@ -275,7 +275,7 @@ final class PiAdapter: WireAdapter, RequestPrompting, InterruptEncoding, TurnSta
             return s.sawError
         }
         guard !err.isEmpty else { return [Event(.result(TurnResult(subtype: "success")))] }
-        let w = Self.classified(err)
+        let w = WireError(classifying: err, harness: .pi)
         return [
             Event(
                 .result(
@@ -305,12 +305,6 @@ final class PiAdapter: WireAdapter, RequestPrompting, InterruptEncoding, TurnSta
         return u
     }
 
-    private static func classified(_ text: String) -> WireError {
-        let c = Classifier.classify(text, harness: .pi)
-        return WireError(
-            message: text, code: c.code, endReason: c.cls == .none ? nil : EndReason(rawValue: c.cls.rawValue))
-    }
-
     // MARK: exit
 
     // Fixed on purpose: an idle session that ends with code 0 gives no error.
@@ -321,6 +315,6 @@ final class PiAdapter: WireAdapter, RequestPrompting, InterruptEncoding, TurnSta
         var text = stderr.trimmingCharacters(in: .whitespacesAndNewlines)
         if text.isEmpty { text = s.sawError }
         if text.isEmpty { text = "pi exited with code \(code) before agent_end" }
-        return [Event(.error(Self.classified(text)))]
+        return [Event(.error(WireError(classifying: text, harness: .pi)))]
     }
 }

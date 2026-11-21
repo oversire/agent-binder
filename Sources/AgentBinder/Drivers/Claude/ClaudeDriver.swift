@@ -2,6 +2,8 @@ import Foundation
 
 /// Drives Claude Code 2.0.0 or later over stream-json on stdin and stdout.
 struct ClaudeDriver: Driver, ModelListing {
+    static let versionFloor = "2.0.0"
+
     /// The models that ``models(_:runtime:)`` returns when the CLI offers no list.
     static let aliases = [
         ModelInfo(id: "default", name: "Default", isDefault: true), ModelInfo(id: "opus", name: "Opus"),
@@ -70,7 +72,7 @@ struct ClaudeDriver: Driver, ModelListing {
     }
 
     static func checkVersion(_ bin: URL, _ ctx: RuntimeContext) async throws {
-        let floor = Runtime.versionFloor(.claude) ?? "2.0.0"
+        let floor = Self.versionFloor
         guard let v = await ctx.version(of: bin), !v.trimmingCharacters(in: .whitespaces).isEmpty else {
             throw AgentBinderError.launch(
                 "claude: cannot determine --version for \(bin.path); pin a CLI >= \(floor) or use another runtime")
@@ -92,16 +94,11 @@ struct ClaudeDriver: Driver, ModelListing {
         var l = try await Self.prepare(r, ctx, resume: false)
         l.arguments = Array(Self.wireArguments.dropLast()) + Self.inputArguments + l.arguments + ["--strict-mcp-config"]
         let adapter = ClaudeAdapter(policy: PermissionPolicy()) { ClaudeAdapter.requestID(ctx.nextID()) }
-        let found = Locked<[ModelInfo]>([])
-        let probe = ProbeAdapter(
-            run: { w in
-                adapter.attach(w)
-                let res = try await adapter.control(["subtype": "initialize", "hooks": .null])
-                found.withLock { $0 = ClaudeFrames.models(res) ?? [] }
-            },
-            parse: { _ = adapter.parse($0) })
-        try await Probe.exchange(r, l, adapter: probe, context: ctx)
-        let list = found.value
+        let list = try await Probe.exchange(r, l, context: ctx, parse: { _ = adapter.parse($0) }) { w in
+            adapter.attach(w)
+            let res = try await adapter.control(["subtype": "initialize", "hooks": .null])
+            return ClaudeFrames.models(res) ?? []
+        }
         return list.isEmpty ? Self.aliases : list
     }
 }

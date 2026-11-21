@@ -241,17 +241,6 @@ struct CodexAdapterTests {
     @Test func noThread() throws {
         let a = CodexAdapter(codexConfig())
         #expect(throws: AgentBinderError.invalidRequest("codex: thread not started")) { try a.encodeInterrupt() }
-        #expect(throws: AgentBinderError.invalidRequest("codex: thread not started")) {
-            try a.encodePrompt(Prompt("hi"))
-        }
-    }
-
-    @Test func fireAndForgetPrompt() throws {
-        let a = CodexAdapter(codexConfig())
-        _ = a.parse(note("thread/started", #"{"thread":{"id":"thr_9"}}"#))
-        let f = try #require(JSONValue.parse(try a.encodePrompt(Prompt("hi"))))
-        #expect(f["method"] == "turn/start" && f.at("params", "threadId") == "thr_9")
-        #expect(f.at("params", "input") == [["type": "text", "text": "hi"]])
     }
 }
 

@@ -55,21 +55,15 @@ struct PiDriver: Driver, ModelListing {
         Self.addMode(&l)
         if !LaunchBuilder.hasFlag(l.arguments, "--no-session") { l.arguments.append("--no-session") }
         let adapter = PiAdapter(policy: r.permissions)
-        let found = Locked<[ModelInfo]>([])
-        let probe = ProbeAdapter(
-            run: { w in
-                adapter.commands.attach(w)
-                var list = try Self.models(try await adapter.commands.request(["type": "get_available_models"]))
-                // The default is optional.
-                if let state = try? await adapter.commands.request(["type": "get_state"]) {
-                    Self.markDefault(&list, state)
-                }
-                let picked = list
-                found.withLock { $0 = picked }
-            },
-            parse: { _ = adapter.parse($0) })
-        try await Probe.exchange(r, l, adapter: probe, context: ctx)
-        return found.value
+        return try await Probe.exchange(r, l, context: ctx, parse: { _ = adapter.parse($0) }) { w in
+            adapter.commands.attach(w)
+            var list = try Self.models(try await adapter.commands.request(["type": "get_available_models"]))
+            // The default is optional.
+            if let state = try? await adapter.commands.request(["type": "get_state"]) {
+                Self.markDefault(&list, state)
+            }
+            return list
+        }
     }
 
     /// The models of a `get_available_models` data object. Entries with no id or no provider are left out.

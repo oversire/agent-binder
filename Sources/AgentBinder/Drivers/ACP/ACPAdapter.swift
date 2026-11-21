@@ -302,7 +302,9 @@ final class ACPAdapter: WireAdapter, RequestPrompting, InterruptEncoding, TurnSt
             return true
         }
         guard mine else { return [] }
-        if let e = r.error { return [Event(.error(classified(e.description)))] }
+        if let e = r.error {
+            return [Event(.error(WireError(classifying: e.description, harness: config.variant.harness)))]
+        }
         var out: [Event] = []
         if let u = ACPUpdates.usage(r.result?["usage"]) { out.append(Event(.usage(u))) }
         let stop = r.result?["stopReason"].stringValue ?? ""
@@ -312,7 +314,7 @@ final class ACPAdapter: WireAdapter, RequestPrompting, InterruptEncoding, TurnSt
         case "cancelled":
             out.append(Event(.result(TurnResult(subtype: "cancelled", isError: true, text: "turn cancelled"))))
         default:
-            let w = classified(stop)
+            let w = WireError(classifying: stop, harness: config.variant.harness)
             out.append(
                 Event(
                     .result(
@@ -391,12 +393,6 @@ final class ACPAdapter: WireAdapter, RequestPrompting, InterruptEncoding, TurnSt
         Task { try? await peer.respondError(id: id, code: code, message: message) }
     }
 
-    private func classified(_ text: String) -> WireError {
-        let c = Classifier.classify(text, harness: config.variant.harness)
-        return WireError(
-            message: text, code: c.code, endReason: c.cls == .none ? nil : EndReason(rawValue: c.cls.rawValue))
-    }
-
     // MARK: exit
 
     // Fixed on purpose: the waiting calls fail at once, and an idle session that ends with code 0 is quiet.
@@ -406,6 +402,6 @@ final class ACPAdapter: WireAdapter, RequestPrompting, InterruptEncoding, TurnSt
         if s.promptID == nil && (s.sawResult || code == 0) { return [] }
         var text = stderr.trimmingCharacters(in: .whitespacesAndNewlines)
         if text.isEmpty { text = "\(kind) exited with code \(code) before the turn ended" }
-        return [Event(.error(classified(text)))]
+        return [Event(.error(WireError(classifying: text, harness: config.variant.harness)))]
     }
 }

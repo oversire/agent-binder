@@ -102,11 +102,19 @@ final class ClaudeAdapter: WireAdapter, InterruptEncoding, TurnStateReporting, S
 
     // MARK: parse
 
+    private static let asciiSpace: Set<UInt8> = [0x20, 0x09, 0x0A, 0x0D, 0x0B, 0x0C]
+
     func parse(_ line: Data) -> [Event] {
-        let text = String(decoding: line, as: UTF8.self).trimmingCharacters(in: .whitespacesAndNewlines)
-        if text.isEmpty { return [] }
-        // A non-JSON line, for example an npm notice, must not fail the wire.
-        guard text.hasPrefix("{") else { return [Event(.status(.running, text: text))] }
+        // Look at the first byte before a String of a frame (up to 16 MiB) is made.
+        let first = line.first { !Self.asciiSpace.contains($0) }
+        guard let first else { return [] }
+        if first != UInt8(ascii: "{") {
+            // A byte of 0x80 or more can start Unicode white space, so the trimmed text decides.
+            let text = String(decoding: line, as: UTF8.self).trimmingCharacters(in: .whitespacesAndNewlines)
+            if text.isEmpty { return [] }
+            // A non-JSON line, for example an npm notice, must not fail the wire.
+            guard text.hasPrefix("{") else { return [Event(.status(.running, text: text))] }
+        }
         guard let m = JSONValue.parse(line), case .object = m else {
             var why = "not an object"
             do { _ = try JSONSerialization.jsonObject(with: line) } catch { why = error.localizedDescription }
@@ -232,7 +240,7 @@ final class ClaudeAdapter: WireAdapter, InterruptEncoding, TurnStateReporting, S
         if r.isError {
             // A result whose subtype is its only text, for example error_max_turns, has no end reason.
             let c = Classifier.classify(r, harness: .claude)
-            r.endReason = c.cls == .none ? nil : EndReason(rawValue: c.cls.rawValue)
+            r.endReason = c.wireEndReason
             r.code = c.code
         }
         out.append(Event(.result(r), sessionID: r.sessionID))
@@ -301,7 +309,7 @@ final class ClaudeAdapter: WireAdapter, InterruptEncoding, TurnStateReporting, S
             let text =
                 [info["message"].stringValue, m["message"].stringValue].first { !$0.isEmpty }
                 ?? "claude rate limit rejected"
-            out.append(Event(.error(Self.classified(text))))
+            out.append(Event(.error(WireError(classifying: text, harness: .claude))))
         }
         if out.isEmpty { out.append(Event(.status(.running, text: "rate_limit:\(status)"))) }
         return out
@@ -314,14 +322,8 @@ final class ClaudeAdapter: WireAdapter, InterruptEncoding, TurnStateReporting, S
         if state.value.sawResult { return out }
         var text = stderr.trimmingCharacters(in: .whitespacesAndNewlines)
         if text.isEmpty { text = "claude exited with code \(code) before a result" }
-        out.append(Event(.error(Self.classified(text))))
+        out.append(Event(.error(WireError(classifying: text, harness: .claude))))
         return out
-    }
-
-    private static func classified(_ text: String) -> WireError {
-        let c = Classifier.classify(text, harness: .claude)
-        return WireError(
-            message: text, code: c.code, endReason: c.cls == .none ? nil : EndReason(rawValue: c.cls.rawValue))
     }
 
     // Parse runs on the read loop, so a reply from parse goes out on its own task.

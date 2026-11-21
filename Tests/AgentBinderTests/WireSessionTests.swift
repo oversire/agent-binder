@@ -140,8 +140,7 @@ struct WireSessionTests {
         let adapter = LineAdapter(
             .init(handshake: { w in
                 try await w.write(["type": "hello"])
-                w.setSessionID("H1")
-                return [Event(.initialized)]
+                return [Event(.initialized, sessionID: "H1")]
             }))
         let (s, peer) = try await memorySession(adapter)
         #expect(peer.frames == [["type": "hello"]])
@@ -419,6 +418,20 @@ struct EventChannelTests {
         var names: [String] = []
         while let e = await c.receive() { names.append(e.assistantText ?? e.kind.name) }
         #expect(names == ["a", "b", "exit"])
+    }
+
+    @Test func sendersResumeInOrder() async throws {
+        let c = EventChannel(capacity: 1)
+        await c.send(Event(.assistant(text: "a", delta: false)))
+        var tasks: [Task<Void, Never>] = []
+        for t in ["b", "c", "d"] {
+            tasks.append(Task { await c.send(Event(.assistant(text: t, delta: false))) })
+            try await Task.sleep(for: .milliseconds(50))
+        }
+        var got: [String] = []
+        for _ in 0..<4 { got.append(try #require(await c.receive()).assistantText ?? "") }
+        #expect(got == ["a", "b", "c", "d"])
+        for t in tasks { await t.value }
     }
 
     @Test func closingReleasesAWaitingSender() async throws {

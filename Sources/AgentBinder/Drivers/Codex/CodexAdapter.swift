@@ -169,14 +169,9 @@ final class CodexAdapter: WireAdapter, RequestPrompting, TurnStateReporting, Ste
         }
     }
 
-    // The fire-and-forget form. The session uses promptSession.
+    // The session uses promptSession.
     func encodePrompt(_ p: Prompt) throws -> Data {
-        guard let thread = state.value.threadID else {
-            throw AgentBinderError.invalidRequest("codex: thread not started")
-        }
-        return Self.request(
-            peer.nextID(), "turn/start", ["threadId": .string(thread), "input": .array(try inputItems(p))]
-        ).frame
+        throw AgentBinderError.unsupported("codex prompt frame")
     }
 
     func encodeInterrupt() throws -> Data {
@@ -334,7 +329,7 @@ final class CodexAdapter: WireAdapter, RequestPrompting, TurnStateReporting, Ste
             return t.isEmpty ? [] : [Event(.assistant(text: t, delta: true))]
         case "thread/tokenUsage/updated", "thread/token_usage/updated": return tokenUsage(params)
         case "account/rateLimits/updated": return Limits(codex: params).map { [Event(.limits($0))] } ?? []
-        case "error": return [Event(.error(Self.classified(Self.errorText(params))))]
+        case "error": return [Event(.error(WireError(classifying: Self.errorText(params), harness: .codex)))]
         default: return []
         }
     }
@@ -364,7 +359,7 @@ final class CodexAdapter: WireAdapter, RequestPrompting, TurnStateReporting, Ste
             let text =
                 [err?.string, err?["message"]?.string, err?["error"]?.string].lazy.compactMap { $0 }
                 .first { !$0.isEmpty } ?? "turn \(status)"
-            let w = Self.classified(text)
+            let w = WireError(classifying: text, harness: .codex)
             return TurnResult(
                 subtype: status, isError: true, text: text, usage: usage, endReason: w.endReason, code: w.code)
         }
@@ -401,18 +396,12 @@ final class CodexAdapter: WireAdapter, RequestPrompting, TurnStateReporting, Ste
         return "codex reported an error"
     }
 
-    private static func classified(_ text: String) -> WireError {
-        let c = Classifier.classify(text, harness: .codex)
-        return WireError(
-            message: text, code: c.code, endReason: c.cls == .none ? nil : EndReason(rawValue: c.cls.rawValue))
-    }
-
     // MARK: exit
 
     func exitEvents(code: Int32, stderr: String) -> [Event] {
         if state.value.sawResult { return [] }
         var text = stderr.trimmingCharacters(in: .whitespacesAndNewlines)
         if text.isEmpty { text = "codex exited with code \(code) before turn/completed" }
-        return [Event(.error(Self.classified(text)))]
+        return [Event(.error(WireError(classifying: text, harness: .codex)))]
     }
 }

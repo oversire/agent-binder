@@ -68,8 +68,7 @@ final class WireSession: Session, Steerable {
         record = try config.recordPath.map { try FrameLog(path: $0) }
         let state = Locked(State())
         self.state = state
-        writer = FrameWriter(
-            harness: harness, log: log, onSessionID: { id in state.withLock { $0.id = id } }, sink: sink)
+        writer = FrameWriter(log: log, sink: sink)
         let channel = EventChannel(capacity: config.eventCapacity)
         self.channel = channel
         let onCancel = Locked<(@Sendable () -> Void)?>(nil)
@@ -101,13 +100,9 @@ final class WireSession: Session, Steerable {
         for h in hooks { s.onClose(h) }
         s.startLoop()
         do {
-            let w = s.writer
-            let evs = try await Deadline.run(config.handshakeTimeout, onTimeout: AgentBinderError.handshakeTimeout) {
-                try await adapter.handshake(w)
-            }
-            for e in evs { await s.emit(e) }
+            try await s.runHandshake()
         } catch {
-            await s.abort()
+            await s.kill()
             throw error
         }
         return s
@@ -124,11 +119,7 @@ final class WireSession: Session, Steerable {
             harness: harness, io: .memory(input), adapter: adapter, config: config, sink: { output($0) })
         s.startLoop()
         do {
-            let w = s.writer
-            let evs = try await Deadline.run(config.handshakeTimeout, onTimeout: AgentBinderError.handshakeTimeout) {
-                try await adapter.handshake(w)
-            }
-            for e in evs { await s.emit(e) }
+            try await s.runHandshake()
         } catch {
             await s.emit(
                 Event(
@@ -261,12 +252,16 @@ final class WireSession: Session, Steerable {
         runHooks()
     }
 
-    func kill() async {
-        state.withLock { $0.closeStarted = true }
-        await hardStop()
+    private func runHandshake() async throws {
+        let adapter = adapter
+        let w = writer
+        let evs = try await Deadline.run(config.handshakeTimeout, onTimeout: AgentBinderError.handshakeTimeout) {
+            try await adapter.handshake(w)
+        }
+        for e in evs { await emit(e) }
     }
 
-    private func abort() async {
+    func kill() async {
         state.withLock { $0.closeStarted = true }
         await hardStop()
     }

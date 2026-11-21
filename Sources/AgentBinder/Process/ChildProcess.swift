@@ -31,6 +31,7 @@ package enum PipeRead: Sendable {
 package final class ChildProcess: Sendable {
     /// The size of the retained stderr tail.
     static let stderrTailMax = 32 << 10
+    static let readChunk = 64 << 10
     /// The default time of each close stage.
     package static let defaultStageTimeout: Duration = .seconds(5)
 
@@ -126,7 +127,7 @@ package final class ChildProcess: Sendable {
     // MARK: stdout
 
     /// Reads the next chunk of stdout. The caller owns framing.
-    package func readStdout(maxBytes: Int = 64 << 10) async -> PipeRead {
+    package func readStdout() async -> PipeRead {
         await withCheckedContinuation { (cont: CheckedContinuation<PipeRead, Never>) in
             stdoutQueue.async { [self] in
                 let fd = state.withLock { $0.stdout }
@@ -134,20 +135,24 @@ package final class ChildProcess: Sendable {
                     cont.resume(returning: .eof)
                     return
                 }
-                var buf = [UInt8](repeating: 0, count: maxBytes)
                 while true {
-                    let n = buf.withUnsafeMutableBytes { Darwin.read(fd, $0.baseAddress!, maxBytes) }
+                    var n = 0
+                    var err: Int32 = 0
+                    let buf = [UInt8](unsafeUninitializedCapacity: Self.readChunk) { p, count in
+                        n = Darwin.read(fd, p.baseAddress!, Self.readChunk)
+                        err = errno
+                        count = max(n, 0)
+                    }
                     if n > 0 {
                         cont.resume(returning: .data(Data(buf[0..<n])))
                     } else if n == 0 {
                         closeStdout()
                         cont.resume(returning: .eof)
-                    } else if errno == EINTR {
+                    } else if err == EINTR {
                         continue
                     } else {
-                        let e = errno
                         closeStdout()
-                        cont.resume(returning: .failed(e))
+                        cont.resume(returning: .failed(err))
                     }
                     return
                 }
@@ -195,10 +200,12 @@ package final class ChildProcess: Sendable {
                 }
                 guard onLine != nil else { continue }
                 pending.append(chunk)
-                while let nl = pending.firstIndex(of: 0x0A) {
-                    emit(pending[pending.startIndex..<nl])
-                    pending = Data(pending[(nl + 1)...])
+                var start = pending.startIndex
+                while let nl = pending[start...].firstIndex(of: 0x0A) {
+                    emit(pending[start..<nl])
+                    start = nl + 1
                 }
+                pending.removeSubrange(..<start)
                 if pending.count > 1 << 20 {
                     emit(pending)
                     pending.removeAll()

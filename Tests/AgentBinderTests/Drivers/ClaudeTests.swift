@@ -236,6 +236,19 @@ struct ClaudeAdapterTests {
         #expect(a.parse(line(#"{"type":"keep_alive"}"#)).isEmpty)
     }
 
+    @Test func parseLeadingWhitespace() throws {
+        let json = "  \t" + #"{"type":"system","subtype":"init","session_id":"s1"}"#
+        let evs = claudeAdapter().parse(line(json))
+        #expect(evs.first?.sessionID == "s1")
+        let nbsp = claudeAdapter().parse(line("\u{00A0}npm notice"))
+        guard case .status(.running, let t) = try #require(nbsp.first).kind else {
+            Issue.record("not a status")
+            return
+        }
+        #expect(nbsp.count == 1 && t == "npm notice")
+        #expect(claudeAdapter().parse(line("  \t ")).isEmpty)
+    }
+
     @Test func exitClassification() throws {
         let evs = claudeAdapter().exitEvents(code: 1, stderr: "Invalid API key\n")
         let e = try #require(evs.errors.first)

@@ -10,11 +10,12 @@ private struct Harness {
 
     init(fail: (any Error)? = nil) {
         let written = written
-        let w = FrameWriter(harness: .fake, log: nil, onSessionID: { _ in }) { d in
+        let w = FrameWriter(log: nil) { d in
             if let fail { throw fail }
             written.withLock { $0.append(d) }
         }
-        peer = JSONRPCPeer(writer: w)
+        peer = JSONRPCPeer()
+        peer.attach(w)
     }
 
     func frame(_ i: Int) async throws -> JSONValue {
@@ -202,18 +203,6 @@ struct JSONRPCPeerTests {
         }
     }
 
-    @Test func decodesResult() async throws {
-        struct Out: Decodable {
-            var sessionId: String
-            var modes: [String]
-        }
-        let h = Harness()
-        let call = Task { try await h.peer.request("session/new", as: Out.self) }
-        _ = h.reply(try await h.frame(0)["id"]!, #"{"sessionId":"ses_9","modes":["ask","auto"]}"#)
-        let out = try await call.value
-        #expect(out.sessionId == "ses_9" && out.modes == ["ask", "auto"])
-    }
-
     @Test func hundredConcurrentRequests() async throws {
         let h = Harness()
         try await withThrowingTaskGroup(of: (Int, JSONValue).self) { group in
@@ -236,12 +225,12 @@ struct JSONRPCPeerTests {
         #expect(h.peer.pending == 0)
     }
 
-    @Test func idPrefixAndSharedCounter() async throws {
-        let w = FrameWriter(harness: .fake, log: nil, onSessionID: { _ in }) { _ in }
-        let p = JSONRPCPeer(writer: w, idPrefix: "ab-")
-        #expect(p.nextID() == "ab-1")
-        #expect(try await p.send("x") == "ab-2")
-        #expect(p.pending == 0)
+    @Test func sharedCounter() async throws {
+        let h = Harness()
+        #expect(h.peer.nextID() == .int(1))
+        try await h.peer.send(id: h.peer.nextID(), "x")
+        #expect(try await h.frame(0)["id"] == .int(2))
+        #expect(h.peer.pending == 0)
     }
 
     @Test func noWriterIsClosed() async throws {

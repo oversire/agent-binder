@@ -62,7 +62,7 @@ public actor Runtime {
 
     /// The minimum vendor versions that the library supports.
     static func versionFloor(_ h: Harness) -> String? {
-        h == .claude ? "2.0.0" : nil
+        h == .claude ? ClaudeDriver.versionFloor : nil
     }
 
     /// The services that drivers get.

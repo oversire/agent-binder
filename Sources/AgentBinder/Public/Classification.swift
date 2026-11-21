@@ -182,3 +182,18 @@ public enum Classifier {
         (c >= 0x61 && c <= 0x7A) || (c >= 0x41 && c <= 0x5A) || (c >= 0x30 && c <= 0x39)
     }
 }
+
+extension Classification {
+    /// The wire end reason of the family. Unlike ``endReason``, `.unknown` stays `.unknown`.
+    var wireEndReason: EndReason? {
+        cls == .none ? nil : EndReason(rawValue: cls.rawValue)
+    }
+}
+
+extension WireError {
+    /// Classifies a failure text and keeps the text as the message.
+    init(classifying text: String, harness: Harness, status: Int? = nil) {
+        let c = Classifier.classify(text, status: status, harness: harness)
+        self.init(message: text, code: c.code, endReason: c.wireEndReason)
+    }
+}

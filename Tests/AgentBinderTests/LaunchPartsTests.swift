@@ -215,6 +215,23 @@ struct ClassifierTests {
         #expect(Classifier.classify("").endReason == .failed)
     }
 
+    @Test func wireEndReasonKeepsUnknown() {
+        func c(_ cls: FailureClass) -> Classification { Classification(cls: cls, code: "x") }
+        #expect(c(.none).wireEndReason == nil)
+        #expect(c(.unknown).wireEndReason == .unknown)
+        #expect(c(.limit).wireEndReason == .limit)
+        #expect(c(.unknown).endReason == .failed)
+    }
+
+    @Test func wireErrorClassifying() {
+        let text = "rate_limit_error: too many requests"
+        let e = WireError(classifying: text, harness: .claude)
+        #expect(e.code == "claude.rate_limited")
+        #expect(e.endReason == .limit)
+        #expect(e.message == text)
+        #expect(WireError(classifying: "odd", harness: .claude, status: 503).code == "claude.http_503")
+    }
+
     @Test func harnessPrefix() {
         let c = Classifier.classify("rate_limit_error: too many requests", harness: .codex)
         #expect(c.cls == .limit)
