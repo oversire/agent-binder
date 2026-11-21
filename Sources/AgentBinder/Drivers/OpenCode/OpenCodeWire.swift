@@ -74,7 +74,7 @@ enum OpenCodeWire: String, Sendable {
     /// A major of 2 or more is V2. No version is V1.
     init(versionLine line: String?) {
         let fields = (line ?? "").split(whereSeparator: \.isWhitespace)
-        let major = fields.lazy.compactMap { parseSemver(String($0))?.0 }.first
+        let major = fields.lazy.compactMap { Semver(line: String($0))?.major }.first
         self = (major ?? 1) >= 2 ? .v2 : .v1
     }
 }

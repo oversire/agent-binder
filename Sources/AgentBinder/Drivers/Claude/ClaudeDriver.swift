@@ -37,12 +37,7 @@ struct ClaudeDriver: Driver, ModelListing {
         if let id = r.sessionID, !id.isEmpty { wire.setID(id) }
         // Stdin stays open in one-shot mode, because the CLI still asks for permissions.
         if let one = r.oneShot, !one.prompt.isEmpty {
-            do {
-                try await wire.prompt(Prompt(one.prompt, kind: "job"))
-            } catch {
-                await wire.kill()
-                throw error
-            }
+            try await wire.runOneShot(one.prompt, closeInput: false)
         }
         return ClaudeSession(wire: wire, adapter: adapter)
     }
@@ -77,8 +72,8 @@ struct ClaudeDriver: Driver, ModelListing {
             throw AgentBinderError.launch(
                 "claude: cannot determine --version for \(bin.path); pin a CLI >= \(floor) or use another runtime")
         }
-        guard semverAtLeast(v, floor) else {
-            throw AgentBinderError.belowVersionFloor(.claude, version: firstToken(v), floor: floor)
+        guard Semver.atLeast(v, floor) else {
+            throw AgentBinderError.belowVersionFloor(.claude, version: Semver.firstToken(v), floor: floor)
         }
     }
 

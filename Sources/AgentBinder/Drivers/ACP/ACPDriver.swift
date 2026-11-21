@@ -39,13 +39,7 @@ struct ACPDriver: Driver, ModelListing {
         // Quirk: stdin closes after session/prompt, so a later permission reply cannot go out.
         // Use a one-shot turn with the auto mode.
         if let one = r.oneShot, !one.prompt.isEmpty {
-            do {
-                try await wire.prompt(Prompt(one.prompt, kind: "job"))
-            } catch {
-                await wire.kill()
-                throw error
-            }
-            wire.closeInput()
+            try await wire.runOneShot(one.prompt, closeInput: true)
         }
         return ACPSession(wire: wire, adapter: adapter)
     }

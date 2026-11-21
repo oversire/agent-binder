@@ -448,3 +448,36 @@ struct LedgerTests {
         try data.write(to: path)
     }
 }
+
+@Suite("ExpiringCacheTests")
+struct ExpiringCacheTests {
+    @Test func getBeforeAndAfterTTL() {
+        let clock = TestClock()
+        let c = ExpiringCache<String, Int>(ttl: 10, now: clock.now)
+        c.set("a", 1)
+        clock.advance(9)
+        #expect(c.get("a") == 1)
+        clock.advance(1)
+        #expect(c.get("a") == nil)
+    }
+
+    @Test func maxAgeFromTheValue() {
+        let clock = TestClock()
+        let c = ExpiringCache<String, Int>(now: clock.now) { TimeInterval($0) }
+        c.set("short", 1)
+        c.set("long", 10)
+        clock.advance(1)
+        #expect(c.get("short") == nil)
+        #expect(c.get("long") == 10)
+    }
+
+    @Test func removeAllWhere() {
+        let clock = TestClock()
+        let c = ExpiringCache<String, Int>(ttl: 10, now: clock.now)
+        c.set("a", 1)
+        c.set("b", 2)
+        c.removeAll { $0 == "a" }
+        #expect(c.get("a") == nil)
+        #expect(c.get("b") == 2)
+    }
+}

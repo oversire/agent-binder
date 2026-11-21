@@ -15,17 +15,11 @@ final class AuthProbe: Sendable {
         var bin: String
     }
 
-    private struct Entry {
-        var at: Date
-        var result: Result
-    }
-
-    private let cache = Locked<[Key: Entry]>([:])
+    private let cache: ExpiringCache<Key, Result>
     private let flight = SingleFlight<Key, Result>()
     private let ttl: TimeInterval
     private let environment: [String: String]
     private let childEnvironment: @Sendable () async -> [String: String]
-    private let now: Now
 
     /// `environment` is the parent environment for the key check. `childEnvironment` gives the
     /// environment of the probe child. A negative `ttl` turns the cache off.
@@ -34,9 +28,9 @@ final class AuthProbe: Sendable {
         childEnvironment: @escaping @Sendable () async -> [String: String], now: @escaping Now = Date.init
     ) {
         self.ttl = ttl.timeInterval
+        cache = ExpiringCache(ttl: ttl.timeInterval, now: now)
         self.environment = environment
         self.childEnvironment = childEnvironment
-        self.now = now
     }
 
     // Presence only. The library never reads the value of a key.
@@ -95,25 +89,18 @@ final class AuthProbe: Sendable {
             if let r = self.fresh(key) { return r }
             let out = await Probe.run(bin, args, environment: await self.childEnvironment(), timeout: Self.timeout)
             let r = Self.parse(h, out) ?? Result(state: .unknown)
-            if self.ttl >= 0 {
-                let e = Entry(at: self.now(), result: r)
-                self.cache.withLock { $0[key] = e }
-            }
+            if self.ttl >= 0 { self.cache.set(key, r) }
             return r
         }
     }
 
     /// Drops the cached probes of one harness, for example after a login or a logout.
     func invalidate(_ h: Harness) {
-        cache.withLock { $0 = $0.filter { $0.key.harness != h } }
+        cache.removeAll { $0.harness == h }
     }
 
     private func fresh(_ key: Key) -> Result? {
         guard ttl >= 0 else { return nil }
-        let t = now()
-        return cache.withLock { c in
-            guard let e = c[key], t.timeIntervalSince(e.at) < ttl else { return nil }
-            return e.result
-        }
+        return cache.get(key)
     }
 }

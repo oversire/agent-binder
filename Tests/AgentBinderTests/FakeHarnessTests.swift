@@ -93,6 +93,21 @@ struct FakeHarnessTests {
         await rt.close()
     }
 
+    @Test func sessionForwardsToTheWire() async throws {
+        let (rt, s) = try await start(FakeDriver())
+        let backed = try #require(s as? any ProcessBacked)
+        #expect(s.harness == .fake)
+        #expect(s.pid != nil)
+        #expect(backed.pgid == s.pid)
+        #expect(backed.argv.first == "/bin/sh")
+        let hook = try #require(s as? any CloseObserving)
+        let ran = Locked(0)
+        hook.onClose { ran.withLock { $0 += 1 } }
+        await s.close()
+        #expect(ran.value == 1)
+        await rt.close()
+    }
+
     @Test func steerDuringATurn() async throws {
         let (rt, s) = try await start(FakeDriver())
         try await s.prompt(Prompt("hi"))

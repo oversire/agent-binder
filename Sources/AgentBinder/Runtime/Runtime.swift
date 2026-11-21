@@ -168,7 +168,7 @@ public actor Runtime {
         }
         d.path = bin
         d.version = await context.version(of: bin)
-        if let floor = Self.versionFloor(h), let v = d.version, !semverAtLeast(v, floor) {
+        if let floor = Self.versionFloor(h), let v = d.version, !Semver.atLeast(v, floor) {
             d.detail = .belowFloor(floor)
             return d
         }

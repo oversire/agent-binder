@@ -259,11 +259,16 @@ struct SemverTests {
         ("", "1.0.0", false), ("1", "1.0.0", false),
     ])
     func atLeast(_ got: String, _ want: String, _ ok: Bool) {
-        #expect(semverAtLeast(got, want) == ok)
+        #expect(Semver.atLeast(got, want) == ok)
     }
 
     @Test func parse() {
-        #expect(parseSemver("0.48.1\n") ?? (0, 0, 0) == (0, 48, 1))
-        #expect(parseSemver("1.x") == nil)
+        #expect(Semver(line: "0.48.1\n") == Semver(major: 0, minor: 48, patch: 1))
+        #expect(Semver(line: "1.x") == nil)
+    }
+
+    @Test func compares() throws {
+        #expect(try #require(Semver(line: "1.10.0")) > #require(Semver(line: "1.9.9")))
+        #expect(try #require(Semver(line: "2.0")).patch == 0)
     }
 }

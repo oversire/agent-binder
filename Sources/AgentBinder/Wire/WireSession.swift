@@ -168,6 +168,18 @@ final class WireSession: Session, Steerable {
         if case .process(let p) = io { p.closeStdin() }
     }
 
+    /// Sends the prompt of a one-shot session as a job. It kills the child on an error.
+    /// With `closeInput`, it closes stdin after the prompt, so the child ends after its turn.
+    func runOneShot(_ prompt: String, closeInput: Bool) async throws {
+        do {
+            try await self.prompt(Prompt(prompt, kind: "job"))
+        } catch {
+            await kill()
+            throw error
+        }
+        if closeInput { self.closeInput() }
+    }
+
     /// Adds a cleanup hook. The hooks run once, after the session ends.
     func onClose(_ hook: @escaping @Sendable () -> Void) {
         state.withLock { $0.hooks.append(hook) }

@@ -66,7 +66,7 @@ final class BinaryResolver: Sendable {
         dirs += ["\(h)/.npm-global/bin", "\(h)/.volta/bin"]
         let nvm = "\(h)/.nvm/versions/node"
         let versions = (try? FileManager.default.contentsOfDirectory(atPath: nvm)) ?? []
-        dirs += versions.sorted { semverAtLeast($0, $1) && $0 != $1 }.map { "\(nvm)/\($0)/bin" }
+        dirs += versions.sorted { Semver.atLeast($0, $1) && $0 != $1 }.map { "\(nvm)/\($0)/bin" }
         dirs += ["\(h)/.cargo/bin", "/usr/bin", "/bin", "/usr/sbin", "/sbin"]
         return dirs
     }

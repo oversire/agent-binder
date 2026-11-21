@@ -35,13 +35,7 @@ struct CodexDriver: Driver, ModelListing, LimitsReading {
         wire.onClose(adapter.cleanup)
         if let id = adapter.threadID { wire.setID(id) }
         if let one = r.oneShot, !one.prompt.isEmpty {
-            do {
-                try await wire.prompt(Prompt(one.prompt, kind: "job"))
-            } catch {
-                await wire.kill()
-                throw error
-            }
-            wire.closeInput()
+            try await wire.runOneShot(one.prompt, closeInput: true)
         }
         return CodexSession(wire: wire, adapter: adapter)
     }

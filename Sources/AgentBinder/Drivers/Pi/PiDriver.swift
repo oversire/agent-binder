@@ -28,13 +28,7 @@ struct PiDriver: Driver, ModelListing {
         let wire = try await ctx.startWire(r, l, adapter: adapter)
         if let id = r.sessionID, !id.isEmpty { wire.setID(id) }
         if let one = r.oneShot, !one.prompt.isEmpty {
-            do {
-                try await wire.prompt(Prompt(one.prompt, kind: "job"))
-            } catch {
-                await wire.kill()
-                throw error
-            }
-            wire.closeInput()
+            try await wire.runOneShot(one.prompt, closeInput: true)
         }
         return PiSession(wire: wire, adapter: adapter)
     }

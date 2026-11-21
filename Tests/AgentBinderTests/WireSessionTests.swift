@@ -65,6 +65,15 @@ struct WireSessionTests {
         await s.close()
     }
 
+    @Test func runOneShotKillsOnError() async throws {
+        let (s, _) = try await memorySession(LineAdapter(.init(promptError: AgentBinderError.unsupported("no"))))
+        await #expect(throws: AgentBinderError.unsupported("no")) {
+            try await s.runOneShot("job", closeInput: true)
+        }
+        let evs = try await withTimeout { await s.events.collect() }
+        #expect(evs.last?.isExit == true)
+    }
+
     @Test func blankLinesAndCRLF() async throws {
         let (s, peer) = try await memorySession()
         peer.send("\n   \n{\"type\":\"assistant\",\"text\":\"a\"}\r\n\r\n{\"type\":\"assistant\",\"text\":\"b\"}")

@@ -9,6 +9,7 @@ final class LineAdapter: WireAdapter, TurnStateReporting, ConcurrentPrompting, S
         var handshake: (@Sendable (FrameWriter) async throws -> [Event])?
         var trackTurns = false
         var concurrent = false
+        var promptError: (any Error)?
     }
 
     let options: Options
@@ -26,6 +27,7 @@ final class LineAdapter: WireAdapter, TurnStateReporting, ConcurrentPrompting, S
     }
 
     func encodePrompt(_ p: Prompt) throws -> Data {
+        if let e = options.promptError { throw e }
         if options.trackTurns { setActive(true) }
         return JSONValue.object(["type": "user", "text": .string(p.text), "kind": .string(p.kind ?? "")]).frame
     }
