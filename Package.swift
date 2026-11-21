@@ -13,7 +13,8 @@ let package = Package(
         // AgentBinderMCP only. AgentBinder and AgentBinderNative must not import it.
         .package(url: "https://github.com/modelcontextprotocol/swift-sdk.git", .upToNextMinor(from: "0.12.1")),
         // The MCP SDK uses it; the stdio transport of AgentBinderMCP needs its logger type.
-        .package(url: "https://github.com/apple/swift-log.git", from: "1.6.0"),
+        // The ceiling is for apple/swift-log#533. Remove it when swift-log needs Swift 6.2.3 as its tools version.
+        .package(url: "https://github.com/apple/swift-log.git", "1.6.0"..<"1.17.0"),
     ],
     targets: [
         .target(name: "AgentBinder"),

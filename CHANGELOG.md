@@ -6,6 +6,10 @@ The project uses [Semantic Versioning](https://semver.org/).
 
 ## [Unreleased]
 
+### Fixed
+
+- The package builds on Swift 6.2.0 to 6.2.2 again. swift-log 1.17 uses an attribute of Swift 6.2.3, so the range of swift-log stops below 1.17.0.
+
 ## [0.3.0] - 2026-10-22
 
 ### Added
