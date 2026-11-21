@@ -6,9 +6,16 @@ The project uses [Semantic Versioning](https://semver.org/).
 
 ## [Unreleased]
 
+## [0.3.1] - 2026-11-21
+
 ### Fixed
 
 - The package builds on Swift 6.2.0 to 6.2.2 again. swift-log 1.17 uses an attribute of Swift 6.2.3, so the range of swift-log stops below 1.17.0.
+- A reply timer no longer holds its captures until the limit. This applies to the JSON-RPC, pi and Claude control replies, and to `Deadline`.
+
+### Changed
+
+- Internal cleanup with no public API change. The drivers share the session forwarding, the one-shot start, the version parse, the TTL cache and one reply table. The wire layer reads stdout, stderr and SSE with fewer copies.
 
 ## [0.3.0] - 2026-10-22
 
