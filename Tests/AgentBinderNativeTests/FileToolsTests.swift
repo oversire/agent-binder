@@ -1,3 +1,4 @@
+import AgentBinderTestSupport
 import Foundation
 import Testing
 
@@ -6,11 +7,11 @@ import Testing
 
 @Suite("FileToolsTests")
 struct FileToolsTests {
-    let dir: Scratch
+    let dir: TempDir
     let fs: FileTools
 
     init() throws {
-        dir = try Scratch()
+        dir = try TempDir(prefix: "agentbinder-native-")
         fs = FileTools(
             root: dir.url, environment: ["PATH": "/usr/bin:/bin", "MARK": "m1"], bashTimeout: .seconds(2),
             maxFileBytes: 64)
@@ -66,7 +67,7 @@ struct FileToolsTests {
 
     // Changed on purpose: a symlink out of the root is refused.
     @Test func symlinkEscape() async throws {
-        let out = try Scratch()
+        let out = try TempDir(prefix: "agentbinder-native-")
         try out.write("secret.txt", "s")
         try FileManager.default.createSymbolicLink(
             at: dir.url.appendingPathComponent("link"), withDestinationURL: out.url)

@@ -1,3 +1,4 @@
+import AgentBinderTestSupport
 import Foundation
 import Testing
 
@@ -444,7 +445,7 @@ struct PiDriverTests {
         let rt = bin.runtime()
         let s = try await rt.start(
             StartRequest(harness: .pi, workingDirectory: bin.dir.url, extraArguments: ["--mode=rpc"]))
-        try await eventually { !bin.lines("argv.txt").isEmpty }
+        try await eventually { !bin.lines("env.txt").isEmpty }
         #expect(bin.lines("argv.txt") == ["--mode=rpc"])
         #expect(bin.lines("env.txt") == ["", "", ""])
         await s.close()

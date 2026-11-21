@@ -1,3 +1,4 @@
+import AgentBinderTestSupport
 import Foundation
 import MCP
 import Testing
@@ -110,7 +111,7 @@ struct MCPToolSetTests {
 
     @Test(.enabled(if: FileManager.default.isExecutableFile(atPath: "/usr/bin/python3")))
     func stdioServer() async throws {
-        let dir = try Scratch()
+        let dir = try TempDir(prefix: "agentbinder-mcp-")
         let file = try dir.write("server.py", Self.script)
         let set = try await MCPToolSet.connect(
             MCPServer(
@@ -124,7 +125,9 @@ struct MCPToolSetTests {
 
     @Test func sessionUsesMCPTools() async throws {
         let (set, server) = try await Self.connected()
-        let m = ScriptedModel([StreamPart.calls(.call("1", "mcp__trebi__ping", #"{"n":1}"#)), StreamPart.text("ok")])
+        let m = ScriptedModel([
+            .parts(StreamPart.calls(.call("1", "mcp__trebi__ping", #"{"n":1}"#))), .parts(StreamPart.text("ok")),
+        ])
         let rt = await runtime(config(m) { $0.toolSets = [set] })
         var r = request()
         r.permissions = PermissionPolicy(allowTools: ["mcp__trebi__*"])
@@ -143,9 +146,9 @@ struct MCPToolSetTests {
     // Fixed on purpose: with the factory, the servers of the request work as before the split.
     @Test(.enabled(if: FileManager.default.isExecutableFile(atPath: "/usr/bin/python3")))
     func requestServersUseFactory() async throws {
-        let dir = try Scratch()
+        let dir = try TempDir(prefix: "agentbinder-mcp-")
         let file = try dir.write("server.py", Self.script)
-        let m = ScriptedModel([StreamPart.calls(.call("1", "mcp__py__env")), StreamPart.text("ok")])
+        let m = ScriptedModel([.parts(StreamPart.calls(.call("1", "mcp__py__env"))), .parts(StreamPart.text("ok"))])
         let rt = await runtime(
             config(m) { $0.mcpFactory = MCPToolSet.factory }, environment: ["PATH": "/usr/bin:/bin", "X_TOKEN": "p"])
         var r = request()
@@ -162,7 +165,7 @@ struct MCPToolSetTests {
 
     @Test(.enabled(if: FileManager.default.isExecutableFile(atPath: "/usr/bin/python3")))
     func factoriesConnectEachSession() async throws {
-        let dir = try Scratch()
+        let dir = try TempDir(prefix: "agentbinder-mcp-")
         let file = try dir.write("server.py", Self.script)
         let fs = MCPToolSet.factories(
             servers: [.stdio(name: "py", command: "python3", args: ["-I", file.path])],

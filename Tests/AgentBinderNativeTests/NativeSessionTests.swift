@@ -1,3 +1,4 @@
+import AgentBinderTestSupport
 import Foundation
 import Testing
 
@@ -27,7 +28,7 @@ struct NativeSessionTests {
     }
 
     @Test func imageAttachment() async throws {
-        let dir = try Scratch()
+        let dir = try TempDir(prefix: "agentbinder-native-")
         let png = try dir.write("a.PNG", "\u{1}\u{2}\u{3}")
         let store = MemoryStore()
         let m = ScriptedModel([.parts(StreamPart.text("ok"))])
@@ -391,7 +392,7 @@ struct NativeSessionTests {
     }
 
     @Test func resumeFromStore() async throws {
-        let dir = try Scratch()
+        let dir = try TempDir(prefix: "agentbinder-native-")
         let store = FileStore(directory: dir.url)
         try await store.append("old", [.user("earlier"), Message(role: .assistant, parts: [.text("reply")])])
         let m = ScriptedModel([.parts(StreamPart.text("ok"))])

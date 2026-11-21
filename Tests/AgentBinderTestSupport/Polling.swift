@@ -1,13 +1,14 @@
 import Foundation
 import Testing
 
-struct TimeoutError: Error, CustomStringConvertible {
-    var description: String
+package struct TimeoutError: Error, CustomStringConvertible {
+    package var description: String
+    package init(description: String = "timeout") { self.description = description }
 }
 
 /// Polls `condition` until it is true, or fails after `timeout`.
-func eventually(
-    timeout: Duration = .seconds(5), interval: Duration = .milliseconds(20),
+package func eventually(
+    timeout: Duration = .seconds(5), interval: Duration = .milliseconds(10),
     _ sourceLocation: SourceLocation = #_sourceLocation, _ condition: @Sendable () async throws -> Bool
 ) async throws {
     let clock = ContinuousClock()
@@ -22,7 +23,7 @@ func eventually(
 }
 
 /// Runs `body` with a time limit.
-func withTimeout<T: Sendable>(
+package func withTimeout<T: Sendable>(
     _ timeout: Duration = .seconds(10), _ body: @escaping @Sendable () async throws -> T
 ) async throws -> T {
     try await withThrowingTaskGroup(of: T.self) { group in

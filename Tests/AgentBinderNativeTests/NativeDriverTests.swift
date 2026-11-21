@@ -1,3 +1,4 @@
+import AgentBinderTestSupport
 import Foundation
 import Testing
 
@@ -112,7 +113,7 @@ struct NativeDriverTests {
     }
 
     @Test func builtinsHideHostKeys() async throws {
-        let dir = try Scratch()
+        let dir = try TempDir(prefix: "agentbinder-native-")
         let m = ScriptedModel([
             .parts(
                 StreamPart.calls(

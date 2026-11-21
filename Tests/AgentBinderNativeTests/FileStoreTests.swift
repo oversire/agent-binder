@@ -1,3 +1,4 @@
+import AgentBinderTestSupport
 import Foundation
 import Testing
 
@@ -27,7 +28,7 @@ struct FileStoreTests {
     ]
 
     @Test func roundTrip() async throws {
-        let dir = try Scratch()
+        let dir = try TempDir(prefix: "agentbinder-native-")
         let s = FileStore(directory: dir.url.appendingPathComponent("deep"))
         await #expect(throws: NativeError.notFound) { _ = try await s.load("a") }
         try await s.append("a", Self.all)
@@ -55,7 +56,7 @@ struct FileStoreTests {
     }
 
     @Test func badAndLegacyLines() async throws {
-        let dir = try Scratch()
+        let dir = try TempDir(prefix: "agentbinder-native-")
         let s = FileStore(directory: dir.url)
         let legacy = [
             #"{"role":"user","content":"old"}"#,
@@ -138,7 +139,7 @@ struct CompactorTests {
 @Suite("SkillTests")
 struct SkillTests {
     @Test func catalogAndActivation() async throws {
-        let dir = try Scratch()
+        let dir = try TempDir(prefix: "agentbinder-native-")
         try dir.write(
             "pdf/SKILL.md",
             "---\nname: pdf-tools\ndescription: Work with PDF files.\nallowed-tools: read, bash\n---\nUse pdftotext.")
@@ -167,7 +168,7 @@ struct SkillTests {
     }
 
     @Test func sessionGetsTheSkillTool() async throws {
-        let dir = try Scratch()
+        let dir = try TempDir(prefix: "agentbinder-native-")
         try dir.write("s/SKILL.md", "---\ndescription: d\n---\nbody")
         let m = ScriptedModel([
             .parts(StreamPart.calls(.call("1", "activate_skill", #"{"name":"s"}"#))), .parts(StreamPart.text("ok")),

@@ -1,3 +1,4 @@
+import AgentBinderTestSupport
 import Foundation
 import Testing
 
@@ -389,8 +390,8 @@ struct ClaudeWireTests {
         #expect(
             peer.seen.first?.jsonString
                 == #"{"request":{"hooks":null,"subtype":"initialize"},"request_id":"req_1","type":"control_request"}"#)
-        try await eventually { await s.offeredModels.count == 3 }
-        #expect(await s.offeredModels.first?.name == "Default (recommended)")
+        try await eventually { s.offeredModels.count == 3 }
+        #expect(s.offeredModels.first?.name == "Default (recommended)")
         await s.kill()
     }
 
@@ -527,7 +528,7 @@ struct ClaudeWireTests {
             ]
         }
         let (_, s) = try await session(peer)
-        try await eventually { await s.offeredModels.count == 1 }
+        try await eventually { s.offeredModels.count == 1 }
         try await s.setModel("sonnet")
         #expect(
             peer.seen[1].jsonString
@@ -541,7 +542,7 @@ struct ClaudeWireTests {
         }
         // A reply to an unknown id is dropped.
         try await s.setModel("haiku")
-        #expect(await s.offeredModels.count == 1)
+        #expect(s.offeredModels.count == 1)
         #expect(peer.pending == 0)
         await s.kill()
     }

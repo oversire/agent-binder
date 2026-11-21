@@ -28,12 +28,19 @@ let package = Package(
         ),
         // A stdio MCP server for the live tests. It is not a product.
         .executableTarget(name: "agentbinder-mcp-helper"),
-        .testTarget(name: "AgentBinderTests", dependencies: ["AgentBinder"]),
-        .testTarget(name: "AgentBinderNativeTests", dependencies: ["AgentBinder", "AgentBinderNative"]),
+        // The kit shared by the unit test targets. It is not a product.
+        .target(
+            name: "AgentBinderTestSupport", dependencies: ["AgentBinder", "AgentBinderNative"],
+            path: "Tests/AgentBinderTestSupport"),
+        .testTarget(name: "AgentBinderTests", dependencies: ["AgentBinder", "AgentBinderTestSupport"]),
+        .testTarget(
+            name: "AgentBinderNativeTests",
+            dependencies: ["AgentBinder", "AgentBinderNative", "AgentBinderTestSupport"]),
         .testTarget(
             name: "AgentBinderMCPTests",
             dependencies: [
-                "AgentBinder", "AgentBinderNative", "AgentBinderMCP", .product(name: "MCP", package: "swift-sdk"),
+                "AgentBinder", "AgentBinderNative", "AgentBinderMCP", "AgentBinderTestSupport",
+                .product(name: "MCP", package: "swift-sdk"),
             ]
         ),
         .testTarget(
