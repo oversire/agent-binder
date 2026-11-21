@@ -22,11 +22,18 @@ enum Deadline {
                 slot.withLock { $0 = cont }
                 let t = Task {
                     do { finish(.success(try await body())) } catch { finish(.failure(error)) }
+                    work.withLock { $0 = nil }
                 }
-                work.withLock { $0 = t }
+                // A body that already finished must not leave its task in the box.
+                work.withLock { if slot.value != nil { $0 = t } }
+                // The timer takes the task out of the box. A finished task is not kept until the limit.
                 DispatchQueue.global().asyncAfter(deadline: .now() + limit.timeInterval) {
+                    let t = work.withLock { s -> Task<Void, Never>? in
+                        defer { s = nil }
+                        return s
+                    }
                     finish(.failure(onTimeout))
-                    t.cancel()
+                    t?.cancel()
                 }
             }
         } onCancel: {

@@ -48,8 +48,8 @@ package final class Latch: Sendable {
                 id.withLock { $0 = key }
                 if Task.isCancelled { resume(key, false) }
                 if let timeout {
-                    DispatchQueue.global().asyncAfter(deadline: .now() + timeout.timeInterval) { [self] in
-                        resume(key, false)
+                    DispatchQueue.global().asyncAfter(deadline: .now() + timeout.timeInterval) { [weak self] in
+                        self?.resume(key, false)
                     }
                 }
             }

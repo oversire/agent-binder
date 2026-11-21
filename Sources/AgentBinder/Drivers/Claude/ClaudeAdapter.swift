@@ -6,16 +6,6 @@ final class ClaudeAdapter: WireAdapter, InterruptEncoding, TurnStateReporting, S
 {
     static let replyWait: Duration = .seconds(10)
 
-    private final class Reply: Sendable {
-        let latch = Latch()
-        let value = Locked<Result<JSONValue?, AgentBinderError>?>(nil)
-
-        func resolve(_ r: Result<JSONValue?, AgentBinderError>) {
-            value.withLock { $0 = r }
-            latch.open()
-        }
-    }
-
     private struct State {
         var writer: FrameWriter?
         // Kept after the result and the exit, as the vendor does. An answer to an old id still works.
@@ -23,12 +13,12 @@ final class ClaudeAdapter: WireAdapter, InterruptEncoding, TurnStateReporting, S
         var tools: [String: String] = [:]
         var sawResult = false
         var active = false
-        var replies: [String: Reply] = [:]
         var initID: String?
         var models: [ModelInfo] = []
     }
 
     private let state = Locked(State())
+    private let replies = ReplyTable<JSONValue?>()
     private let policy: PermissionPolicy
     private let makeID: @Sendable () -> String
 
@@ -63,18 +53,18 @@ final class ClaudeAdapter: WireAdapter, InterruptEncoding, TurnStateReporting, S
     /// Sends one control request and waits for its reply. It returns `response.response`.
     func control(_ request: [String: JSONValue]) async throws -> JSONValue? {
         let id = makeID()
-        let reply = Reply()
-        let w = state.withLock { s -> FrameWriter? in
-            s.replies[id] = reply
-            return s.writer
-        }
-        defer { state.withLock { $0.replies[id] = nil } }
-        guard let w else { throw AgentBinderError.sessionClosed }
+        let subtype = request["subtype"].stringValue
+        try replies.register(id)
+        defer { replies.remove(id) }
+        guard let w = state.value.writer else { throw AgentBinderError.sessionClosed }
         try await w.write(ClaudeFrames.controlRequest(id: id, request))
-        guard await reply.latch.wait(timeout: Self.replyWait), let r = reply.value.value else {
-            throw AgentBinderError.timeout("claude \(request["subtype"].stringValue)")
+        // The timer starts after the write.
+        replies.expire(id, after: Self.replyWait, with: AgentBinderError.timeout("claude \(subtype)"))
+        do {
+            return try await replies.wait(id).get()
+        } catch is CancellationError {
+            throw AgentBinderError.timeout("claude \(subtype)")
         }
-        return try r.get()
     }
 
     func encodePrompt(_ p: Prompt) throws -> Data {
@@ -292,11 +282,10 @@ final class ClaudeAdapter: WireAdapter, InterruptEncoding, TurnStateReporting, S
             resp["subtype"]?.string == "error"
             ? .failure(.vendor(code: 0, message: "claude: " + (resp["error"]?.string ?? "control request failed")))
             : .success(resp["response"])
-        let reply = state.withLock { s -> Reply? in
+        state.withLock { s in
             if !id.isEmpty, id == s.initID, case .success(let v) = r { s.models = ClaudeFrames.models(v) ?? [] }
-            return s.replies[id]
         }
-        reply?.resolve(r)
+        replies.resolve(id, r.mapError { $0 })
     }
 
     private func rateLimit(_ m: JSONValue) -> [Event] {

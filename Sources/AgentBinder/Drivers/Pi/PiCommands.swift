@@ -5,22 +5,13 @@ import Foundation
 final class PiCommands: Sendable {
     static let replyWait: Duration = .seconds(10)
 
-    private typealias Reply = Result<JSONValue, any Error>
-
-    private enum Slot {
-        case registered
-        case waiting(CheckedContinuation<Reply, Never>)
-        case done(Reply)
-    }
-
     private struct State {
         var writer: FrameWriter?
         var next = 0
-        var slots: [String: Slot] = [:]
-        var dead: (any Error)?
     }
 
     private let state = Locked(State())
+    private let replies = ReplyTable<JSONValue>()
 
     func attach(_ w: FrameWriter) { state.withLock { $0.writer = w } }
 
@@ -39,43 +30,21 @@ final class PiCommands: Sendable {
     func request(_ command: [String: JSONValue], timeout: Duration = replyWait) async throws -> JSONValue {
         let type = command["type"].stringValue
         let id = nextID()
-        let w = try state.withLock { s -> FrameWriter in
-            if let d = s.dead { throw d }
-            guard let w = s.writer else { throw AgentBinderError.sessionClosed }
-            s.slots[id] = .registered
-            return w
+        try replies.register(id)
+        guard let w = writer else {
+            replies.remove(id)
+            throw AgentBinderError.sessionClosed
         }
-        DispatchQueue.global().asyncAfter(deadline: .now() + timeout.timeInterval) { [self] in
-            resume(id, .failure(AgentBinderError.timeout("pi \(type)")))
-        }
+        replies.expire(id, after: timeout, with: AgentBinderError.timeout("pi \(type)"))
         var frame = command
         frame["id"] = .string(id)
         do {
             try await w.write(.object(frame))
         } catch {
-            _ = state.withLock { $0.slots.removeValue(forKey: id) }
+            replies.remove(id)
             throw error
         }
-        let reply: Reply = await withTaskCancellationHandler {
-            await withCheckedContinuation { (cont: CheckedContinuation<Reply, Never>) in
-                let ready = state.withLock { s -> Reply? in
-                    switch s.slots[id] {
-                    case .done(let r):
-                        s.slots[id] = nil
-                        return r
-                    case .registered:
-                        s.slots[id] = .waiting(cont)
-                        return nil
-                    case .waiting, nil:
-                        return .failure(s.dead ?? AgentBinderError.sessionClosed)
-                    }
-                }
-                if let ready { cont.resume(returning: ready) }
-            }
-        } onCancel: {
-            resume(id, .failure(CancellationError()))
-        }
-        return try reply.get()
+        return try await replies.wait(id).get()
     }
 
     /// Gives a `response` frame to its caller. It returns false when no caller waits for the id.
@@ -83,7 +52,7 @@ final class PiCommands: Sendable {
     func deliver(_ m: JSONValue) -> Bool {
         let id = m["id"].stringValue
         guard !id.isEmpty else { return false }
-        return resume(id, Self.reply(m))
+        return replies.resolve(id, Self.reply(m))
     }
 
     /// The data of a success, or the error of a `success: false` response.
@@ -97,33 +66,6 @@ final class PiCommands: Sendable {
 
     /// Stops the channel. Each waiting caller and each later call throws `error`.
     func failAll(_ error: any Error = AgentBinderError.sessionClosed) {
-        let waiters = state.withLock { s -> [CheckedContinuation<Reply, Never>] in
-            if s.dead == nil { s.dead = error }
-            var out: [CheckedContinuation<Reply, Never>] = []
-            for (k, slot) in s.slots {
-                if case .waiting(let c) = slot { out.append(c) }
-                s.slots[k] = nil
-            }
-            return out
-        }
-        for w in waiters { w.resume(returning: .failure(error)) }
-    }
-
-    @discardableResult
-    private func resume(_ id: String, _ r: Reply) -> Bool {
-        let (c, hit) = state.withLock { s -> (CheckedContinuation<Reply, Never>?, Bool) in
-            switch s.slots[id] {
-            case .registered:
-                s.slots[id] = .done(r)
-                return (nil, true)
-            case .waiting(let c):
-                s.slots[id] = nil
-                return (c, true)
-            case .done, nil:
-                return (nil, false)
-            }
-        }
-        c?.resume(returning: r)
-        return hit
+        replies.failAll(error)
     }
 }

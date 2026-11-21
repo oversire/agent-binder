@@ -304,6 +304,22 @@ struct PiWireTests {
         await s.kill()
     }
 
+    @Test func writeErrorDoesNotKillTheChannel() async throws {
+        struct Down: Error, Equatable {}
+        let commands = PiCommands()
+        let failing = FrameWriter(log: nil) { _ in throw Down() }
+        commands.attach(failing)
+        await #expect(throws: Down.self) { try await commands.request(["type": "get_state"]) }
+
+        let sent = Locked<[Data]>([])
+        commands.attach(FrameWriter(log: nil) { d in sent.withLock { $0.append(d) } })
+        let call = Task { try await commands.request(["type": "get_state"]) }
+        try await eventually { !sent.value.isEmpty }
+        let id = try #require(JSONValue.parse(sent.value[0])?["id"]?.string)
+        #expect(commands.deliver(["type": "response", "id": .string(id), "success": true, "data": 1]))
+        #expect(try await call.value == 1)
+    }
+
     @Test func exitFailsTheWaitingCommands() async throws {
         let peer = ScriptedPeer()
         let (s, a) = try await session(peer)

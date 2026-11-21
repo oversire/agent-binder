@@ -348,6 +348,16 @@ struct ClaudeAdapterTests {
             _ = try await claudeAdapter().control(["subtype": "set_model"])
         }
     }
+
+    @Test func cancelledControlThrowsTimeout() async throws {
+        let a = claudeAdapter()
+        let sent = Locked<[Data]>([])
+        a.attach(FrameWriter(log: nil) { d in sent.withLock { $0.append(d) } })
+        let call = Task { try await a.control(["subtype": "set_model"]) }
+        try await eventually { !sent.value.isEmpty }
+        call.cancel()
+        await #expect(throws: AgentBinderError.timeout("claude set_model")) { _ = try await call.value }
+    }
 }
 
 // MARK: wire
